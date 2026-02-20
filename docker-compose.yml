@@ -1,6 +1,6 @@
 # Optional: run MongoDB locally for testing
 # Usage: docker compose up -d
-# Then set MONGODB_URI=mongodb://localhost:27017/financepage in server/.env
+# Then set MONGODB_URI=mongodb://localhost:27017/eliteskills in server/.env
 
 services:
   mongodb:

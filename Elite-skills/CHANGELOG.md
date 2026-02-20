@@ -48,7 +48,7 @@ Documentation of changes made for collaboration. Last updated: Feb 2026.
 
 ## Environment
 
-- **API key:** Set `GEMINI_API_KEY` in `Elite-skills/.env.local` (not in the parent `FinanceCV` folder).
+- **API key:** Set `GEMINI_API_KEY` in `Elite-skills/.env.local` (not in the parent project folder).
 - `.env.local` is gitignored; do not commit API keys.
 
 ---

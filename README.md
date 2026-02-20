@@ -1,4 +1,4 @@
-# Finance Page – IB Bible + ATS Unified Project
+# IB Bible + ATS Unified Project
 
 A unified project combining the **IB Bible** (Elite-skills) landing page with the **ATS Resume Checker** app. Visitors see the landing page; logged-in users are redirected to the ATS dashboard.
 
@@ -11,7 +11,6 @@ A unified project combining the **IB Bible** (Elite-skills) landing page with th
 ## Project Structure
 
 ```
-FinancePage/
 ├── Elite-skills/     # Client: Landing page + ATS app (React + Vite)
 ├── server/           # Backend: ATS API (Express + MongoDB)
 ├── package.json      # Root workspace config
@@ -34,7 +33,7 @@ npm install
 PORT=5000
 
 # Local MongoDB (for testing)
-MONGODB_URI=mongodb://localhost:27017/financepage
+MONGODB_URI=mongodb://localhost:27017/eliteskills
 
 # Or use MongoDB Atlas for production
 # MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/<dbName>?retryWrites=true&w=majority
