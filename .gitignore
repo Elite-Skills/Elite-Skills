@@ -55,3 +55,6 @@ Thumbs.db
 
 # Misc
 *.pem
+
+# Local Cursor rules (not shared)
+.cursor/rules/
