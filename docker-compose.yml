@@ -1,0 +1,14 @@
+# Optional: run MongoDB locally for testing
+# Usage: docker compose up -d
+# Then set MONGODB_URI=mongodb://localhost:27017/financepage in server/.env
+
+services:
+  mongodb:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:

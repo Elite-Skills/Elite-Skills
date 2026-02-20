@@ -1,0 +1,22 @@
+{
+  "name": "finance-page",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "Elite-skills",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w Elite-skills\"",
+    "dev:client": "npm run dev -w Elite-skills",
+    "dev:server": "npm run dev -w server",
+    "build": "npm run build -w server && npm run build -w Elite-skills",
+    "start": "npm run start -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "dependencies": {
+    "mongodb": "^6.21.0"
+  }
+}
