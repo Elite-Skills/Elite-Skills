@@ -4,11 +4,18 @@ node_modules/
 # Build outputs
 dist/
 dist-ssr/
+build/
 *.tsbuildinfo
 
-# Environment (never commit secrets)
+# Environment – never commit secrets
 .env
 .env.local
+.env.development
+.env.development.local
+.env.production
+.env.production.local
+.env.test
+.env.test.local
 .env.*.local
 
 # Logs
@@ -17,16 +24,34 @@ logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Cache
+.cache/
+.parcel-cache/
+.turbo/
+
+# OS
+.DS_Store
+Thumbs.db
 
 # Editor
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
-
-# Misc
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# Deployment
+.vercel
+.netlify
+
+# Misc
+*.pem
