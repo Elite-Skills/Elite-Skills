@@ -2,6 +2,12 @@
 
 A unified project combining the **IB Bible** (Elite-skills) landing page with the **ATS Resume Checker** app. Visitors see the landing page; logged-in users are redirected to the ATS dashboard.
 
+## Overview
+
+- **Connected landing page to ATS** – Single app flow: guests see IB Bible at `/`, logged-in users go to ATS dashboard at `/checker`
+- **Restyled ATS** – Dark theme with gold accents to match the landing page branding
+- **Auth integration** – JWT login/register, protected routes for checker, referrals, connections, chat, etc.
+
 ## Project Structure
 
 ```
