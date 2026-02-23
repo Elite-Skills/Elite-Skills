@@ -146,7 +146,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     <div className="appShell">
       <aside className="sidebar">
         <div className="sidebarTop">
-          <Link className="sidebarBrand" to="/checker" title="IB Bible">
+          <Link className="sidebarBrand" to="/checker" title="Elite Skills">
             IB
           </Link>
         </div>

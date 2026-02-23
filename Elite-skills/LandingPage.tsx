@@ -35,7 +35,7 @@ const LandingPage: React.FC = () => {
               <span className="text-gold-gradient font-serif italic">Investment Banking Offer</span>
             </h1>
             <p className="text-xl text-elite-text-muted mb-12 font-light max-w-2xl leading-relaxed">
-              The definitive technical interview bible used by students at Europe's top business schools. Now featuring proprietary AI stress-testing and MD-level logic drills.
+              The definitive Elite Skills guide used by students at Europe's top business schools. Now featuring proprietary AI stress-testing and MD-level logic drills.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start">
               {token ? (
@@ -142,7 +142,7 @@ const LandingPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bento-card col-span-1 md:col-span-2 p-10 relative overflow-hidden group rounded-xl">
               <div className="absolute top-0 right-0 w-32 h-32 bg-elite-gold/5 blur-3xl -z-10 group-hover:bg-elite-gold/10 transition-colors"></div>
-              <h3 className="text-3xl font-serif text-white mb-4">The 2026 Technical Bible</h3>
+              <h3 className="text-3xl font-serif text-white mb-4">The 2026 Elite Skills Guide</h3>
               <p className="text-base text-elite-text-muted mb-10 leading-relaxed">
                 100+ Advanced questions covering DCF, LBO accounting, and M&A math. Not just answers, but the *logic* preferred by elite firms like Centerview and PWP.
               </p>
@@ -216,7 +216,7 @@ const LandingPage: React.FC = () => {
                 className="group relative bg-elite-gold text-black font-bold py-6 px-16 rounded-sm text-xl shadow-[0_0_40px_rgba(212,175,55,0.4)] hover:shadow-[0_0_60px_rgba(212,175,55,0.6)] transition-all transform hover:scale-[1.02] inline-block"
               >
                 <div className="absolute inset-0 border border-white/20 translate-x-1 translate-y-1 group-hover:translate-x-0 group-hover:translate-y-0 transition-all"></div>
-                Get The IB Bible Bundle — €49
+                Get The Elite Skills Bundle — €49
               </Link>
             )}
             <p className="mt-6 text-xs text-gray-600 uppercase tracking-[0.3em]">Instant Access • PDF Guide • AI Simulator • Strategy Vault</p>
@@ -230,7 +230,7 @@ const LandingPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
             <div className="col-span-1 md:col-span-2">
               <span className="text-2xl font-serif font-bold text-white tracking-widest block mb-6">
-                THE <span className="text-elite-gold">IB</span> BIBLE
+                <span className="text-elite-gold">ELITE</span> SKILLS
               </span>
               <p className="text-elite-text-muted text-sm max-w-sm leading-relaxed">
                 The leading professional training resource for aspiring bulge bracket and elite boutique investment bankers. Created by alumni from HEC, LBS, and Goldman Sachs.
@@ -254,7 +254,7 @@ const LandingPage: React.FC = () => {
             </div>
           </div>
           <div className="flex flex-col md:flex-row justify-between items-center border-t border-white/5 pt-8 text-[10px] text-gray-700 uppercase tracking-widest">
-            <div>© 2026 THE IB BIBLE ACCELERATOR. ALL RIGHTS RESERVED.</div>
+            <div>© 2026 ELITE SKILLS ACCELERATOR. ALL RIGHTS RESERVED.</div>
             <div className="mt-4 md:mt-0 flex gap-8">
               <span>Verified Secure</span>
               <span>Finance Career Partners</span>

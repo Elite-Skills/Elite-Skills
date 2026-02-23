@@ -1,4 +1,4 @@
-# Changelog – Elite-skills / IB Bible
+# Changelog – Elite-skills / Elite Skills
 
 Documentation of changes made for collaboration. Last updated: Feb 2026.
 

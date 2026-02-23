@@ -13,7 +13,7 @@ export default function LandingNavbar() {
               to="/"
               className="text-2xl font-serif font-bold text-white tracking-wider hover:opacity-90 transition-opacity"
             >
-              THE <span className="text-elite-gold">IB</span> BIBLE
+              <span className="text-elite-gold">ELITE</span> SKILLS
             </Link>
           </div>
           <div className="hidden md:flex space-x-8 text-xs uppercase tracking-[0.2em] text-elite-text-muted">
