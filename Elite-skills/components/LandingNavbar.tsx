@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Menu, X } from 'lucide-react'
 import { useAuth } from '../state/AuthContext'
 
 function scrollToSection(id: string) {
@@ -6,13 +8,22 @@ function scrollToSection(id: string) {
   if (el) el.scrollIntoView({ behavior: 'smooth' })
 }
 
+const navLinks = [
+  { id: 'problem', label: 'The Reality' },
+  { id: 'accelerator', label: 'The Accelerator' },
+  { id: 'ai-demo', label: '✨ AI Simulation', highlight: true },
+  { id: 'roi', label: 'ROI' },
+]
+
 export default function LandingNavbar() {
   const { token } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
+  const [mobileOpen, setMobileOpen] = useState(false)
   const isLanding = location.pathname === '/'
 
   const handleNavClick = (e: React.MouseEvent, sectionId: string) => {
+    setMobileOpen(false)
     if (isLanding) {
       e.preventDefault()
       scrollToSection(sectionId)
@@ -23,7 +34,7 @@ export default function LandingNavbar() {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-elite-black/90 backdrop-blur-md border-b border-white/10 min-w-0">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20 gap-4">
           <div className="flex items-center">
             <Link
@@ -34,20 +45,27 @@ export default function LandingNavbar() {
             </Link>
           </div>
           <div className="hidden md:flex space-x-8 text-xs uppercase tracking-[0.2em] text-elite-text-muted">
-            <Link to="/#problem" onClick={(e) => handleNavClick(e, 'problem')} className="hover:text-elite-gold transition-colors">
-              The Reality
-            </Link>
-            <Link to="/#accelerator" onClick={(e) => handleNavClick(e, 'accelerator')} className="hover:text-elite-gold transition-colors">
-              The Accelerator
-            </Link>
-            <Link to="/#ai-demo" onClick={(e) => handleNavClick(e, 'ai-demo')} className="hover:text-elite-gold transition-colors font-bold text-elite-gold">
-              ✨ AI Simulation
-            </Link>
-            <Link to="/#roi" onClick={(e) => handleNavClick(e, 'roi')} className="hover:text-elite-gold transition-colors">
-              ROI
-            </Link>
+            {navLinks.map(({ id, label, highlight }) => (
+              <Link
+                key={id}
+                to={`/#${id}`}
+                onClick={(e) => handleNavClick(e, id)}
+                className={`hover:text-elite-gold transition-colors ${highlight ? 'font-bold text-elite-gold' : ''}`}
+              >
+                {label}
+              </Link>
+            ))}
           </div>
-          {token ? (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setMobileOpen((o) => !o)}
+              className="md:hidden p-2 text-elite-text-muted hover:text-white"
+              aria-label="Toggle menu"
+            >
+              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+            {token ? (
             <Link
               to="/checker"
               className="bg-elite-gold hover:bg-elite-gold-dim text-black font-bold px-6 py-2 rounded-sm transition-all text-xs uppercase tracking-widest shrink-0"
@@ -61,8 +79,23 @@ export default function LandingNavbar() {
             >
               Get Access
             </Link>
-          )}
+            )}
+          </div>
         </div>
+        {mobileOpen && (
+          <div className="md:hidden absolute top-20 left-0 right-0 bg-elite-black border-b border-white/10 py-4 px-4 flex flex-col gap-4">
+            {navLinks.map(({ id, label, highlight }) => (
+              <Link
+                key={id}
+                to={`/#${id}`}
+                onClick={(e) => handleNavClick(e, id)}
+                className={`py-2 text-xs uppercase tracking-[0.2em] hover:text-elite-gold transition-colors ${highlight ? 'font-bold text-elite-gold' : 'text-elite-text-muted'}`}
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </nav>
   )
