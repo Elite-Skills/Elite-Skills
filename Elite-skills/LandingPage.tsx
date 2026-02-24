@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import AIChatSimulator from './components/AIChatSimulator';
 import FunnelChart from './components/FunnelChart';
 import StrategyGenerator from './components/StrategyGenerator';
@@ -10,6 +10,15 @@ import { useAuth } from './state/AuthContext';
 const LandingPage: React.FC = () => {
   const [salary, setSalary] = useState(120000);
   const { token } = useAuth();
+  const { hash } = useLocation();
+
+  useEffect(() => {
+    if (hash) {
+      const id = hash.slice(1);
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [hash]);
 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);

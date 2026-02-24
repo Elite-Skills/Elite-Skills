@@ -1,8 +1,25 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
+
+function scrollToSection(id: string) {
+  const el = document.getElementById(id)
+  if (el) el.scrollIntoView({ behavior: 'smooth' })
+}
 
 export default function LandingNavbar() {
   const { token } = useAuth()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const isLanding = location.pathname === '/'
+
+  const handleNavClick = (e: React.MouseEvent, sectionId: string) => {
+    if (isLanding) {
+      e.preventDefault()
+      scrollToSection(sectionId)
+    } else {
+      navigate({ pathname: '/', hash: sectionId })
+    }
+  }
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-elite-black/90 backdrop-blur-md border-b border-white/10 min-w-0">
@@ -17,16 +34,16 @@ export default function LandingNavbar() {
             </Link>
           </div>
           <div className="hidden md:flex space-x-8 text-xs uppercase tracking-[0.2em] text-elite-text-muted">
-            <Link to="/#problem" className="hover:text-elite-gold transition-colors">
+            <Link to="/#problem" onClick={(e) => handleNavClick(e, 'problem')} className="hover:text-elite-gold transition-colors">
               The Reality
             </Link>
-            <Link to="/#accelerator" className="hover:text-elite-gold transition-colors">
+            <Link to="/#accelerator" onClick={(e) => handleNavClick(e, 'accelerator')} className="hover:text-elite-gold transition-colors">
               The Accelerator
             </Link>
-            <Link to="/#ai-demo" className="hover:text-elite-gold transition-colors font-bold text-elite-gold">
+            <Link to="/#ai-demo" onClick={(e) => handleNavClick(e, 'ai-demo')} className="hover:text-elite-gold transition-colors font-bold text-elite-gold">
               ✨ AI Simulation
             </Link>
-            <Link to="/#roi" className="hover:text-elite-gold transition-colors">
+            <Link to="/#roi" onClick={(e) => handleNavClick(e, 'roi')} className="hover:text-elite-gold transition-colors">
               ROI
             </Link>
           </div>
