@@ -2,10 +2,7 @@
   "name": "elite-skills-development",
   "private": true,
   "version": "1.0.0",
-  "workspaces": [
-    "Elite-skills",
-    "server"
-  ],
+  "workspaces": ["Elite-skills", "server"],
   "scripts": {
     "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w Elite-skills\"",
     "dev:client": "npm run dev -w Elite-skills",
@@ -18,5 +15,8 @@
   },
   "dependencies": {
     "mongodb": "^6.21.0"
+  },
+  "engines": {
+    "node": "20.x"
   }
 }

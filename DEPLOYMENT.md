@@ -22,11 +22,10 @@ The app has two parts: **Elite-skills** (React frontend) and **server** (Express
 
 1. Go to [vercel.com](https://vercel.com) and sign in with GitHub.
 2. **Add New** → **Project** → import your repo.
-3. Configure:
-   - **Root Directory**: `Elite-skills`
-   - **Framework Preset**: Vite (auto-detected)
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist`
+3. Configure (or use the root `vercel.json` which sets this automatically):
+   - **Root Directory**: leave empty (use repo root)
+   - **Build Command**: `npm run build -w Elite-skills`
+   - **Output Directory**: `Elite-skills/dist`
 4. Add environment variables:
    - `VITE_API_BASE` – your Railway API URL (e.g. `https://your-api.up.railway.app`)
    - `GEMINI_API_KEY` – for AI features (optional)

@@ -1,0 +1,7 @@
+{
+  "buildCommand": "npm run build -w Elite-skills",
+  "outputDirectory": "Elite-skills/dist",
+  "framework": "vite",
+  "installCommand": "npm install",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
