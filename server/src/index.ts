@@ -62,7 +62,7 @@ const allowedOrigins = String(process.env.CLIENT_ORIGIN ?? '')
 
 const isProd = String(process.env.NODE_ENV ?? '').toLowerCase() === 'production'
 if (isProd && allowedOrigins.length === 0) {
-  throw new Error('CLIENT_ORIGIN must be set in production')
+  console.warn('WARNING: CLIENT_ORIGIN not set in production. CORS will allow all origins. Set CLIENT_ORIGIN in Render Environment for security.')
 }
 
 app.use(
