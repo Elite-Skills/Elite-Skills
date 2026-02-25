@@ -8,6 +8,19 @@ const data = [
   { name: 'Offers Given', value: 50, color: '#D4AF37' },
 ];
 
+function CustomTooltip({ active, payload }: { active?: boolean; payload?: Array<{ payload?: { name: string; value: number }; name?: string; value?: number }> }) {
+  if (!active || !payload?.length) return null;
+  const item = payload[0];
+  const name = item.payload?.name ?? item.name ?? '';
+  const value = item.payload?.value ?? item.value ?? 0;
+  return (
+    <div className="bg-[#1a1a1a] border border-[#333] rounded px-3 py-2 shadow-lg">
+      <div className="text-white text-sm font-medium">{name}</div>
+      <div className="text-[#D4AF37] text-sm">Value: {value.toLocaleString()}</div>
+    </div>
+  );
+}
+
 const FunnelChart: React.FC = () => {
   return (
     <div className="h-[300px] w-full">
@@ -28,7 +41,7 @@ const FunnelChart: React.FC = () => {
           />
           <Tooltip 
             cursor={{ fill: 'transparent' }}
-            contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333', color: '#fff' }}
+            content={<CustomTooltip />}
           />
           <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={40}>
             {data.map((entry, index) => (
