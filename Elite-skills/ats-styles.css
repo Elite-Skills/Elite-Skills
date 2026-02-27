@@ -35,6 +35,11 @@
   color: #F2D06B;
 }
 
+.ats-app .dashboard-nav-btn,
+.ats-app .dashboard-nav-btn:hover {
+  color: var(--elite-black) !important;
+}
+
 .ats-app .container {
   max-width: 1100px;
   padding: 28px 18px;
@@ -48,8 +53,15 @@
   background: var(--elite-black);
 }
 
+.ats-app .appShellWrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 .ats-app .appShell.appShellWithNav {
   padding-top: 80px;
+  flex: 1;
 }
 
 .ats-app .appShellWithNav .sidebar {

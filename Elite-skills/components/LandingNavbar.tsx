@@ -68,7 +68,7 @@ export default function LandingNavbar() {
             {token ? (
             <Link
               to="/checker"
-              className="bg-elite-gold hover:bg-elite-gold-dim text-black font-bold px-6 py-2 rounded-sm transition-all text-xs uppercase tracking-widest shrink-0"
+              className="dashboard-nav-btn bg-elite-gold hover:bg-elite-gold-dim text-black font-bold px-6 py-2 rounded-sm transition-all text-xs uppercase tracking-widest shrink-0"
             >
               Dashboard
             </Link>

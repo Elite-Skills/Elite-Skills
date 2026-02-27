@@ -144,77 +144,79 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   ]
 
   return (
-    <div className="appShell appShellWithNav">
+    <div className="appShellWrapper">
       <LandingNavbar />
-      <aside className="sidebar">
-        <div className="sidebarTop">
-          <Link className="sidebarBrand" to="/checker" title="Elite Skills">
-            ES
-          </Link>
-        </div>
+      <div className="appShell appShellWithNav">
+        <aside className="sidebar">
+          <div className="sidebarTop">
+            <Link className="sidebarBrand" to="/checker" title="Elite Skills">
+              ES
+            </Link>
+          </div>
 
-        <nav className="sidebarNav">
-          {items.map((it) => {
+          <nav className="sidebarNav">
+            {items.map((it) => {
             const active = isActivePath(location.pathname, it.to)
-            return (
-              <div key={it.to} className="sidebarItemWrap">
-                <Link
-                  to={it.to}
-                  className={`sidebarItem ${active ? 'active' : ''}`}
-                  title={it.label}
-                  aria-label={it.label}
-                >
-                  {it.icon}
-                </Link>
-                {it.to === '/notifications' && unreadCount > 0 ? (
-                  <span className="badge" title={`${unreadCount} unread`}>
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                ) : null}
-              </div>
-            )
-          })}
-        </nav>
+              return (
+                <div key={it.to} className="sidebarItemWrap">
+                  <Link
+                    to={it.to}
+                    className={`sidebarItem ${active ? 'active' : ''}`}
+                    title={it.label}
+                    aria-label={it.label}
+                  >
+                    {it.icon}
+                  </Link>
+                  {it.to === '/notifications' && unreadCount > 0 ? (
+                    <span className="badge" title={`${unreadCount} unread`}>
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  ) : null}
+                </div>
+              )
+            })}
+          </nav>
 
-        <div className="sidebarBottom">
-          <button className="sidebarItem" type="button" onClick={logout} title="Logout" aria-label="Logout">
-            <Icon>
-              <path
-                d="M10 17l-1 3h6l-1-3"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M7 3h10a2 2 0 0 1 2 2v6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M7 8H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M16 12h6m0 0-2-2m2 2-2 2"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </Icon>
-          </button>
-        </div>
-      </aside>
+          <div className="sidebarBottom">
+            <button className="sidebarItem" type="button" onClick={logout} title="Logout" aria-label="Logout">
+              <Icon>
+                <path
+                  d="M10 17l-1 3h6l-1-3"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M7 3h10a2 2 0 0 1 2 2v6"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M7 8H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M16 12h6m0 0-2-2m2 2-2 2"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Icon>
+            </button>
+          </div>
+        </aside>
 
-      <main className="main">
-        <div className="mainInner">{children}</div>
-      </main>
+        <main className="main">
+          <div className="mainInner">{children}</div>
+        </main>
+      </div>
     </div>
   )
 }
