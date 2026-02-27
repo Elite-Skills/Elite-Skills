@@ -34,9 +34,11 @@ const app = express()
 
 app.disable('x-powered-by')
 
-if (String(process.env.TRUST_PROXY ?? '').toLowerCase() === 'true') {
-  app.set('trust proxy', 1)
-}
+// Required on Render/Vercel etc. - reverse proxy sets X-Forwarded-For
+const trustProxy = process.env.TRUST_PROXY !== undefined
+  ? String(process.env.TRUST_PROXY).toLowerCase() === 'true'
+  : process.env.NODE_ENV === 'production'
+app.set('trust proxy', trustProxy ? 1 : false)
 
 app.use(express.json({ limit: '2mb' }))
 
