@@ -8,7 +8,7 @@ async function getStrategyResponse(bank: string): Promise<string> {
   }
 
   const ai = new GoogleGenAI({ apiKey })
-  const modelsToTry = ['gemini-1.5-flash-8b', 'gemini-1.5-flash']
+  const modelsToTry = ['gemini-3-flash-preview', 'gemini-2.0-flash', 'gemini-1.5-flash']
 
   const systemInstruction = `
     You are a top Investment Banking Recruitment Consultant. 

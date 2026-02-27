@@ -19,8 +19,7 @@ async function getMDResponse(userMessage: string, history: { role: string; text:
   }
 
   const ai = new GoogleGenAI({ apiKey })
-  // Try 8B first (higher free-tier limits), then 1.5-flash
-  const modelsToTry = ['gemini-1.5-flash-8b', 'gemini-1.5-flash']
+  const modelsToTry = ['gemini-3-flash-preview', 'gemini-2.0-flash', 'gemini-1.5-flash']
 
   const systemInstruction = `
     You are a hard-nosed Senior Managing Director at an elite investment bank (e.g., Goldman Sachs, Lazard, or Rothschild). 
