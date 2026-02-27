@@ -1,7 +1,11 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { getMDResponse } from '../services/geminiService';
-import { Send, User, Briefcase } from 'lucide-react';
+import { Send, Briefcase } from 'lucide-react';
+import { useAuth } from '../state/AuthContext';
+
+const MESSAGE_LIMIT_GUEST = 4;
 
 interface Message {
   role: 'user' | 'model';
@@ -9,6 +13,7 @@ interface Message {
 }
 
 const AIChatSimulator: React.FC = () => {
+  const { token } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
     { role: 'model', text: "Welcome to the boardroom. I'm a Senior MD at an Elite Boutique. Let's see if you can handle a technical question. Ready?" }
   ]);
@@ -22,8 +27,11 @@ const AIChatSimulator: React.FC = () => {
     }
   }, [messages, isLoading]);
 
+  const userMessageCount = messages.filter(m => m.role === 'user').length;
+  const hitLimit = !token && userMessageCount >= MESSAGE_LIMIT_GUEST;
+
   const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || hitLimit) return;
 
     const userMessage = input;
     setInput('');
@@ -76,23 +84,35 @@ const AIChatSimulator: React.FC = () => {
         )}
       </div>
 
-      <div className="flex gap-4">
-        <input 
-          type="text" 
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          placeholder="Answer the technical question..." 
-          className="flex-grow bg-white/5 border border-white/10 rounded-sm px-4 py-3 text-sm focus:outline-none focus:border-elite-gold transition-colors text-white"
-        />
-        <button 
-          onClick={handleSend}
-          disabled={isLoading}
-          className="bg-elite-gold text-black px-6 py-3 font-bold rounded-sm text-sm hover:bg-white transition-all flex items-center gap-2"
-        >
-          {isLoading ? 'Thinking...' : <><Send className="w-4 h-4" /> Test Me</>}
-        </button>
-      </div>
+      {hitLimit ? (
+        <div className="bg-elite-gold/10 border border-elite-gold/30 rounded-sm p-6 text-center">
+          <p className="text-white mb-4">You&apos;ve used your {MESSAGE_LIMIT_GUEST} free messages. Sign in for unlimited access.</p>
+          <Link
+            to="/login"
+            className="inline-block bg-elite-gold text-black px-8 py-3 font-bold rounded-sm text-sm hover:bg-white transition-all"
+          >
+            Log in to continue
+          </Link>
+        </div>
+      ) : (
+        <div className="flex gap-4">
+          <input 
+            type="text" 
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            placeholder="Answer the technical question..." 
+            className="flex-grow bg-white/5 border border-white/10 rounded-sm px-4 py-3 text-sm focus:outline-none focus:border-elite-gold transition-colors text-white"
+          />
+          <button 
+            onClick={handleSend}
+            disabled={isLoading}
+            className="bg-elite-gold text-black px-6 py-3 font-bold rounded-sm text-sm hover:bg-white transition-all flex items-center gap-2"
+          >
+            {isLoading ? 'Thinking...' : <><Send className="w-4 h-4" /> Test Me</>}
+          </button>
+        </div>
+      )}
       <p className="text-[10px] text-gray-500 mt-4 text-center italic">Powered by Gemini 3 Flash. Unlimited access for Accelerator members.</p>
     </div>
   );
