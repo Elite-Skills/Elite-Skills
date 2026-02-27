@@ -78,6 +78,8 @@ Click **Advanced** → **Add Environment Variable**. Add:
 2. Render will build and deploy (first deploy ~2–5 min)
 3. When ready, copy the service URL (e.g. `https://elite-skills-api.onrender.com`)
 
+**If Boardroom shows "API temporarily unavailable" after code changes:** Render → **Settings** → **Build & Deploy** → **Clear build cache** → **Save**, then **Manual Deploy**.
+
 ---
 
 ## 6. Update Your Frontend

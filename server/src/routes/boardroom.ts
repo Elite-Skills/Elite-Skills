@@ -19,8 +19,8 @@ async function getMDResponse(userMessage: string, history: { role: string; text:
   }
 
   const ai = new GoogleGenAI({ apiKey })
-  // gemini-1.5-flash has higher free-tier limits than 2.0
-  const model = 'gemini-1.5-flash'
+  // Try 8B first (higher free-tier limits), then 1.5-flash
+  const modelsToTry = ['gemini-1.5-flash-8b', 'gemini-1.5-flash']
 
   const systemInstruction = `
     You are a hard-nosed Senior Managing Director at an elite investment bank (e.g., Goldman Sachs, Lazard, or Rothschild). 
@@ -38,29 +38,30 @@ async function getMDResponse(userMessage: string, history: { role: string; text:
 
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    try {
-      const response = await ai.models.generateContent({
-        model,
-        contents: [...formattedHistory, { role: 'user', parts: [{ text: userMessage }] }],
-        config: {
-          systemInstruction,
-          temperature: 0.8,
-        },
-      })
-      return response.text ?? "Your answer was insufficient. Try harder. (API temporarily unavailable—please try again.)"
-    } catch (error: unknown) {
-      const status = (error as { status?: number })?.status
-      const is429 = status === 429 || String(error).includes('429') || String(error).includes('RESOURCE_EXHAUSTED')
-      if (is429 && attempt < 3) {
-        const delay = 40000 * attempt
-        console.log(`[Boardroom] Gemini 429, retry ${attempt}/3 in ${delay / 1000}s`)
-        await sleep(delay)
-        continue
+  for (const model of modelsToTry) {
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        console.log(`[Boardroom] Trying model=${model} attempt=${attempt}`)
+        const response = await ai.models.generateContent({
+          model,
+          contents: [...formattedHistory, { role: 'user', parts: [{ text: userMessage }] }],
+          config: {
+            systemInstruction,
+            temperature: 0.8,
+          },
+        })
+        return response.text ?? "Your answer was insufficient. Try harder. (API temporarily unavailable—please try again.)"
+      } catch (error: unknown) {
+        const status = (error as { status?: number })?.status
+        const is429 = status === 429 || String(error).includes('429') || String(error).includes('RESOURCE_EXHAUSTED')
+        if (is429 && attempt < 2) {
+          console.log(`[Boardroom] ${model} 429, retry in 45s`)
+          await sleep(45000)
+          continue
+        }
+        console.error(`[Boardroom] ${model} failed:`, (error instanceof Error ? error : new Error(String(error))).message.slice(0, 200))
+        break
       }
-      const err = error instanceof Error ? error : new Error(String(error))
-      console.error('[Boardroom] Gemini error:', err.message)
-      return 'Your answer was insufficient. Try harder. (API temporarily unavailable—please try again.)'
     }
   }
   return 'Your answer was insufficient. Try harder. (API temporarily unavailable—please try again.)'
