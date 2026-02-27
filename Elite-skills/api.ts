@@ -320,3 +320,14 @@ export async function markNotificationRead(id: string): Promise<{ ok: true }> {
 export async function markAllNotificationsRead(): Promise<{ ok: true }> {
   return request('/api/notifications/read-all', { method: 'POST' })
 }
+
+export async function boardroomChat(payload: {
+  userMessage: string
+  history: { role: string; text: string }[]
+}): Promise<{ response: string }> {
+  return request('/api/boardroom', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+}

@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getMDResponse } from '../services/geminiService';
+import { boardroomChat } from '../api';
 import { Send, Briefcase } from 'lucide-react';
 import { useAuth } from '../state/AuthContext';
 
@@ -66,9 +66,17 @@ const AIChatSimulator: React.FC = () => {
     setIsLoading(true);
 
     const history = messages.map(m => ({ role: m.role, text: m.text }));
-    const response = await getMDResponse(userMessage, history);
-    
-    setMessages(prev => [...prev, { role: 'model', text: response || 'Interesting response. Next question.' }]);
+    try {
+      const { response } = await boardroomChat({ userMessage, history });
+      setMessages(prev => [...prev, { role: 'model', text: response || 'Interesting response. Next question.' }]);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Request failed';
+      if (msg.includes('limit') || msg.includes('429')) {
+        sessionStorage.setItem(STORAGE_KEY, String(MESSAGE_LIMIT_GUEST));
+        setGuestCount(MESSAGE_LIMIT_GUEST);
+      }
+      setMessages(prev => [...prev, { role: 'model', text: "You've used your free messages. Log in for unlimited access." }]);
+    }
     setIsLoading(false);
   };
 

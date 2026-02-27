@@ -54,6 +54,7 @@ Click **Advanced** → **Add Environment Variable**. Add:
 | `MONGODB_URI` | Your MongoDB Atlas connection string |
 | `JWT_SECRET` | A long random string (e.g. 32+ chars) |
 | `CLIENT_ORIGIN` | Your Vercel URL, e.g. `https://eliteskills.vercel.app` |
+| `GEMINI_API_KEY` | Your Google Gemini API key (for Boardroom AI) |
 
 **MongoDB Atlas:**
 - Atlas → **Database** → **Connect** → **Connect your application**

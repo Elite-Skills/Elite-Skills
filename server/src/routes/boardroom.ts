@@ -1,0 +1,80 @@
+import { Router, type Request, type Response } from 'express'
+import { optionalAuth } from '../middleware/optionalAuth.js'
+import { GoogleGenAI } from '@google/genai'
+
+const MESSAGE_LIMIT_GUEST = 5
+const guestUsage = new Map<string, number>()
+
+function getClientId(req: Request): string {
+  const forwarded = req.headers['x-forwarded-for']
+  const ip = typeof forwarded === 'string' ? forwarded.split(',')[0].trim() : req.socket.remoteAddress ?? 'unknown'
+  return ip
+}
+
+async function getMDResponse(userMessage: string, history: { role: string; text: string }[]): Promise<string> {
+  const apiKey = process.env.GEMINI_API_KEY
+  if (!apiKey) {
+    console.error('GEMINI_API_KEY not set')
+    return 'Your answer was insufficient. Try harder. (API temporarily unavailable—please try again.)'
+  }
+
+  const ai = new GoogleGenAI({ apiKey })
+  const model = 'gemini-2.0-flash'
+
+  const systemInstruction = `
+    You are a hard-nosed Senior Managing Director at an elite investment bank (e.g., Goldman Sachs, Lazard, or Rothschild). 
+    A candidate is answering a technical finance question. 
+    Be brief, professional, and slightly critical. 
+    Give them quick feedback on their answer (whether it was technically sound, too verbose, or lacked intuition).
+    Then, ask one more deep-dive technical question about valuation (DCF/Comps), M&A math, or accounting (3-statement linking). 
+    Limit response to 2-3 sentences max. Maintain an elite, high-stakes persona.
+  `
+
+  const formattedHistory = history.map((h) => ({
+    role: h.role === 'user' ? 'user' : 'model',
+    parts: [{ text: h.text }],
+  }))
+
+  try {
+    const response = await ai.models.generateContent({
+      model,
+      contents: [...formattedHistory, { role: 'user', parts: [{ text: userMessage }] }],
+      config: {
+        systemInstruction,
+        temperature: 0.8,
+      },
+    })
+    return response.text ?? "Your answer was insufficient. Try harder. (API temporarily unavailable—please try again.)"
+  } catch (error) {
+    console.error('Gemini MD error:', error)
+    return 'Your answer was insufficient. Try harder. (API temporarily unavailable—please try again.)'
+  }
+}
+
+export const boardroomRouter = Router()
+
+boardroomRouter.post('/', optionalAuth, async (req: Request, res: Response) => {
+  const { userMessage, history } = req.body as { userMessage?: string; history?: { role: string; text: string }[] }
+
+  if (typeof userMessage !== 'string' || !userMessage.trim() || !Array.isArray(history)) {
+    res.status(400).json({ error: 'Invalid request: userMessage and history required' })
+    return
+  }
+
+  const isGuest = !req.userId
+  if (isGuest) {
+    const clientId = getClientId(req)
+    const count = guestUsage.get(clientId) ?? 0
+    if (count >= MESSAGE_LIMIT_GUEST) {
+      res.status(429).json({
+        error: 'limit_reached',
+        message: `You've used your ${MESSAGE_LIMIT_GUEST} free messages. Log in for unlimited access.`,
+      })
+      return
+    }
+    guestUsage.set(clientId, count + 1)
+  }
+
+  const response = await getMDResponse(userMessage.trim(), history)
+  res.json({ response })
+})
