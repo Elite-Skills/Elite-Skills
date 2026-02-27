@@ -14,12 +14,12 @@ function getClientId(req: Request): string {
 async function getMDResponse(userMessage: string, history: { role: string; text: string }[]): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
-    console.error('GEMINI_API_KEY not set')
+    console.error('[Boardroom] GEMINI_API_KEY not set in env. Add it in Render → Environment.')
     return 'Your answer was insufficient. Try harder. (API temporarily unavailable—please try again.)'
   }
 
   const ai = new GoogleGenAI({ apiKey })
-  const model = 'gemini-2.0-flash'
+  const model = 'gemini-1.5-flash'
 
   const systemInstruction = `
     You are a hard-nosed Senior Managing Director at an elite investment bank (e.g., Goldman Sachs, Lazard, or Rothschild). 
@@ -46,7 +46,8 @@ async function getMDResponse(userMessage: string, history: { role: string; text:
     })
     return response.text ?? "Your answer was insufficient. Try harder. (API temporarily unavailable—please try again.)"
   } catch (error) {
-    console.error('Gemini MD error:', error)
+    const err = error instanceof Error ? error : new Error(String(error))
+    console.error('[Boardroom] Gemini error:', err.message, err)
     return 'Your answer was insufficient. Try harder. (API temporarily unavailable—please try again.)'
   }
 }
@@ -55,6 +56,8 @@ export const boardroomRouter = Router()
 
 boardroomRouter.post('/', optionalAuth, async (req: Request, res: Response) => {
   const { userMessage, history } = req.body as { userMessage?: string; history?: { role: string; text: string }[] }
+
+  console.log('[Boardroom] Request received, hasKey:', Boolean(process.env.GEMINI_API_KEY), 'userId:', req.userId ?? 'guest')
 
   if (typeof userMessage !== 'string' || !userMessage.trim() || !Array.isArray(history)) {
     res.status(400).json({ error: 'Invalid request: userMessage and history required' })
