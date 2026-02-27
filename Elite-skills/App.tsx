@@ -15,6 +15,7 @@ import NewRequestPage from './pages/NewRequestPage';
 import ConnectionProfilePage from './pages/ConnectionProfilePage';
 import ChatPage from './pages/ChatPage';
 import NotificationsPage from './pages/NotificationsPage';
+import ResumeCreatorPage from './pages/ResumeCreatorPage';
 import ProtectedRoute from './state/ProtectedRoute';
 
 function LandingOrRedirect() {
@@ -98,6 +99,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <NotificationsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/resume-creator"
+        element={
+          <ProtectedRoute>
+            <ResumeCreatorPage />
           </ProtectedRoute>
         }
       />
