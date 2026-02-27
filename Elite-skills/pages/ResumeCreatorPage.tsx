@@ -14,6 +14,57 @@ const TEMPLATES: { id: TemplateId; name: string; desc: string }[] = [
   { id: 'compact', name: 'Compact', desc: 'Dense single column, maximum content' },
 ]
 
+/** Filler data for style preview so users see what each template looks like with real content */
+const FILLER_PROFILE: Profile = {
+  userId: '',
+  name: 'Alexandra Chen',
+  headline: 'Senior Financial Analyst | CFA Level II | 8+ Years in Investment Banking',
+  experience: [
+    'Senior Financial Analyst at Morgan Stanley (2020–Present) — Led due diligence for $2B+ M&A transactions; built financial models for equity and debt offerings.',
+    'Financial Analyst at Goldman Sachs (2016–2020) — Supported IPO roadshows; prepared pitch books and valuation analyses for tech and healthcare sectors.',
+    'Investment Banking Summer Analyst at J.P. Morgan (2015) — Built LBO models; assisted with sell-side M&A process for mid-market companies.',
+  ],
+  projects: [
+    'Built automated DCF and LBO valuation toolkit used across 3 teams; reduced model build time by 40%.',
+    'Led cross-functional initiative to standardize financial reporting; improved data accuracy and reduced reconciliation time by 25%.',
+  ],
+  contact: {
+    email: 'alexandra.chen@email.com',
+    phone: '+1 (555) 123-4567',
+    linkedIn: 'linkedin.com/in/alexandra-chen',
+  },
+  visibility: { showEmail: true, showPhone: true, showLinkedIn: true },
+  connectionQuestions: [],
+  recommendations: [],
+}
+
+/** Merge user profile with filler for display; use filler when sections are empty */
+function getDisplayProfile(profile: Profile): Profile {
+  const hasExp = (profile.experience?.length ?? 0) > 0
+  const hasProj = (profile.projects?.length ?? 0) > 0
+  const hasHeadline = !!profile.headline?.trim()
+  const hasContact = profile.contact && (profile.contact.email || profile.contact.phone || profile.contact.linkedIn)
+  return {
+    ...profile,
+    name: profile.name?.trim() || FILLER_PROFILE.name,
+    headline: hasHeadline ? profile.headline : FILLER_PROFILE.headline,
+    experience: hasExp ? profile.experience : FILLER_PROFILE.experience,
+    projects: hasProj ? profile.projects : FILLER_PROFILE.projects,
+    contact: hasContact ? profile.contact : FILLER_PROFILE.contact,
+  }
+}
+
+/** Generate a concise professional summary from profile data */
+function generateSummary(profile: Profile): string {
+  if (profile.headline?.trim()) return profile.headline.trim()
+  const first = profile.experience?.[0]
+  if (first) return first.length > 180 ? first.slice(0, 177) + '…' : first
+  return ''
+}
+
+const FILLER_SUMMARY =
+  'Results-driven finance professional with 8+ years in investment banking and M&A. CFA Level II candidate with proven track record in financial modeling, valuation, and cross-functional project delivery.'
+
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 18, paddingBottom: 14, borderBottom: '1px solid #000' }}>
@@ -25,12 +76,12 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   )
 }
 
-function ClassicTemplate({ profile }: { profile: Profile }) {
+function ClassicTemplate({ profile, summary }: { profile: Profile; summary?: string }) {
   const { name, headline, experience, projects, contact } = profile
   return (
     <div style={{ fontFamily: 'Georgia, serif', fontSize: 11, color: '#000', padding: 24, maxWidth: 595 }}>
       <div style={{ textAlign: 'center', marginBottom: 16 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0, letterSpacing: '0.05em' }}>{name}</h1>
+        <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0, letterSpacing: '0.05em', color: '#000' }}>{name}</h1>
         <div style={{ fontSize: 10, marginTop: 4, color: '#333' }}>{headline || '—'}</div>
         <div style={{ fontSize: 9, marginTop: 6, color: '#555' }}>
           {contact?.email && <span>{contact.email}</span>}
@@ -39,6 +90,11 @@ function ClassicTemplate({ profile }: { profile: Profile }) {
         </div>
       </div>
       <hr style={{ border: 'none', borderTop: '1px solid #000', margin: '12px 0' }} />
+      {summary && (
+        <Section title="Summary">
+          <div style={{ lineHeight: 1.4, color: '#333' }}>{summary}</div>
+        </Section>
+      )}
       {experience && experience.length > 0 && (
         <Section title="Experience">
           {experience.map((e, i) => (
@@ -57,20 +113,25 @@ function ClassicTemplate({ profile }: { profile: Profile }) {
   )
 }
 
-function ModernTemplate({ profile }: { profile: Profile }) {
+function ModernTemplate({ profile, summary }: { profile: Profile; summary?: string }) {
   const { name, headline, experience, projects, contact } = profile
   return (
     <div style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontSize: 10, color: '#000', display: 'flex', maxWidth: 595 }}>
       <div style={{ width: 140, padding: 20, background: '#fff', borderRight: '1px solid #000' }}>
-        <h1 style={{ fontSize: 14, fontWeight: 700, margin: '0 0 8px 0' }}>{name}</h1>
+        <h1 style={{ fontSize: 14, fontWeight: 700, margin: '0 0 8px 0', color: '#000' }}>{name}</h1>
         <div style={{ fontSize: 9, color: '#333', lineHeight: 1.4 }}>{headline || '—'}</div>
-        <div style={{ marginTop: 16, fontSize: 9 }}>
+        <div style={{ marginTop: 16, fontSize: 9, color: '#333' }}>
           {contact?.email && <div style={{ marginBottom: 4 }}>{contact.email}</div>}
           {contact?.phone && <div style={{ marginBottom: 4 }}>{contact.phone}</div>}
           {contact?.linkedIn && <div style={{ marginBottom: 4 }}>{contact.linkedIn}</div>}
         </div>
       </div>
       <div style={{ flex: 1, padding: 24 }}>
+        {summary && (
+          <Section title="Summary">
+            <div style={{ lineHeight: 1.4, color: '#333' }}>{summary}</div>
+          </Section>
+        )}
         {experience && experience.length > 0 && (
           <Section title="Experience">
             {experience.map((e, i) => (
@@ -90,15 +151,20 @@ function ModernTemplate({ profile }: { profile: Profile }) {
   )
 }
 
-function MinimalTemplate({ profile }: { profile: Profile }) {
+function MinimalTemplate({ profile, summary }: { profile: Profile; summary?: string }) {
   const { name, headline, experience, projects, contact } = profile
   return (
     <div style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontSize: 11, color: '#000', padding: 32, maxWidth: 595 }}>
-      <h1 style={{ fontSize: 20, fontWeight: 600, margin: '0 0 4px 0', letterSpacing: '-0.02em' }}>{name}</h1>
+      <h1 style={{ fontSize: 20, fontWeight: 600, margin: '0 0 4px 0', letterSpacing: '-0.02em', color: '#000' }}>{name}</h1>
       <div style={{ fontSize: 10, color: '#444', marginBottom: 24 }}>{headline || '—'}</div>
       <div style={{ fontSize: 9, color: '#666', marginBottom: 28 }}>
         {[contact?.email, contact?.phone, contact?.linkedIn].filter(Boolean).join(' · ')}
       </div>
+      {summary && (
+        <Section title="Summary">
+          <div style={{ lineHeight: 1.5, color: '#333' }}>{summary}</div>
+        </Section>
+      )}
       {experience && experience.length > 0 && (
         <Section title="Experience">
           {experience.map((e, i) => (
@@ -117,12 +183,12 @@ function MinimalTemplate({ profile }: { profile: Profile }) {
   )
 }
 
-function CompactTemplate({ profile }: { profile: Profile }) {
+function CompactTemplate({ profile, summary }: { profile: Profile; summary?: string }) {
   const { name, headline, experience, projects, contact } = profile
   return (
     <div style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontSize: 10, color: '#000', padding: 20, maxWidth: 595 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8, borderBottom: '1px solid #000', paddingBottom: 8 }}>
-        <h1 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>{name}</h1>
+        <h1 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: '#000' }}>{name}</h1>
         <div style={{ fontSize: 8, color: '#333' }}>
           {contact?.email && <span>{contact.email}</span>}
           {contact?.phone && <span style={{ marginLeft: 8 }}>{contact.phone}</span>}
@@ -130,6 +196,11 @@ function CompactTemplate({ profile }: { profile: Profile }) {
         </div>
       </div>
       <div style={{ fontSize: 9, marginBottom: 12, color: '#444' }}>{headline || '—'}</div>
+      {summary && (
+        <Section title="Summary">
+          <div style={{ lineHeight: 1.35, color: '#333' }}>{summary}</div>
+        </Section>
+      )}
       {experience && experience.length > 0 && (
         <Section title="Experience">
           {experience.map((e, i) => (
@@ -148,16 +219,16 @@ function CompactTemplate({ profile }: { profile: Profile }) {
   )
 }
 
-function TemplatePreview({ templateId, profile }: { templateId: TemplateId; profile: Profile }) {
+function TemplatePreview({ templateId, profile, summary }: { templateId: TemplateId; profile: Profile; summary?: string }) {
   switch (templateId) {
     case 'classic':
-      return <ClassicTemplate profile={profile} />
+      return <ClassicTemplate profile={profile} summary={summary} />
     case 'modern':
-      return <ModernTemplate profile={profile} />
+      return <ModernTemplate profile={profile} summary={summary} />
     case 'minimal':
-      return <MinimalTemplate profile={profile} />
+      return <MinimalTemplate profile={profile} summary={summary} />
     case 'compact':
-      return <CompactTemplate profile={profile} />
+      return <CompactTemplate profile={profile} summary={summary} />
   }
 }
 
@@ -235,6 +306,8 @@ export default function ResumeCreatorPage() {
   }
 
   const hasContent = (profile.experience?.length ?? 0) > 0 || (profile.projects?.length ?? 0) > 0
+  const displayProfile = getDisplayProfile(profile)
+  const summary = hasContent ? generateSummary(profile) : FILLER_SUMMARY
 
   return (
     <div className="page">
@@ -275,7 +348,7 @@ export default function ResumeCreatorPage() {
 
         <div style={{ background: '#fff', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
           <div ref={resumeRef} style={{ background: '#fff', minHeight: 400, width: 595, maxWidth: '100%', margin: '0 auto' }}>
-            <TemplatePreview templateId={selected} profile={profile} />
+            <TemplatePreview templateId={selected} profile={displayProfile} summary={summary} />
           </div>
         </div>
 

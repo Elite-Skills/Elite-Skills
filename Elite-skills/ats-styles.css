@@ -570,6 +570,12 @@
   padding: 18px 16px;
 }
 
+/* Keep description text visible on hover/focus (gold background) */
+.ats-app .resume-template-grid button:hover .muted,
+.ats-app .resume-template-grid button:focus-visible .muted {
+  color: #1a1a1a !important;
+}
+
 @media (max-width: 700px) {
   .ats-app .resume-template-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
