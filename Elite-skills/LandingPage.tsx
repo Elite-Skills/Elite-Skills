@@ -4,11 +4,13 @@ import AIChatSimulator from './components/AIChatSimulator';
 import FunnelChart from './components/FunnelChart';
 import StrategyGenerator from './components/StrategyGenerator';
 import LandingNavbar from './components/LandingNavbar';
+import ContactFormModal from './components/ContactFormModal';
 import { Calculator, ChevronRight, GraduationCap, TrendingUp, Globe, Award } from 'lucide-react';
 import { useAuth } from './state/AuthContext';
 
 const LandingPage: React.FC = () => {
   const [salary, setSalary] = useState(120000);
+  const [contactOpen, setContactOpen] = useState(false);
   const { token } = useAuth();
   const { hash } = useLocation();
 
@@ -251,6 +253,7 @@ const LandingPage: React.FC = () => {
                 <li><button onClick={() => scrollToSection('problem')} className="hover:text-white transition-colors">Success Rates</button></li>
                 <li><button onClick={() => scrollToSection('accelerator')} className="hover:text-white transition-colors">Technical Vault</button></li>
                 <li><button onClick={() => scrollToSection('ai-demo')} className="hover:text-white transition-colors">MD Simulation</button></li>
+                <li><button onClick={() => setContactOpen(true)} className="hover:text-elite-gold transition-colors">Contact Us</button></li>
               </ul>
             </div>
             <div>
@@ -271,6 +274,7 @@ const LandingPage: React.FC = () => {
           </div>
         </div>
       </footer>
+      <ContactFormModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
     </div>
   );
 };
