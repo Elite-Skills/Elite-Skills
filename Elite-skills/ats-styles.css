@@ -556,3 +556,22 @@
   color: var(--elite-gold);
   cursor: pointer;
 }
+
+/* Resume Creator template grid – full width, 4 equal columns */
+.ats-app .resume-template-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+
+.ats-app .resume-template-grid button {
+  text-align: center;
+  padding: 18px 16px;
+}
+
+@media (max-width: 700px) {
+  .ats-app .resume-template-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

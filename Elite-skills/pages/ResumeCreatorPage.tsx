@@ -16,8 +16,8 @@ const TEMPLATES: { id: TemplateId; name: string; desc: string }[] = [
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div style={{ marginBottom: 14 }}>
-      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 6, borderBottom: '1px solid #000', paddingBottom: 4 }}>
+    <div style={{ marginBottom: 18, paddingBottom: 14, borderBottom: '1px solid #000' }}>
+      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8, borderBottom: '1px solid #000', paddingBottom: 4 }}>
         {title}
       </div>
       {children}
@@ -60,7 +60,7 @@ function ClassicTemplate({ profile }: { profile: Profile }) {
 function ModernTemplate({ profile }: { profile: Profile }) {
   const { name, headline, experience, projects, contact } = profile
   return (
-    <div style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontSize: 10, color: '#000', display: 'flex', maxWidth: 595, minHeight: 842 }}>
+    <div style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontSize: 10, color: '#000', display: 'flex', maxWidth: 595 }}>
       <div style={{ width: 140, padding: 20, background: '#fff', borderRight: '1px solid #000' }}>
         <h1 style={{ fontSize: 14, fontWeight: 700, margin: '0 0 8px 0' }}>{name}</h1>
         <div style={{ fontSize: 9, color: '#333', lineHeight: 1.4 }}>{headline || '—'}</div>
@@ -255,7 +255,7 @@ export default function ResumeCreatorPage() {
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12, marginBottom: 24 }}>
+        <div className="resume-template-grid" style={{ marginBottom: 24 }}>
           {TEMPLATES.map((t) => (
             <button
               key={t.id}
@@ -263,14 +263,12 @@ export default function ResumeCreatorPage() {
               onClick={() => setSelected(t.id)}
               className="btn"
               style={{
-                textAlign: 'left',
-                padding: 12,
                 border: selected === t.id ? '2px solid var(--elite-gold)' : undefined,
                 background: selected === t.id ? 'rgba(212,175,55,0.1)' : undefined,
               }}
             >
-              <div style={{ fontWeight: 700, marginBottom: 4 }}>{t.name}</div>
-              <div className="muted" style={{ fontSize: 11 }}>{t.desc}</div>
+              <div style={{ fontWeight: 700, marginBottom: 6, fontSize: 15 }}>{t.name}</div>
+              <div className="muted" style={{ fontSize: 12, lineHeight: 1.35 }}>{t.desc}</div>
             </button>
           ))}
         </div>
