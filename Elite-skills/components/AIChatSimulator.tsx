@@ -5,7 +5,7 @@ import { getMDResponse } from '../services/geminiService';
 import { Send, Briefcase } from 'lucide-react';
 import { useAuth } from '../state/AuthContext';
 
-const MESSAGE_LIMIT_GUEST = 4;
+const MESSAGE_LIMIT_GUEST = 5;
 
 interface Message {
   role: 'user' | 'model';
@@ -32,6 +32,7 @@ const AIChatSimulator: React.FC = () => {
 
   const handleSend = async () => {
     if (!input.trim() || isLoading || hitLimit) return;
+    if (!token && userMessageCount >= MESSAGE_LIMIT_GUEST) return;
 
     const userMessage = input;
     setInput('');
@@ -86,12 +87,13 @@ const AIChatSimulator: React.FC = () => {
 
       {hitLimit ? (
         <div className="bg-elite-gold/10 border border-elite-gold/30 rounded-sm p-6 text-center">
-          <p className="text-white mb-4">You&apos;ve used your {MESSAGE_LIMIT_GUEST} free messages. Sign in for unlimited access.</p>
+          <p className="text-white mb-2 font-medium">Conversation locked.</p>
+          <p className="text-elite-text-muted text-sm mb-4">You&apos;ve used your {MESSAGE_LIMIT_GUEST} free messages. Log in for unlimited access.</p>
           <Link
             to="/login"
             className="inline-block bg-elite-gold text-black px-8 py-3 font-bold rounded-sm text-sm hover:bg-white transition-all"
           >
-            Log in to continue
+            Log in for more usage
           </Link>
         </div>
       ) : (
