@@ -82,7 +82,7 @@ const AIChatSimulator: React.FC = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto bento-card p-6 md:p-10 rounded-lg overflow-hidden flex flex-col h-[500px]">
+    <div className="relative max-w-3xl mx-auto bento-card p-6 md:p-10 rounded-lg overflow-hidden flex flex-col h-[500px]">
       <div className="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
         <div className="bg-elite-gold/10 p-2 rounded-full">
             <Briefcase className="w-5 h-5 text-elite-gold" />
@@ -133,7 +133,7 @@ const AIChatSimulator: React.FC = () => {
 
       {hitLimit && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          className="absolute inset-0 z-10 flex items-center justify-center bg-black/80 backdrop-blur-sm rounded-lg"
           role="dialog"
           aria-modal="true"
           aria-labelledby="limit-popup-title"
