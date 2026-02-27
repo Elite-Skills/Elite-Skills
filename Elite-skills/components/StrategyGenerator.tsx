@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { getStrategyResponse } from '../services/geminiService';
+import { fetchStrategy } from '../api';
 import { ShieldCheck, Target, ChevronDown } from 'lucide-react';
 
 /** Parses strategy text: **bold** titles, proper paragraphs */
@@ -37,23 +37,16 @@ const AI_TIRED_MESSAGE = "**The AI is taking a quick break.** It'll be back soon
 const isErrorResponse = (text: string) =>
   text.includes('Temporary service limit') || text.includes('high demand') || text.includes('503') || text.includes('taking a quick break');
 
-async function fetchStrategyWithRetry(
-  bank: string,
-  signal: AbortSignal | undefined,
-  maxAttempts = 6,
-  delayMs = 3500
-): Promise<string> {
+async function fetchStrategyWithRetry(bank: string, maxAttempts = 2): Promise<string> {
   let lastError: unknown;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      const result = await getStrategyResponse(bank, signal);
-      if (isErrorResponse(result)) throw new Error(result);
-      return result;
+      const { response } = await fetchStrategy(bank);
+      if (isErrorResponse(response)) throw new Error(response);
+      return response;
     } catch (err) {
       lastError = err;
-      if (err instanceof Error && err.name === 'AbortError') throw err;
-      if (attempt === maxAttempts) throw lastError;
-      await new Promise((r) => setTimeout(r, delayMs));
+      if (attempt < maxAttempts) await new Promise((r) => setTimeout(r, 4000));
     }
   }
   throw lastError;
@@ -93,9 +86,9 @@ const StrategyGenerator: React.FC = () => {
     }
     setIsLoading(true);
     try {
-      let response = await fetchStrategyWithRetry(selectedBank, undefined);
+      let response = await fetchStrategyWithRetry(selectedBank);
       if (!response || isErrorResponse(response)) {
-        response = await fetchStrategyWithRetry(selectedBank, undefined);
+        response = await fetchStrategyWithRetry(selectedBank);
       }
       if (response && !isErrorResponse(response)) {
         cacheRef.current.set(selectedBank, response);

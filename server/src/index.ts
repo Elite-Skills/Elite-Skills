@@ -28,6 +28,7 @@ import { connectionsRouter } from './routes/connections.js'
 import { chatRouter } from './routes/chat.js'
 import { notificationsRouter } from './routes/notifications.js'
 import { boardroomRouter } from './routes/boardroom.js'
+import { strategyRouter } from './routes/strategy.js'
 import { setupSocketIo } from './socket.js'
 
 const app = express()
@@ -103,6 +104,7 @@ app.use('/api/connections', connectionsRouter)
 app.use('/api/chat', chatRouter)
 app.use('/api/notifications', notificationsRouter)
 app.use('/api/boardroom', boardroomRouter)
+app.use('/api/strategy', strategyRouter)
 
 app.use('/api', (_req: Request, res: Response) => {
   res.status(404).json({ error: 'Not found' })

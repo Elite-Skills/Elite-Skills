@@ -332,3 +332,11 @@ export async function boardroomChat(payload: {
     body: JSON.stringify(payload),
   })
 }
+
+export async function fetchStrategy(bank: string): Promise<{ response: string }> {
+  return request('/api/strategy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ bank }),
+  })
+}
