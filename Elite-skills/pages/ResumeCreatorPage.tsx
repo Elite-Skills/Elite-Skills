@@ -50,13 +50,12 @@ const FILLER_PROFILE: DisplayProfile = {
   recommendations: [],
 }
 
-/** Merge user profile with filler for display; use filler when sections are empty */
+/** Merge user profile with filler for display; always show full example (education, additionalInfo) in preview */
 function getDisplayProfile(profile: Profile): DisplayProfile {
   const hasExp = (profile.experience?.length ?? 0) > 0
   const hasProj = (profile.projects?.length ?? 0) > 0
   const hasHeadline = !!profile.headline?.trim()
   const hasContact = profile.contact && (profile.contact.email || profile.contact.phone || profile.contact.linkedIn)
-  const useFiller = !hasExp && !hasProj
   return {
     ...profile,
     name: profile.name?.trim() || FILLER_PROFILE.name,
@@ -64,8 +63,8 @@ function getDisplayProfile(profile: Profile): DisplayProfile {
     experience: hasExp ? profile.experience : FILLER_PROFILE.experience,
     projects: hasProj ? profile.projects : FILLER_PROFILE.projects,
     contact: hasContact ? profile.contact : FILLER_PROFILE.contact,
-    education: useFiller ? FILLER_PROFILE.education : undefined,
-    additionalInfo: useFiller ? FILLER_PROFILE.additionalInfo : undefined,
+    education: FILLER_PROFILE.education,
+    additionalInfo: FILLER_PROFILE.additionalInfo,
   }
 }
 
@@ -83,7 +82,7 @@ const FILLER_SUMMARY =
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 18 }}>
-      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8 }}>
+      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8, borderBottom: '1px solid #000', paddingBottom: 4 }}>
         {title}
       </div>
       {children}
@@ -309,6 +308,7 @@ export default function ResumeCreatorPage() {
   const [selected, setSelected] = useState<TemplateId>('classic')
   const [exporting, setExporting] = useState(false)
   const resumeRef = useRef<HTMLDivElement>(null)
+  const exportRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -327,10 +327,12 @@ export default function ResumeCreatorPage() {
   }, [])
 
   async function handleExportPDF() {
-    if (!resumeRef.current || !profile) return
+    if (!profile) return
+    const hasContent = (profile.experience?.length ?? 0) > 0 || (profile.projects?.length ?? 0) > 0
+    const el = hasContent && exportRef.current ? exportRef.current : resumeRef.current
+    if (!el) return
     setExporting(true)
     try {
-      const el = resumeRef.current
       const canvas = await html2canvas(el, {
         scale: 2,
         useCORS: true,
@@ -377,7 +379,7 @@ export default function ResumeCreatorPage() {
 
   const hasContent = (profile.experience?.length ?? 0) > 0 || (profile.projects?.length ?? 0) > 0
   const displayProfile = getDisplayProfile(profile)
-  const summary = hasContent ? generateSummary(profile) : FILLER_SUMMARY
+  const summary = (hasContent ? generateSummary(profile) : '') || FILLER_SUMMARY
 
   return (
     <div className="page">
@@ -416,10 +418,19 @@ export default function ResumeCreatorPage() {
           ))}
         </div>
 
-        <div style={{ background: '#fff', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
+        <div style={{ position: 'relative', background: '#fff', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
           <div ref={resumeRef} style={{ background: '#fff', minHeight: 400, width: 595, maxWidth: '100%', margin: '0 auto' }}>
             <TemplatePreview templateId={selected} profile={displayProfile} summary={summary} />
           </div>
+          {hasContent && (
+            <div ref={exportRef} style={{ position: 'absolute', left: -9999, top: 0, width: 595, background: '#fff' }}>
+              <TemplatePreview
+                templateId={selected}
+                profile={{ ...profile, education: undefined, additionalInfo: undefined }}
+                summary={generateSummary(profile)}
+              />
+            </div>
+          )}
         </div>
 
         <div style={{ marginTop: 20, display: 'flex', gap: 12, alignItems: 'center' }}>
