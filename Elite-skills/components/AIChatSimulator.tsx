@@ -7,6 +7,7 @@ import { useAuth } from '../state/AuthContext';
 
 const MESSAGE_LIMIT_GUEST = 5;
 const STORAGE_KEY = 'boardroom_guest_sent';
+const LIMIT_MESSAGE = "You've used your free messages. Log in for unlimited access.";
 
 function getGuestSentCount(): number {
   try {
@@ -75,7 +76,7 @@ const AIChatSimulator: React.FC = () => {
         sessionStorage.setItem(STORAGE_KEY, String(MESSAGE_LIMIT_GUEST));
         setGuestCount(MESSAGE_LIMIT_GUEST);
       }
-      setMessages(prev => [...prev, { role: 'model', text: "You've used your free messages. Log in for unlimited access." }]);
+      setMessages(prev => [...prev, { role: 'model', text: LIMIT_MESSAGE }]);
     }
     setIsLoading(false);
   };
@@ -106,7 +107,18 @@ const AIChatSimulator: React.FC = () => {
               <span className={`block font-bold text-[10px] uppercase tracking-widest mb-1 ${msg.role === 'user' ? 'text-elite-gold text-right' : 'text-elite-text-muted'}`}>
                 {msg.role === 'user' ? 'Candidate' : 'Senior MD'}
               </span>
-              <p className={msg.role === 'model' ? 'italic' : ''}>{msg.text}</p>
+              <p className={msg.role === 'model' ? 'italic' : ''}>
+                {msg.text === LIMIT_MESSAGE ? (
+                  <>
+                    You&apos;ve used your free messages.{' '}
+                    <Link to="/login" className="text-elite-gold underline hover:text-elite-gold-dim font-semibold">
+                      Log in for unlimited access.
+                    </Link>
+                  </>
+                ) : (
+                  msg.text
+                )}
+              </p>
             </div>
           </div>
         ))}

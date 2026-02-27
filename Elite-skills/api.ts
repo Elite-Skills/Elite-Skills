@@ -18,6 +18,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const token = getToken()
   const res = await fetch(`${API_BASE}${path}`, {
     ...init,
+    credentials: 'include',
     headers: {
       ...(init?.headers ?? {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),

@@ -67,9 +67,6 @@ const StrategyGenerator: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const strategyCardRef = useRef<HTMLDivElement>(null);
   const cacheRef = useRef<Map<string, string>>(new Map());
-  const prefetchPromiseRef = useRef<Promise<string> | null>(null);
-  const prefetchBankRef = useRef<string | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -81,56 +78,7 @@ const StrategyGenerator: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const hasRequestedRef = useRef(false);
-
-  useEffect(() => {
-    abortControllerRef.current?.abort();
-    const bank = selectedBank;
-    if (cacheRef.current.has(bank)) {
-      hasRequestedRef.current = true;
-      setStrategy(cacheRef.current.get(bank)!);
-      return;
-    }
-    if (!hasRequestedRef.current) {
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
-      prefetchBankRef.current = bank;
-      prefetchPromiseRef.current = fetchStrategyWithRetry(bank, controller.signal)
-        .then((r) => {
-          cacheRef.current.set(bank, r);
-          return r;
-        })
-        .catch((err) => {
-          if (err instanceof Error && err.name === 'AbortError') return;
-        });
-      return;
-    }
-    setStrategy(null);
-    setIsLoading(true);
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-    prefetchBankRef.current = bank;
-    prefetchPromiseRef.current = fetchStrategyWithRetry(bank, controller.signal)
-      .then((r) => {
-        cacheRef.current.set(bank, r);
-        if (prefetchBankRef.current === bank) {
-          setStrategy(r);
-        }
-        return r;
-      })
-      .catch((err) => {
-        if (err instanceof Error && err.name === 'AbortError') return;
-        if (prefetchBankRef.current === bank) {
-          setStrategy(AI_TIRED_MESSAGE);
-        }
-        throw err;
-      })
-      .finally(() => {
-        if (prefetchBankRef.current === bank) {
-          setIsLoading(false);
-        }
-      });
-  }, [selectedBank]);
+  /* Only fetch when user clicks "Build Strategy" - no auto-fetch on mount */
 
   useEffect(() => {
     if ((strategy || isLoading) && strategyCardRef.current) {
@@ -139,19 +87,13 @@ const StrategyGenerator: React.FC = () => {
   }, [strategy, isLoading]);
 
   const handleGenerate = async () => {
-    hasRequestedRef.current = true;
     if (cacheRef.current.has(selectedBank)) {
       setStrategy(cacheRef.current.get(selectedBank)!);
       return;
     }
     setIsLoading(true);
     try {
-      let response: string | undefined;
-      if (prefetchBankRef.current === selectedBank && prefetchPromiseRef.current) {
-        response = await prefetchPromiseRef.current;
-      } else {
-        response = await fetchStrategyWithRetry(selectedBank, undefined);
-      }
+      let response = await fetchStrategyWithRetry(selectedBank, undefined);
       if (!response || isErrorResponse(response)) {
         response = await fetchStrategyWithRetry(selectedBank, undefined);
       }

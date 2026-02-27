@@ -40,6 +40,15 @@
   color: var(--elite-black) !important;
 }
 
+/* Navbar in dashboard: match landing page colors */
+.ats-app .landing-navbar a:not(.dashboard-nav-btn) {
+  color: var(--elite-text-muted);
+}
+.ats-app .landing-navbar a:not(.dashboard-nav-btn):hover,
+.ats-app .landing-navbar a.font-bold {
+  color: var(--elite-gold);
+}
+
 .ats-app .container {
   max-width: 1100px;
   padding: 28px 18px;

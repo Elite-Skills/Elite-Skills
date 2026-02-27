@@ -76,11 +76,15 @@ app.use(
     }
 
     if (allowedOrigins.length > 0) {
-      callback(null, { origin: allowedOrigins.includes(origin), credentials: true })
+      callback(null, {
+        origin: allowedOrigins.includes(origin),
+        credentials: true,
+        allowedHeaders: ['Content-Type', 'Authorization'],
+      })
       return
     }
 
-    callback(null, { origin: true, credentials: true })
+    callback(null, { origin: true, credentials: true, allowedHeaders: ['Content-Type', 'Authorization'] })
   })
 )
 
