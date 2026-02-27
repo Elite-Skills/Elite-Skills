@@ -48,6 +48,15 @@
   background: var(--elite-black);
 }
 
+.ats-app .appShell.appShellWithNav {
+  padding-top: 80px;
+}
+
+.ats-app .appShellWithNav .sidebar {
+  height: calc(100vh - 80px);
+  top: 80px;
+}
+
 .ats-app .sidebar {
   position: sticky;
   top: 0;

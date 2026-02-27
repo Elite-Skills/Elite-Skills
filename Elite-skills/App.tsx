@@ -20,7 +20,6 @@ import ProtectedRoute from './state/ProtectedRoute';
 function LandingOrRedirect() {
   const { token, loading } = useAuth();
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-elite-black text-elite-gold">Loading…</div>;
-  if (token) return <Navigate to="/checker" replace />;
   return <LandingPage />;
 }
 

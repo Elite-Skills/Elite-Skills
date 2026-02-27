@@ -67,7 +67,7 @@ export const getStrategyResponse = async (bank: string, signal?: AbortSignal) =>
   
   const systemInstruction = `
     You are a top Investment Banking Recruitment Consultant. 
-    Provide 3 specific, tactical bullet points for an IB internship applicant at the selected firm. 
+    Provide 3 specific, tactical bullet points for an Elite Skills (ES) applicant at the selected firm. 
     Focus on the firm's culture (e.g., Lazard's intellectualism, Goldman's teamwork, Rothschild's family-owned advisory heritage), 
     typical interview style, and key technical focus areas. Professional, elite tone.
     

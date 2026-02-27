@@ -6,6 +6,15 @@ import { Send, Briefcase } from 'lucide-react';
 import { useAuth } from '../state/AuthContext';
 
 const MESSAGE_LIMIT_GUEST = 5;
+const STORAGE_KEY = 'boardroom_guest_sent';
+
+function getGuestSentCount(): number {
+  try {
+    return parseInt(sessionStorage.getItem(STORAGE_KEY) || '0', 10);
+  } catch {
+    return 0;
+  }
+}
 
 interface Message {
   role: 'user' | 'model';
@@ -19,7 +28,20 @@ const AIChatSimulator: React.FC = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [guestCount, setGuestCount] = useState(() => getGuestSentCount());
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const guestSentCount = token ? 0 : guestCount;
+  const hitLimit = !token && guestSentCount >= MESSAGE_LIMIT_GUEST;
+
+  useEffect(() => {
+    if (token) {
+      sessionStorage.removeItem(STORAGE_KEY);
+      setGuestCount(0);
+    } else {
+      setGuestCount(getGuestSentCount());
+    }
+  }, [token]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -27,14 +49,18 @@ const AIChatSimulator: React.FC = () => {
     }
   }, [messages, isLoading]);
 
-  const userMessageCount = messages.filter(m => m.role === 'user').length;
-  const hitLimit = !token && userMessageCount >= MESSAGE_LIMIT_GUEST;
-
   const handleSend = async () => {
-    if (!input.trim() || isLoading || hitLimit) return;
-    if (!token && userMessageCount >= MESSAGE_LIMIT_GUEST) return;
+    if (!input.trim() || isLoading) return;
+    if (hitLimit) return;
+    const currentCount = getGuestSentCount();
+    if (!token && currentCount >= MESSAGE_LIMIT_GUEST) return;
 
     const userMessage = input;
+    if (!token) {
+      const next = currentCount + 1;
+      sessionStorage.setItem(STORAGE_KEY, String(next));
+      setGuestCount(next);
+    }
     setInput('');
     setMessages(prev => [...prev, { role: 'user', text: userMessage }]);
     setIsLoading(true);

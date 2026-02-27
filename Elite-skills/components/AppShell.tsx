@@ -2,6 +2,7 @@ import type React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
 import { useAuth } from '../state/AuthContext'
+import LandingNavbar from './LandingNavbar'
 import { useRealtime } from '../state/RealtimeContext'
 
 function isActivePath(pathname: string, target: string): boolean {
@@ -143,11 +144,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   ]
 
   return (
-    <div className="appShell">
+    <div className="appShell appShellWithNav">
+      <LandingNavbar />
       <aside className="sidebar">
         <div className="sidebarTop">
           <Link className="sidebarBrand" to="/checker" title="Elite Skills">
-            IB
+            ES
           </Link>
         </div>
 
