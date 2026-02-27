@@ -117,7 +117,7 @@ export default function CheckerPage() {
 
           {error ? <div className="error">{error}</div> : null}
 
-          <button className="btn" disabled={loading} type="submit">
+          <button className="btn" disabled={loading} type="submit" style={{ marginTop: 20 }}>
             {loading ? 'Analyzing…' : 'Get ATS Score'}
           </button>
         </div>
