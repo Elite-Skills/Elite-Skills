@@ -119,18 +119,30 @@ const AIChatSimulator: React.FC = () => {
         )}
       </div>
 
-      {hitLimit ? (
-        <div className="bg-elite-gold/10 border border-elite-gold/30 rounded-sm p-6 text-center">
-          <p className="text-white mb-2 font-medium">Conversation locked.</p>
-          <p className="text-elite-text-muted text-sm mb-4">You&apos;ve used your {MESSAGE_LIMIT_GUEST} free messages. Log in for unlimited access.</p>
+      {hitLimit && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="limit-popup-title"
+        >
           <Link
             to="/login"
-            className="inline-block bg-elite-gold text-black px-8 py-3 font-bold rounded-sm text-sm hover:bg-white transition-all"
+            className="block max-w-sm mx-4 p-8 bg-elite-gray border-2 border-elite-gold/50 rounded-lg text-center shadow-xl hover:border-elite-gold hover:shadow-[0_0_30px_rgba(212,175,55,0.3)] transition-all cursor-pointer"
           >
-            Log in for more usage
+            <p id="limit-popup-title" className="text-white font-serif text-xl font-bold mb-2">
+              Conversation locked
+            </p>
+            <p className="text-elite-text-muted text-sm mb-6">
+              You&apos;ve used your {MESSAGE_LIMIT_GUEST} free messages. Log in for unlimited access.
+            </p>
+            <span className="inline-block bg-elite-gold text-black px-8 py-3 font-bold rounded-sm text-sm hover:bg-white transition-all">
+              Log in for unlimited access
+            </span>
           </Link>
         </div>
-      ) : (
+      )}
+      {!hitLimit && (
         <div className="flex gap-4">
           <input 
             type="text" 
