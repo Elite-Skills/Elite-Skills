@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import { submitContact } from '../api';
 
 type Props = {
   isOpen: boolean;
@@ -11,18 +12,28 @@ export default function ContactFormModal({ isOpen, onClose }: Props) {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: wire to backend or email service
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setName('');
-      setEmail('');
-      setMessage('');
-      onClose();
-    }, 2000);
+    setError(null);
+    setLoading(true);
+    try {
+      await submitContact({ name, email, message });
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        setName('');
+        setEmail('');
+        setMessage('');
+        onClose();
+      }, 2000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to send. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -89,6 +100,7 @@ export default function ContactFormModal({ isOpen, onClose }: Props) {
               placeholder="How can we help?"
             />
           </div>
+          {error && <p className="text-red-400 text-sm text-center py-2">{error}</p>}
           {submitted ? (
             <p className="text-elite-gold text-sm text-center py-2">Thank you! We&apos;ll be in touch soon.</p>
           ) : (
@@ -96,15 +108,17 @@ export default function ContactFormModal({ isOpen, onClose }: Props) {
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 py-3 px-4 border border-white/20 text-white rounded hover:border-elite-gold hover:text-elite-gold transition-colors"
+                disabled={loading}
+                className="flex-1 py-3 px-4 border border-white/20 text-white rounded hover:border-elite-gold hover:text-elite-gold transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex-1 py-3 px-4 bg-elite-gold text-black font-bold rounded hover:bg-elite-gold-dim transition-colors"
+                disabled={loading}
+                className="flex-1 py-3 px-4 bg-elite-gold text-black font-bold rounded hover:bg-elite-gold-dim transition-colors disabled:opacity-50"
               >
-                Send
+                {loading ? 'Sending…' : 'Send'}
               </button>
             </div>
           )}

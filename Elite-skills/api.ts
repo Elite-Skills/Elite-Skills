@@ -56,6 +56,14 @@ export async function me(): Promise<{ user: AuthUser }> {
   return request('/api/auth/me')
 }
 
+export async function submitContact(payload: { name: string; email: string; message: string }): Promise<{ ok: true }> {
+  return request('/api/contact', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+}
+
 export type ScanResult = {
   score: number
   matchedKeywords: string[]
