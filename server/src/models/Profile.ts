@@ -3,9 +3,13 @@ import mongoose, { type InferSchemaType } from 'mongoose'
 const profileSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true, index: true },
+    cvName: { type: String, default: '', trim: true },
     headline: { type: String, default: '', trim: true },
+    professionalSummary: { type: String, default: '', trim: true },
     experience: { type: [String], default: [] },
     projects: { type: [String], default: [] },
+    education: { type: [String], default: [] },
+    additionalInfo: { type: [String], default: [] },
     contact: {
       email: { type: String, default: '', trim: true },
       phone: { type: String, default: '', trim: true },

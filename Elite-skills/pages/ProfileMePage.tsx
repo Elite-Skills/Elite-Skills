@@ -20,9 +20,13 @@ export default function ProfileMePage() {
 
   const [profile, setProfile] = useState<Profile | null>(null)
 
+  const [cvName, setCvName] = useState('')
   const [headline, setHeadline] = useState('')
+  const [professionalSummary, setProfessionalSummary] = useState('')
   const [experience, setExperience] = useState('')
   const [projects, setProjects] = useState('')
+  const [education, setEducation] = useState('')
+  const [additionalInfo, setAdditionalInfo] = useState('')
   const [connectionQuestions, setConnectionQuestions] = useState('')
 
   const [email, setEmail] = useState('')
@@ -46,9 +50,13 @@ export default function ProfileMePage() {
         if (cancelled) return
 
         setProfile(data.profile)
+        setCvName(data.profile.name ?? '')
         setHeadline(data.profile.headline ?? '')
+        setProfessionalSummary(data.profile.professionalSummary ?? '')
         setExperience(joinLines(data.profile.experience ?? []))
         setProjects(joinLines(data.profile.projects ?? []))
+        setEducation(joinLines(data.profile.education ?? []))
+        setAdditionalInfo(joinLines(data.profile.additionalInfo ?? []))
         setConnectionQuestions(joinLines(data.profile.connectionQuestions ?? []))
 
         setEmail(data.profile.contact?.email ?? '')
@@ -79,9 +87,13 @@ export default function ProfileMePage() {
     setError(null)
     try {
       await updateMyProfile({
+        cvName: cvName.trim(),
         headline,
+        professionalSummary,
         experience: splitLines(experience),
         projects: splitLines(projects),
+        education: splitLines(education),
+        additionalInfo: splitLines(additionalInfo),
         connectionQuestions: splitLines(connectionQuestions),
         contact: { email, phone, linkedIn },
         visibility: { showEmail, showPhone, showLinkedIn },
@@ -107,8 +119,18 @@ export default function ProfileMePage() {
 
         <div className="form">
           <label className="label">
+            Name (for CV)
+            <input className="input" value={cvName} onChange={(e) => setCvName(e.target.value)} placeholder="Your full name as it appears on your resume" />
+          </label>
+
+          <label className="label">
             Headline
             <input className="input" value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="BBA Finance | Digital Marketing | SEO" />
+          </label>
+
+          <label className="label">
+            Professional Summary
+            <textarea className="textarea" rows={3} value={professionalSummary} onChange={(e) => setProfessionalSummary(e.target.value)} placeholder="2–3 sentence summary of your experience and goals" />
           </label>
 
           <label className="label">
@@ -119,6 +141,16 @@ export default function ProfileMePage() {
           <label className="label">
             Projects (one per line)
             <textarea className="textarea" rows={6} value={projects} onChange={(e) => setProjects(e.target.value)} placeholder="SEO audit project\nMarketing campaign analysis" />
+          </label>
+
+          <label className="label">
+            Education (one per line)
+            <textarea className="textarea" rows={4} value={education} onChange={(e) => setEducation(e.target.value)} placeholder={'MBA, Finance — Wharton (2016)\nB.S. Economics — Stanford (2012)'} />
+          </label>
+
+          <label className="label">
+            Additional Information (one per line)
+            <textarea className="textarea" rows={3} value={additionalInfo} onChange={(e) => setAdditionalInfo(e.target.value)} placeholder={'CFA Level II | Languages: English, Mandarin\nTechnical: Excel, Python, SQL'} />
           </label>
 
           <label className="label">

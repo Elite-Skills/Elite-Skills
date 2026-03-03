@@ -50,12 +50,14 @@ const FILLER_PROFILE: DisplayProfile = {
   recommendations: [],
 }
 
-/** Merge user profile with filler for display; always show full example (education, additionalInfo) in preview */
+/** Merge user profile with filler for display; use filler when sections are empty */
 function getDisplayProfile(profile: Profile): DisplayProfile {
   const hasExp = (profile.experience?.length ?? 0) > 0
   const hasProj = (profile.projects?.length ?? 0) > 0
   const hasHeadline = !!profile.headline?.trim()
   const hasContact = profile.contact && (profile.contact.email || profile.contact.phone || profile.contact.linkedIn)
+  const hasEducation = (profile.education?.length ?? 0) > 0
+  const hasAdditionalInfo = (profile.additionalInfo?.length ?? 0) > 0
   return {
     ...profile,
     name: profile.name?.trim() || FILLER_PROFILE.name,
@@ -63,8 +65,8 @@ function getDisplayProfile(profile: Profile): DisplayProfile {
     experience: hasExp ? profile.experience : FILLER_PROFILE.experience,
     projects: hasProj ? profile.projects : FILLER_PROFILE.projects,
     contact: hasContact ? profile.contact : FILLER_PROFILE.contact,
-    education: FILLER_PROFILE.education,
-    additionalInfo: FILLER_PROFILE.additionalInfo,
+    education: hasEducation ? profile.education : FILLER_PROFILE.education,
+    additionalInfo: hasAdditionalInfo ? profile.additionalInfo : FILLER_PROFILE.additionalInfo,
   }
 }
 
@@ -90,49 +92,62 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   )
 }
 
-function ClassicTemplate({ profile, summary }: { profile: DisplayProfile; summary?: string }) {
+function Editable({ children, editable, style, ...rest }: { children: React.ReactNode; editable?: boolean; style?: React.CSSProperties }) {
+  return (
+    <div
+      {...rest}
+      style={style}
+      contentEditable={editable}
+      suppressContentEditableWarning
+    >
+      {children}
+    </div>
+  )
+}
+
+function ClassicTemplate({ profile, summary, editable }: { profile: DisplayProfile; summary?: string; editable?: boolean }) {
   const { name, headline, experience, projects, education, additionalInfo, contact } = profile
   return (
     <div style={{ fontFamily: 'Georgia, serif', fontSize: 11, color: '#000', padding: 24, maxWidth: 595 }}>
       <div style={{ textAlign: 'center', marginBottom: 16 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0, letterSpacing: '0.05em', color: '#000' }}>{name}</h1>
-        <div style={{ fontSize: 10, marginTop: 4, color: '#333' }}>{headline || '—'}</div>
+        <Editable editable={editable} style={{ fontSize: 22, fontWeight: 700, margin: 0, letterSpacing: '0.05em', color: '#000' }}>{name}</Editable>
+        <Editable editable={editable} style={{ fontSize: 10, marginTop: 4, color: '#333' }}>{headline || '—'}</Editable>
         <div style={{ fontSize: 9, marginTop: 6, color: '#555' }}>
-          {contact?.email && <span>{contact.email}</span>}
-          {contact?.phone && <span style={{ marginLeft: 12 }}>{contact.phone}</span>}
-          {contact?.linkedIn && <span style={{ marginLeft: 12 }}>{contact.linkedIn}</span>}
+          {contact?.email && <Editable editable={editable} style={{ display: 'inline' }}>{contact.email}</Editable>}
+          {contact?.phone && <Editable editable={editable} style={{ display: 'inline', marginLeft: 12 }}>{contact.phone}</Editable>}
+          {contact?.linkedIn && <Editable editable={editable} style={{ display: 'inline', marginLeft: 12 }}>{contact.linkedIn}</Editable>}
         </div>
       </div>
       {summary && (
         <Section title="Professional Summary">
-          <div style={{ lineHeight: 1.4, color: '#333' }}>{summary}</div>
+          <Editable editable={editable} style={{ lineHeight: 1.4, color: '#333' }}>{summary}</Editable>
         </Section>
       )}
       {experience && experience.length > 0 && (
         <Section title="Experience">
           {experience.map((e, i) => (
-            <div key={i} style={{ marginBottom: 6, lineHeight: 1.4 }}>{e}</div>
+            <Editable key={i} editable={editable} style={{ marginBottom: 6, lineHeight: 1.4 }}>{e}</Editable>
           ))}
         </Section>
       )}
       {projects && projects.length > 0 && (
         <Section title="Projects">
           {projects.map((p, i) => (
-            <div key={i} style={{ marginBottom: 6, lineHeight: 1.4 }}>{p}</div>
+            <Editable key={i} editable={editable} style={{ marginBottom: 6, lineHeight: 1.4 }}>{p}</Editable>
           ))}
         </Section>
       )}
       {education && education.length > 0 && (
         <Section title="Education">
           {education.map((e, i) => (
-            <div key={i} style={{ marginBottom: 6, lineHeight: 1.4 }}>{e}</div>
+            <Editable key={i} editable={editable} style={{ marginBottom: 6, lineHeight: 1.4 }}>{e}</Editable>
           ))}
         </Section>
       )}
       {additionalInfo && additionalInfo.length > 0 && (
         <Section title="Additional Information">
           {additionalInfo.map((a, i) => (
-            <div key={i} style={{ marginBottom: 6, lineHeight: 1.4 }}>{a}</div>
+            <Editable key={i} editable={editable} style={{ marginBottom: 6, lineHeight: 1.4 }}>{a}</Editable>
           ))}
         </Section>
       )}
@@ -140,50 +155,50 @@ function ClassicTemplate({ profile, summary }: { profile: DisplayProfile; summar
   )
 }
 
-function ModernTemplate({ profile, summary }: { profile: DisplayProfile; summary?: string }) {
+function ModernTemplate({ profile, summary, editable }: { profile: DisplayProfile; summary?: string; editable?: boolean }) {
   const { name, headline, experience, projects, education, additionalInfo, contact } = profile
   return (
     <div style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontSize: 10, color: '#000', display: 'flex', maxWidth: 595 }}>
       <div style={{ width: 140, padding: 20, background: '#fff', borderRight: '1px solid #000' }}>
-        <h1 style={{ fontSize: 14, fontWeight: 700, margin: '0 0 8px 0', color: '#000' }}>{name}</h1>
-        <div style={{ fontSize: 9, color: '#333', lineHeight: 1.4 }}>{headline || '—'}</div>
+        <Editable editable={editable} style={{ fontSize: 14, fontWeight: 700, margin: '0 0 8px 0', color: '#000' }}>{name}</Editable>
+        <Editable editable={editable} style={{ fontSize: 9, color: '#333', lineHeight: 1.4 }}>{headline || '—'}</Editable>
         <div style={{ marginTop: 16, fontSize: 9, color: '#333' }}>
-          {contact?.email && <div style={{ marginBottom: 4 }}>{contact.email}</div>}
-          {contact?.phone && <div style={{ marginBottom: 4 }}>{contact.phone}</div>}
-          {contact?.linkedIn && <div style={{ marginBottom: 4 }}>{contact.linkedIn}</div>}
+          {contact?.email && <Editable editable={editable} style={{ marginBottom: 4 }}>{contact.email}</Editable>}
+          {contact?.phone && <Editable editable={editable} style={{ marginBottom: 4 }}>{contact.phone}</Editable>}
+          {contact?.linkedIn && <Editable editable={editable} style={{ marginBottom: 4 }}>{contact.linkedIn}</Editable>}
         </div>
       </div>
       <div style={{ flex: 1, padding: 24 }}>
         {summary && (
           <Section title="Professional Summary">
-            <div style={{ lineHeight: 1.4, color: '#333' }}>{summary}</div>
+            <Editable editable={editable} style={{ lineHeight: 1.4, color: '#333' }}>{summary}</Editable>
           </Section>
         )}
         {experience && experience.length > 0 && (
           <Section title="Experience">
             {experience.map((e, i) => (
-              <div key={i} style={{ marginBottom: 6, lineHeight: 1.4 }}>{e}</div>
+              <Editable key={i} editable={editable} style={{ marginBottom: 6, lineHeight: 1.4 }}>{e}</Editable>
             ))}
           </Section>
         )}
         {projects && projects.length > 0 && (
           <Section title="Projects">
             {projects.map((p, i) => (
-              <div key={i} style={{ marginBottom: 6, lineHeight: 1.4 }}>{p}</div>
+              <Editable key={i} editable={editable} style={{ marginBottom: 6, lineHeight: 1.4 }}>{p}</Editable>
             ))}
           </Section>
         )}
         {education && education.length > 0 && (
           <Section title="Education">
             {education.map((e, i) => (
-              <div key={i} style={{ marginBottom: 6, lineHeight: 1.4 }}>{e}</div>
+              <Editable key={i} editable={editable} style={{ marginBottom: 6, lineHeight: 1.4 }}>{e}</Editable>
             ))}
           </Section>
         )}
         {additionalInfo && additionalInfo.length > 0 && (
           <Section title="Additional Information">
             {additionalInfo.map((a, i) => (
-              <div key={i} style={{ marginBottom: 6, lineHeight: 1.4 }}>{a}</div>
+              <Editable key={i} editable={editable} style={{ marginBottom: 6, lineHeight: 1.4 }}>{a}</Editable>
             ))}
           </Section>
         )}
@@ -192,45 +207,44 @@ function ModernTemplate({ profile, summary }: { profile: DisplayProfile; summary
   )
 }
 
-function MinimalTemplate({ profile, summary }: { profile: DisplayProfile; summary?: string }) {
+function MinimalTemplate({ profile, summary, editable }: { profile: DisplayProfile; summary?: string; editable?: boolean }) {
   const { name, headline, experience, projects, education, additionalInfo, contact } = profile
+  const contactStr = [contact?.email, contact?.phone, contact?.linkedIn].filter(Boolean).join(' · ')
   return (
     <div style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontSize: 11, color: '#000', padding: 32, maxWidth: 595 }}>
-      <h1 style={{ fontSize: 20, fontWeight: 600, margin: '0 0 4px 0', letterSpacing: '-0.02em', color: '#000' }}>{name}</h1>
-      <div style={{ fontSize: 10, color: '#444', marginBottom: 24 }}>{headline || '—'}</div>
-      <div style={{ fontSize: 9, color: '#666', marginBottom: 28 }}>
-        {[contact?.email, contact?.phone, contact?.linkedIn].filter(Boolean).join(' · ')}
-      </div>
+      <Editable editable={editable} style={{ fontSize: 20, fontWeight: 600, margin: '0 0 4px 0', letterSpacing: '-0.02em', color: '#000' }}>{name}</Editable>
+      <Editable editable={editable} style={{ fontSize: 10, color: '#444', marginBottom: 24 }}>{headline || '—'}</Editable>
+      <Editable editable={editable} style={{ fontSize: 9, color: '#666', marginBottom: 28 }}>{contactStr}</Editable>
       {summary && (
         <Section title="Professional Summary">
-          <div style={{ lineHeight: 1.5, color: '#333' }}>{summary}</div>
+          <Editable editable={editable} style={{ lineHeight: 1.5, color: '#333' }}>{summary}</Editable>
         </Section>
       )}
       {experience && experience.length > 0 && (
         <Section title="Experience">
           {experience.map((e, i) => (
-            <div key={i} style={{ marginBottom: 8, lineHeight: 1.5 }}>{e}</div>
+            <Editable key={i} editable={editable} style={{ marginBottom: 8, lineHeight: 1.5 }}>{e}</Editable>
           ))}
         </Section>
       )}
       {projects && projects.length > 0 && (
         <Section title="Projects">
           {projects.map((p, i) => (
-            <div key={i} style={{ marginBottom: 8, lineHeight: 1.5 }}>{p}</div>
+            <Editable key={i} editable={editable} style={{ marginBottom: 8, lineHeight: 1.5 }}>{p}</Editable>
           ))}
         </Section>
       )}
       {education && education.length > 0 && (
         <Section title="Education">
           {education.map((e, i) => (
-            <div key={i} style={{ marginBottom: 8, lineHeight: 1.5 }}>{e}</div>
+            <Editable key={i} editable={editable} style={{ marginBottom: 8, lineHeight: 1.5 }}>{e}</Editable>
           ))}
         </Section>
       )}
       {additionalInfo && additionalInfo.length > 0 && (
         <Section title="Additional Information">
           {additionalInfo.map((a, i) => (
-            <div key={i} style={{ marginBottom: 8, lineHeight: 1.5 }}>{a}</div>
+            <Editable key={i} editable={editable} style={{ marginBottom: 8, lineHeight: 1.5 }}>{a}</Editable>
           ))}
         </Section>
       )}
@@ -238,49 +252,49 @@ function MinimalTemplate({ profile, summary }: { profile: DisplayProfile; summar
   )
 }
 
-function CompactTemplate({ profile, summary }: { profile: DisplayProfile; summary?: string }) {
+function CompactTemplate({ profile, summary, editable }: { profile: DisplayProfile; summary?: string; editable?: boolean }) {
   const { name, headline, experience, projects, education, additionalInfo, contact } = profile
   return (
     <div style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontSize: 10, color: '#000', padding: 20, maxWidth: 595 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8, paddingBottom: 8 }}>
-        <h1 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: '#000' }}>{name}</h1>
+        <Editable editable={editable} style={{ fontSize: 16, fontWeight: 700, margin: 0, color: '#000' }}>{name}</Editable>
         <div style={{ fontSize: 8, color: '#333' }}>
-          {contact?.email && <span>{contact.email}</span>}
-          {contact?.phone && <span style={{ marginLeft: 8 }}>{contact.phone}</span>}
-          {contact?.linkedIn && <span style={{ marginLeft: 8 }}>{contact.linkedIn}</span>}
+          {contact?.email && <Editable editable={editable} style={{ display: 'inline' }}>{contact.email}</Editable>}
+          {contact?.phone && <Editable editable={editable} style={{ display: 'inline', marginLeft: 8 }}>{contact.phone}</Editable>}
+          {contact?.linkedIn && <Editable editable={editable} style={{ display: 'inline', marginLeft: 8 }}>{contact.linkedIn}</Editable>}
         </div>
       </div>
-      <div style={{ fontSize: 9, marginBottom: 12, color: '#444' }}>{headline || '—'}</div>
+      <Editable editable={editable} style={{ fontSize: 9, marginBottom: 12, color: '#444' }}>{headline || '—'}</Editable>
       {summary && (
         <Section title="Professional Summary">
-          <div style={{ lineHeight: 1.35, color: '#333' }}>{summary}</div>
+          <Editable editable={editable} style={{ lineHeight: 1.35, color: '#333' }}>{summary}</Editable>
         </Section>
       )}
       {experience && experience.length > 0 && (
         <Section title="Experience">
           {experience.map((e, i) => (
-            <div key={i} style={{ marginBottom: 4, lineHeight: 1.35 }}>{e}</div>
+            <Editable key={i} editable={editable} style={{ marginBottom: 4, lineHeight: 1.35 }}>{e}</Editable>
           ))}
         </Section>
       )}
       {projects && projects.length > 0 && (
         <Section title="Projects">
           {projects.map((p, i) => (
-            <div key={i} style={{ marginBottom: 4, lineHeight: 1.35 }}>{p}</div>
+            <Editable key={i} editable={editable} style={{ marginBottom: 4, lineHeight: 1.35 }}>{p}</Editable>
           ))}
         </Section>
       )}
       {education && education.length > 0 && (
         <Section title="Education">
           {education.map((e, i) => (
-            <div key={i} style={{ marginBottom: 4, lineHeight: 1.35 }}>{e}</div>
+            <Editable key={i} editable={editable} style={{ marginBottom: 4, lineHeight: 1.35 }}>{e}</Editable>
           ))}
         </Section>
       )}
       {additionalInfo && additionalInfo.length > 0 && (
         <Section title="Additional Information">
           {additionalInfo.map((a, i) => (
-            <div key={i} style={{ marginBottom: 4, lineHeight: 1.35 }}>{a}</div>
+            <Editable key={i} editable={editable} style={{ marginBottom: 4, lineHeight: 1.35 }}>{a}</Editable>
           ))}
         </Section>
       )}
@@ -288,16 +302,16 @@ function CompactTemplate({ profile, summary }: { profile: DisplayProfile; summar
   )
 }
 
-function TemplatePreview({ templateId, profile, summary }: { templateId: TemplateId; profile: DisplayProfile; summary?: string }) {
+function TemplatePreview({ templateId, profile, summary, editable }: { templateId: TemplateId; profile: DisplayProfile; summary?: string; editable?: boolean }) {
   switch (templateId) {
     case 'classic':
-      return <ClassicTemplate profile={profile} summary={summary} />
+      return <ClassicTemplate profile={profile} summary={summary} editable={editable} />
     case 'modern':
-      return <ModernTemplate profile={profile} summary={summary} />
+      return <ModernTemplate profile={profile} summary={summary} editable={editable} />
     case 'minimal':
-      return <MinimalTemplate profile={profile} summary={summary} />
+      return <MinimalTemplate profile={profile} summary={summary} editable={editable} />
     case 'compact':
-      return <CompactTemplate profile={profile} summary={summary} />
+      return <CompactTemplate profile={profile} summary={summary} editable={editable} />
   }
 }
 
@@ -308,7 +322,6 @@ export default function ResumeCreatorPage() {
   const [selected, setSelected] = useState<TemplateId>('classic')
   const [exporting, setExporting] = useState(false)
   const resumeRef = useRef<HTMLDivElement>(null)
-  const exportRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -327,13 +340,10 @@ export default function ResumeCreatorPage() {
   }, [])
 
   async function handleExportPDF() {
-    if (!profile) return
-    const hasContent = (profile.experience?.length ?? 0) > 0 || (profile.projects?.length ?? 0) > 0
-    const el = hasContent && exportRef.current ? exportRef.current : resumeRef.current
-    if (!el) return
+    if (!profile || !resumeRef.current) return
     setExporting(true)
     try {
-      const canvas = await html2canvas(el, {
+      const canvas = await html2canvas(resumeRef.current, {
         scale: 2,
         useCORS: true,
         backgroundColor: '#ffffff',
@@ -377,9 +387,16 @@ export default function ResumeCreatorPage() {
     )
   }
 
-  const hasContent = (profile.experience?.length ?? 0) > 0 || (profile.projects?.length ?? 0) > 0
+  const hasContent =
+    (profile.experience?.length ?? 0) > 0 ||
+    (profile.projects?.length ?? 0) > 0 ||
+    (profile.education?.length ?? 0) > 0 ||
+    !!profile.professionalSummary?.trim()
   const displayProfile = getDisplayProfile(profile)
-  const summary = (hasContent ? generateSummary(profile) : '') || FILLER_SUMMARY
+  const summary =
+    profile.professionalSummary?.trim() ||
+    (hasContent ? generateSummary(profile) : '') ||
+    FILLER_SUMMARY
 
   return (
     <div className="page">
@@ -393,7 +410,7 @@ export default function ResumeCreatorPage() {
 
         {!hasContent && (
           <div className="error" style={{ marginBottom: 16 }}>
-            Add experience or projects in your profile first.
+            Add experience, projects, education, or a professional summary in your profile first.
             <Link className="btn" to="/profile/me" style={{ marginLeft: 12, display: 'inline-block' }}>
               Edit profile
             </Link>
@@ -418,19 +435,15 @@ export default function ResumeCreatorPage() {
           ))}
         </div>
 
-        <div style={{ position: 'relative', background: '#fff', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
-          <div ref={resumeRef} style={{ background: '#fff', minHeight: 400, width: 595, maxWidth: '100%', margin: '0 auto' }}>
-            <TemplatePreview templateId={selected} profile={displayProfile} summary={summary} />
-          </div>
+        <div style={{ background: '#fff', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
           {hasContent && (
-            <div ref={exportRef} style={{ position: 'absolute', left: -9999, top: 0, width: 595, background: '#fff' }}>
-              <TemplatePreview
-                templateId={selected}
-                profile={{ ...profile, education: undefined, additionalInfo: undefined }}
-                summary={generateSummary(profile)}
-              />
-            </div>
+            <p className="muted" style={{ padding: '8px 16px', margin: 0, fontSize: 12, borderBottom: '1px solid var(--border)' }}>
+              Click any text to edit before downloading.
+            </p>
           )}
+          <div ref={resumeRef} style={{ background: '#fff', minHeight: 400, width: 595, maxWidth: '100%', margin: '0 auto' }}>
+            <TemplatePreview templateId={selected} profile={displayProfile} summary={summary} editable={hasContent} />
+          </div>
         </div>
 
         <div style={{ marginTop: 20, display: 'flex', gap: 12, alignItems: 'center' }}>

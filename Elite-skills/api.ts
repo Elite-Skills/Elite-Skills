@@ -174,8 +174,11 @@ export type Profile = {
   userId: string
   name: string
   headline: string
+  professionalSummary?: string
   experience: string[]
   projects: string[]
+  education?: string[]
+  additionalInfo?: string[]
   contact: { email: string; phone: string; linkedIn: string }
   visibility: { showEmail: boolean; showPhone: boolean; showLinkedIn: boolean }
   connectionQuestions: string[]
@@ -206,9 +209,13 @@ export async function getMyProfile(): Promise<{ profile: Profile }> {
 }
 
 export async function updateMyProfile(payload: {
+  cvName?: string
   headline?: string
+  professionalSummary?: string
   experience?: string[]
   projects?: string[]
+  education?: string[]
+  additionalInfo?: string[]
   connectionQuestions?: string[]
   contact?: { email?: string; phone?: string; linkedIn?: string }
   visibility?: { showEmail?: boolean; showPhone?: boolean; showLinkedIn?: boolean }

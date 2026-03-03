@@ -29,10 +29,13 @@ profileRouter.get('/me', requireAuth, async (req: Request, res: Response) => {
   res.json({
     profile: {
       userId: String(profile.userId),
-      name: user?.name ?? '',
+      name: (profile.cvName || user?.name || '').trim(),
       headline: profile.headline,
+      professionalSummary: profile.professionalSummary,
       experience: profile.experience,
       projects: profile.projects,
+      education: profile.education,
+      additionalInfo: profile.additionalInfo,
       contact: profile.contact,
       visibility: profile.visibility,
       connectionQuestions: profile.connectionQuestions,
@@ -42,9 +45,13 @@ profileRouter.get('/me', requireAuth, async (req: Request, res: Response) => {
 })
 
 profileRouter.put('/me', requireAuth, async (req: Request, res: Response) => {
+  const cvName = String(req.body?.cvName ?? '').trim()
   const headline = String(req.body?.headline ?? '').trim()
+  const professionalSummary = String(req.body?.professionalSummary ?? '').trim()
   const experience = Array.isArray(req.body?.experience) ? req.body.experience.map((s: unknown) => String(s)) : undefined
   const projects = Array.isArray(req.body?.projects) ? req.body.projects.map((s: unknown) => String(s)) : undefined
+  const education = Array.isArray(req.body?.education) ? req.body.education.map((s: unknown) => String(s)).filter(Boolean) : undefined
+  const additionalInfo = Array.isArray(req.body?.additionalInfo) ? req.body.additionalInfo.map((s: unknown) => String(s)).filter(Boolean) : undefined
 
   const contact = req.body?.contact
   const visibility = req.body?.visibility
@@ -55,9 +62,13 @@ profileRouter.put('/me', requireAuth, async (req: Request, res: Response) => {
 
   const profile = await ensureProfile(String(req.userId))
 
+  if (cvName !== undefined) profile.cvName = cvName
   if (headline !== undefined) profile.headline = headline
+  if (professionalSummary !== undefined) profile.professionalSummary = professionalSummary
   if (experience) profile.experience = experience
   if (projects) profile.projects = projects
+  if (education) profile.education = education
+  if (additionalInfo) profile.additionalInfo = additionalInfo
   if (connectionQuestions) profile.connectionQuestions = connectionQuestions
 
   if (contact && typeof contact === 'object') {
@@ -135,10 +146,13 @@ profileRouter.get('/:userId', requireAuth, async (req: Request, res: Response) =
   res.json({
     profile: {
       userId: targetUserId,
-      name: targetUser.name,
+      name: (profile.cvName || targetUser.name || '').trim(),
       headline: profile.headline,
+      professionalSummary: profile.professionalSummary,
       experience: profile.experience,
       projects: profile.projects,
+      education: profile.education,
+      additionalInfo: profile.additionalInfo,
       contact,
       recommendations: profile.recommendations,
       connected,

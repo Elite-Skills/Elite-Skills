@@ -31,7 +31,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return
         }
 
-        const data = await me()
+        const timeout = (ms: number) =>
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Auth timeout')), ms))
+        const data = await Promise.race([me(), timeout(8000)])
         if (!cancelled) {
           setUser(data.user)
           setLoading(false)

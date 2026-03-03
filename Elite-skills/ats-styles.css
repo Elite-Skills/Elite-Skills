@@ -581,3 +581,16 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* Editable resume content */
+.ats-app [contenteditable='true'] {
+  outline: none;
+}
+.ats-app [contenteditable='true']:hover {
+  outline: 1px dashed rgba(212, 175, 55, 0.4);
+  background: rgba(212, 175, 55, 0.03);
+}
+.ats-app [contenteditable='true']:focus {
+  outline: 1px solid rgba(212, 175, 55, 0.6);
+  background: rgba(212, 175, 55, 0.05);
+}
