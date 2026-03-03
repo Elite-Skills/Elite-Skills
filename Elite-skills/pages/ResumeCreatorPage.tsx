@@ -97,12 +97,12 @@ function ClassicTemplate({ profile, summary, editable }: { profile: DisplayProfi
         <Editable editable={editable} placeholder="2–3 sentences about your experience and goals" style={{ lineHeight: 1.4, color: '#333' }}>{summary?.trim()}</Editable>
       </Section>
       <Section title="Experience">
-        {(expItems.length > 0 ? expItems : [{ title: '', description: '' }, { title: '', description: '' }]).map((item, i) => (
+        {expItems.map((item, i) => (
           <ExpItemBlock key={i} item={item} editable={editable} titlePlaceholder="Job title — Company (Years)" descPlaceholder="Key achievements and responsibilities" />
         ))}
       </Section>
       <Section title="Projects">
-        {(projItems.length > 0 ? projItems : [{ title: '', description: '' }, { title: '', description: '' }]).map((item, i) => (
+        {projItems.map((item, i) => (
           <ExpItemBlock key={i} item={item} editable={editable} titlePlaceholder="Project title" descPlaceholder="Description and outcomes" />
         ))}
       </Section>
@@ -140,12 +140,12 @@ function ModernTemplate({ profile, summary, editable }: { profile: DisplayProfil
           <Editable editable={editable} placeholder="2–3 sentences about your experience and goals" style={{ lineHeight: 1.4, color: '#333' }}>{summary?.trim()}</Editable>
         </Section>
         <Section title="Experience">
-          {(expItems.length > 0 ? expItems : [{ title: '', description: '' }, { title: '', description: '' }]).map((item, i) => (
+          {expItems.map((item, i) => (
             <ExpItemBlock key={i} item={item} editable={editable} titlePlaceholder="Job title — Company (Years)" descPlaceholder="Key achievements" />
           ))}
         </Section>
         <Section title="Projects">
-          {(projItems.length > 0 ? projItems : [{ title: '', description: '' }, { title: '', description: '' }]).map((item, i) => (
+          {projItems.map((item, i) => (
             <ExpItemBlock key={i} item={item} editable={editable} titlePlaceholder="Project title" descPlaceholder="Description and outcomes" />
           ))}
         </Section>
@@ -178,12 +178,12 @@ function MinimalTemplate({ profile, summary, editable }: { profile: DisplayProfi
         <Editable editable={editable} placeholder="2–3 sentences about your experience and goals" style={{ lineHeight: 1.5, color: '#333' }}>{summary?.trim()}</Editable>
       </Section>
       <Section title="Experience">
-        {(expItems.length > 0 ? expItems : [{ title: '', description: '' }, { title: '', description: '' }]).map((item, i) => (
+        {expItems.map((item, i) => (
           <ExpItemBlock key={i} item={item} editable={editable} titlePlaceholder="Job title — Company (Years)" descPlaceholder="Key achievements" style={{ marginBottom: 8 }} />
         ))}
       </Section>
       <Section title="Projects">
-        {(projItems.length > 0 ? projItems : [{ title: '', description: '' }, { title: '', description: '' }]).map((item, i) => (
+        {projItems.map((item, i) => (
           <ExpItemBlock key={i} item={item} editable={editable} titlePlaceholder="Project title" descPlaceholder="Description and outcomes" style={{ marginBottom: 8 }} />
         ))}
       </Section>
@@ -220,12 +220,12 @@ function CompactTemplate({ profile, summary, editable }: { profile: DisplayProfi
         <Editable editable={editable} placeholder="2–3 sentences about your experience and goals" style={{ lineHeight: 1.35, color: '#333' }}>{summary?.trim()}</Editable>
       </Section>
       <Section title="Experience">
-        {(expItems.length > 0 ? expItems : [{ title: '', description: '' }, { title: '', description: '' }]).map((item, i) => (
+        {expItems.map((item, i) => (
           <ExpItemBlock key={i} item={item} editable={editable} titlePlaceholder="Job title — Company (Years)" descPlaceholder="Key achievements" style={{ marginBottom: 6 }} />
         ))}
       </Section>
       <Section title="Projects">
-        {(projItems.length > 0 ? projItems : [{ title: '', description: '' }, { title: '', description: '' }]).map((item, i) => (
+        {projItems.map((item, i) => (
           <ExpItemBlock key={i} item={item} editable={editable} titlePlaceholder="Project title" descPlaceholder="Description and outcomes" style={{ marginBottom: 6 }} />
         ))}
       </Section>

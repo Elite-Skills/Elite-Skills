@@ -47,8 +47,8 @@ export default function ProfileMePage() {
         setCvName(data.profile.name ?? '')
         setHeadline(data.profile.headline ?? '')
         setProfessionalSummary(data.profile.professionalSummary ?? '')
-        setExperience((data.profile.experience ?? []).length > 0 ? data.profile.experience : [{ title: '', description: '' }, { title: '', description: '' }])
-        setProjects((data.profile.projects ?? []).length > 0 ? data.profile.projects : [{ title: '', description: '' }, { title: '', description: '' }])
+        setExperience(data.profile.experience ?? [])
+        setProjects(data.profile.projects ?? [])
         setEducation(joinLines(data.profile.education ?? []))
         setAdditionalInfo(joinLines(data.profile.additionalInfo ?? []))
         setConnectionQuestions(joinLines(data.profile.connectionQuestions ?? []))
@@ -84,8 +84,8 @@ export default function ProfileMePage() {
         cvName: cvName.trim(),
         headline,
         professionalSummary,
-        experience: experience.filter((e) => e.title.trim() || e.description.trim()),
-        projects: projects.filter((p) => p.title.trim() || p.description.trim()),
+        experience,
+        projects,
         education: education.split('\n').map((x) => x.trim()).filter(Boolean),
         additionalInfo: additionalInfo.split('\n').map((x) => x.trim()).filter(Boolean),
         connectionQuestions: connectionQuestions.split('\n').map((x) => x.trim()).filter(Boolean),
@@ -170,7 +170,7 @@ export default function ProfileMePage() {
                       placeholder="Job title — Company (Years)"
                       style={{ flex: 1, marginRight: 8 }}
                     />
-                    {experience.length > 1 && (
+                    {experience.length >= 1 && (
                       <button type="button" onClick={() => removeExperience(i)} className="btn secondary" style={{ padding: 8 }} aria-label="Remove">
                         <Trash2 size={16} />
                       </button>
@@ -207,7 +207,7 @@ export default function ProfileMePage() {
                       placeholder="Project title"
                       style={{ flex: 1, marginRight: 8 }}
                     />
-                    {projects.length > 1 && (
+                    {projects.length >= 1 && (
                       <button type="button" onClick={() => removeProject(i)} className="btn secondary" style={{ padding: 8 }} aria-label="Remove">
                         <Trash2 size={16} />
                       </button>
