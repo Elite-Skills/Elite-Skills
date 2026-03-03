@@ -170,13 +170,16 @@ export type Recommendation = {
   createdAt: string
 }
 
+export type ExperienceItem = { title: string; description: string }
+export type ProjectItem = { title: string; description: string }
+
 export type Profile = {
   userId: string
   name: string
   headline: string
   professionalSummary?: string
-  experience: string[]
-  projects: string[]
+  experience: ExperienceItem[]
+  projects: ProjectItem[]
   education?: string[]
   additionalInfo?: string[]
   contact: { email: string; phone: string; linkedIn: string }
@@ -193,12 +196,12 @@ export type ProfilePublic =
       connectionQuestions?: string[]
       recommendations: Recommendation[]
     }
-  | {
+    | {
       userId: string
       name: string
       headline: string
-      experience: string[]
-      projects: string[]
+      experience: ExperienceItem[]
+      projects: ProjectItem[]
       contact?: { email?: string; phone?: string; linkedIn?: string }
       recommendations: Recommendation[]
       connected: boolean
@@ -212,8 +215,8 @@ export async function updateMyProfile(payload: {
   cvName?: string
   headline?: string
   professionalSummary?: string
-  experience?: string[]
-  projects?: string[]
+  experience?: ExperienceItem[]
+  projects?: ProjectItem[]
   education?: string[]
   additionalInfo?: string[]
   connectionQuestions?: string[]

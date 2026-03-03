@@ -289,7 +289,7 @@
 
 .ats-app .input::placeholder,
 .ats-app .textarea::placeholder {
-  color: var(--muted);
+  color: #6b6b6b;
 }
 
 .ats-app .input:focus,
@@ -593,4 +593,10 @@
 .ats-app [contenteditable='true']:focus {
   outline: 1px solid rgba(212, 175, 55, 0.6);
   background: rgba(212, 175, 55, 0.05);
+}
+
+/* Placeholder for empty editable resume fields */
+.ats-app [contenteditable='true'][data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  color: #999;
 }

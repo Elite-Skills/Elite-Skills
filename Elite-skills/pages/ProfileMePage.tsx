@@ -1,13 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 
-import { getMyProfile, updateMyProfile, type Profile } from '../api'
-
-function splitLines(s: string): string[] {
-  return s
-    .split('\n')
-    .map((x) => x.trim())
-    .filter(Boolean)
-}
+import { getMyProfile, updateMyProfile, type Profile, type ExperienceItem, type ProjectItem } from '../api'
+import { Plus, Trash2 } from 'lucide-react'
 
 function joinLines(xs: string[]): string {
   return (xs ?? []).join('\n')
@@ -23,8 +17,8 @@ export default function ProfileMePage() {
   const [cvName, setCvName] = useState('')
   const [headline, setHeadline] = useState('')
   const [professionalSummary, setProfessionalSummary] = useState('')
-  const [experience, setExperience] = useState('')
-  const [projects, setProjects] = useState('')
+  const [experience, setExperience] = useState<ExperienceItem[]>([])
+  const [projects, setProjects] = useState<ProjectItem[]>([])
   const [education, setEducation] = useState('')
   const [additionalInfo, setAdditionalInfo] = useState('')
   const [connectionQuestions, setConnectionQuestions] = useState('')
@@ -53,8 +47,8 @@ export default function ProfileMePage() {
         setCvName(data.profile.name ?? '')
         setHeadline(data.profile.headline ?? '')
         setProfessionalSummary(data.profile.professionalSummary ?? '')
-        setExperience(joinLines(data.profile.experience ?? []))
-        setProjects(joinLines(data.profile.projects ?? []))
+        setExperience((data.profile.experience ?? []).length > 0 ? data.profile.experience : [{ title: '', description: '' }])
+        setProjects((data.profile.projects ?? []).length > 0 ? data.profile.projects : [{ title: '', description: '' }])
         setEducation(joinLines(data.profile.education ?? []))
         setAdditionalInfo(joinLines(data.profile.additionalInfo ?? []))
         setConnectionQuestions(joinLines(data.profile.connectionQuestions ?? []))
@@ -90,11 +84,11 @@ export default function ProfileMePage() {
         cvName: cvName.trim(),
         headline,
         professionalSummary,
-        experience: splitLines(experience),
-        projects: splitLines(projects),
-        education: splitLines(education),
-        additionalInfo: splitLines(additionalInfo),
-        connectionQuestions: splitLines(connectionQuestions),
+        experience: experience.filter((e) => e.title.trim() || e.description.trim()),
+        projects: projects.filter((p) => p.title.trim() || p.description.trim()),
+        education: education.split('\n').map((x) => x.trim()).filter(Boolean),
+        additionalInfo: additionalInfo.split('\n').map((x) => x.trim()).filter(Boolean),
+        connectionQuestions: connectionQuestions.split('\n').map((x) => x.trim()).filter(Boolean),
         contact: { email, phone, linkedIn },
         visibility: { showEmail, showPhone, showLinkedIn },
       })
@@ -106,6 +100,30 @@ export default function ProfileMePage() {
     } finally {
       setSaving(false)
     }
+  }
+
+  function addExperience() {
+    setExperience((prev) => [...prev, { title: '', description: '' }])
+  }
+
+  function removeExperience(i: number) {
+    setExperience((prev) => prev.filter((_, idx) => idx !== i))
+  }
+
+  function updateExperience(i: number, field: 'title' | 'description', value: string) {
+    setExperience((prev) => prev.map((e, idx) => (idx === i ? { ...e, [field]: value } : e)))
+  }
+
+  function addProject() {
+    setProjects((prev) => [...prev, { title: '', description: '' }])
+  }
+
+  function removeProject(i: number) {
+    setProjects((prev) => prev.filter((_, idx) => idx !== i))
+  }
+
+  function updateProject(i: number, field: 'title' | 'description', value: string) {
+    setProjects((prev) => prev.map((p, idx) => (idx === i ? { ...p, [field]: value } : p)))
   }
 
   return (
@@ -133,15 +151,79 @@ export default function ProfileMePage() {
             <textarea className="textarea" rows={3} value={professionalSummary} onChange={(e) => setProfessionalSummary(e.target.value)} placeholder="2–3 sentence summary of your experience and goals" />
           </label>
 
-          <label className="label">
-            Experience (one per line)
-            <textarea className="textarea" rows={6} value={experience} onChange={(e) => setExperience(e.target.value)} placeholder="Intern - ABC Co (2025)\nCampus ambassador - XYZ" />
-          </label>
+          <div style={{ marginTop: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div style={{ fontWeight: 700 }}>Experience</div>
+              <button type="button" onClick={addExperience} className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <Plus size={16} />
+                Add Experience
+              </button>
+            </div>
+            <div style={{ display: 'grid', gap: 12 }}>
+              {experience.map((e, i) => (
+                <div key={i} className="listItem" style={{ padding: 14 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                    <input
+                      className="input"
+                      value={e.title}
+                      onChange={(ev) => updateExperience(i, 'title', ev.target.value)}
+                      placeholder="Job title — Company (Years)"
+                      style={{ flex: 1, marginRight: 8 }}
+                    />
+                    {experience.length > 1 && (
+                      <button type="button" onClick={() => removeExperience(i)} className="btn secondary" style={{ padding: 8 }} aria-label="Remove">
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                  <textarea
+                    className="textarea"
+                    value={e.description}
+                    onChange={(ev) => updateExperience(i, 'description', ev.target.value)}
+                    placeholder="Key achievements and responsibilities"
+                    rows={3}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
 
-          <label className="label">
-            Projects (one per line)
-            <textarea className="textarea" rows={6} value={projects} onChange={(e) => setProjects(e.target.value)} placeholder="SEO audit project\nMarketing campaign analysis" />
-          </label>
+          <div style={{ marginTop: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div style={{ fontWeight: 700 }}>Projects</div>
+              <button type="button" onClick={addProject} className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <Plus size={16} />
+                Add Project
+              </button>
+            </div>
+            <div style={{ display: 'grid', gap: 12 }}>
+              {projects.map((p, i) => (
+                <div key={i} className="listItem" style={{ padding: 14 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                    <input
+                      className="input"
+                      value={p.title}
+                      onChange={(ev) => updateProject(i, 'title', ev.target.value)}
+                      placeholder="Project title"
+                      style={{ flex: 1, marginRight: 8 }}
+                    />
+                    {projects.length > 1 && (
+                      <button type="button" onClick={() => removeProject(i)} className="btn secondary" style={{ padding: 8 }} aria-label="Remove">
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                  <textarea
+                    className="textarea"
+                    value={p.description}
+                    onChange={(ev) => updateProject(i, 'description', ev.target.value)}
+                    placeholder="Description and outcomes"
+                    rows={3}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
 
           <label className="label">
             Education (one per line)

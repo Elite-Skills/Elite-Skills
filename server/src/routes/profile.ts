@@ -22,6 +22,26 @@ async function ensureProfile(userId: string) {
   return profile
 }
 
+export function normalizeExperience(exp: unknown): { title: string; description: string }[] {
+  if (!Array.isArray(exp)) return []
+  return exp.map((item) => {
+    if (item && typeof item === 'object' && 'title' in item && 'description' in item) {
+      return { title: String((item as any).title ?? ''), description: String((item as any).description ?? '') }
+    }
+    return { title: '', description: String(item ?? '') }
+  })
+}
+
+export function normalizeProjects(proj: unknown): { title: string; description: string }[] {
+  if (!Array.isArray(proj)) return []
+  return proj.map((item) => {
+    if (item && typeof item === 'object' && 'title' in item && 'description' in item) {
+      return { title: String((item as any).title ?? ''), description: String((item as any).description ?? '') }
+    }
+    return { title: '', description: String(item ?? '') }
+  })
+}
+
 profileRouter.get('/me', requireAuth, async (req: Request, res: Response) => {
   const profile = await ensureProfile(String(req.userId))
   const user = await User.findById(req.userId)
@@ -32,8 +52,8 @@ profileRouter.get('/me', requireAuth, async (req: Request, res: Response) => {
       name: (profile.cvName || user?.name || '').trim(),
       headline: profile.headline,
       professionalSummary: profile.professionalSummary,
-      experience: profile.experience,
-      projects: profile.projects,
+      experience: normalizeExperience(profile.experience),
+      projects: normalizeProjects(profile.projects),
       education: profile.education,
       additionalInfo: profile.additionalInfo,
       contact: profile.contact,
@@ -48,8 +68,22 @@ profileRouter.put('/me', requireAuth, async (req: Request, res: Response) => {
   const cvName = String(req.body?.cvName ?? '').trim()
   const headline = String(req.body?.headline ?? '').trim()
   const professionalSummary = String(req.body?.professionalSummary ?? '').trim()
-  const experience = Array.isArray(req.body?.experience) ? req.body.experience.map((s: unknown) => String(s)) : undefined
-  const projects = Array.isArray(req.body?.projects) ? req.body.projects.map((s: unknown) => String(s)) : undefined
+  const experience = Array.isArray(req.body?.experience)
+    ? req.body.experience.map((item: unknown) => {
+        if (item && typeof item === 'object' && 'title' in item && 'description' in item) {
+          return { title: String((item as any).title ?? ''), description: String((item as any).description ?? '') }
+        }
+        return { title: '', description: String(item ?? '') }
+      })
+    : undefined
+  const projects = Array.isArray(req.body?.projects)
+    ? req.body.projects.map((item: unknown) => {
+        if (item && typeof item === 'object' && 'title' in item && 'description' in item) {
+          return { title: String((item as any).title ?? ''), description: String((item as any).description ?? '') }
+        }
+        return { title: '', description: String(item ?? '') }
+      })
+    : undefined
   const education = Array.isArray(req.body?.education) ? req.body.education.map((s: unknown) => String(s)).filter(Boolean) : undefined
   const additionalInfo = Array.isArray(req.body?.additionalInfo) ? req.body.additionalInfo.map((s: unknown) => String(s)).filter(Boolean) : undefined
 
@@ -149,8 +183,8 @@ profileRouter.get('/:userId', requireAuth, async (req: Request, res: Response) =
       name: (profile.cvName || targetUser.name || '').trim(),
       headline: profile.headline,
       professionalSummary: profile.professionalSummary,
-      experience: profile.experience,
-      projects: profile.projects,
+      experience: normalizeExperience(profile.experience),
+      projects: normalizeProjects(profile.projects),
       education: profile.education,
       additionalInfo: profile.additionalInfo,
       contact,

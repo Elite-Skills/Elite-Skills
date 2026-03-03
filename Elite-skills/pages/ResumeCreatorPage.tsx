@@ -14,72 +14,37 @@ const TEMPLATES: { id: TemplateId; name: string; desc: string }[] = [
   { id: 'compact', name: 'Compact', desc: 'Dense single column, maximum content' },
 ]
 
-/** Filler data for style preview so users see what each template looks like with real content */
-/** Extended profile for display - includes education & additionalInfo (filler only, not in API) */
+/** Extended profile for display */
 type DisplayProfile = Profile & { education?: string[]; additionalInfo?: string[] }
 
-const FILLER_PROFILE: DisplayProfile = {
-  userId: '',
-  name: 'Alexandra Chen',
-  headline: 'Senior Financial Analyst | CFA Level II | 8+ Years in Investment Banking',
-  experience: [
-    'Senior Financial Analyst at Morgan Stanley (2020–Present) — Led due diligence for $2B+ M&A transactions; built financial models for equity and debt offerings.',
-    'Financial Analyst at Goldman Sachs (2016–2020) — Supported IPO roadshows; prepared pitch books and valuation analyses for tech and healthcare sectors.',
-    'Investment Banking Summer Analyst at J.P. Morgan (2015) — Built LBO models; assisted with sell-side M&A process for mid-market companies.',
-  ],
-  projects: [
-    'Built automated DCF and LBO valuation toolkit used across 3 teams; reduced model build time by 40%.',
-    'Led cross-functional initiative to standardize financial reporting; improved data accuracy and reduced reconciliation time by 25%.',
-  ],
-  education: [
-    'MBA, Finance — Wharton School of Business, University of Pennsylvania (2016)',
-    'B.S. Economics — Stanford University (2012), Magna Cum Laude',
-  ],
-  additionalInfo: [
-    'CFA Level II Candidate | Series 7, 63 Licensed',
-    'Languages: English (Native), Mandarin (Fluent)',
-    'Technical: Excel, Bloomberg Terminal, Python, SQL, Tableau',
-  ],
-  contact: {
-    email: 'alexandra.chen@email.com',
-    phone: '+1 (555) 123-4567',
-    linkedIn: 'linkedin.com/in/alexandra-chen',
-  },
-  visibility: { showEmail: true, showPhone: true, showLinkedIn: true },
-  connectionQuestions: [],
-  recommendations: [],
+/** Render one experience/project item: title above description */
+function ExpItemBlock({
+  item,
+  editable,
+  titlePlaceholder,
+  descPlaceholder,
+  style,
+}: {
+  item: { title: string; description: string }
+  editable?: boolean
+  titlePlaceholder?: string
+  descPlaceholder?: string
+  style?: React.CSSProperties
+}) {
+  const t = (item.title || '').trim()
+  const d = (item.description || '').trim()
+  return (
+    <div style={{ marginBottom: 10, ...style }}>
+      <Editable editable={editable} placeholder={titlePlaceholder} style={{ fontWeight: 600, marginBottom: 2, lineHeight: 1.4 }}>{t}</Editable>
+      <Editable editable={editable} placeholder={descPlaceholder} style={{ lineHeight: 1.4, color: '#333' }}>{d}</Editable>
+    </div>
+  )
 }
 
-/** Merge user profile with filler for display; use filler when sections are empty */
+/** Use profile data; empty sections get placeholder text (no filler) */
 function getDisplayProfile(profile: Profile): DisplayProfile {
-  const hasExp = (profile.experience?.length ?? 0) > 0
-  const hasProj = (profile.projects?.length ?? 0) > 0
-  const hasHeadline = !!profile.headline?.trim()
-  const hasContact = profile.contact && (profile.contact.email || profile.contact.phone || profile.contact.linkedIn)
-  const hasEducation = (profile.education?.length ?? 0) > 0
-  const hasAdditionalInfo = (profile.additionalInfo?.length ?? 0) > 0
-  return {
-    ...profile,
-    name: profile.name?.trim() || FILLER_PROFILE.name,
-    headline: hasHeadline ? profile.headline : FILLER_PROFILE.headline,
-    experience: hasExp ? profile.experience : FILLER_PROFILE.experience,
-    projects: hasProj ? profile.projects : FILLER_PROFILE.projects,
-    contact: hasContact ? profile.contact : FILLER_PROFILE.contact,
-    education: hasEducation ? profile.education : FILLER_PROFILE.education,
-    additionalInfo: hasAdditionalInfo ? profile.additionalInfo : FILLER_PROFILE.additionalInfo,
-  }
+  return { ...profile }
 }
-
-/** Generate a concise professional summary from profile data */
-function generateSummary(profile: Profile): string {
-  if (profile.headline?.trim()) return profile.headline.trim()
-  const first = profile.experience?.[0]
-  if (first) return first.length > 180 ? first.slice(0, 177) + '…' : first
-  return ''
-}
-
-const FILLER_SUMMARY =
-  'Results-driven finance professional with 8+ years in investment banking and M&A. CFA Level II candidate with proven track record in financial modeling, valuation, and cross-functional project delivery.'
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -92,13 +57,21 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   )
 }
 
-function Editable({ children, editable, style, ...rest }: { children: React.ReactNode; editable?: boolean; style?: React.CSSProperties }) {
+function Editable({
+  children,
+  editable,
+  placeholder,
+  style,
+  ...rest
+}: { children: React.ReactNode; editable?: boolean; placeholder?: string; style?: React.CSSProperties }) {
+  const isEmpty = !children || (typeof children === 'string' && !children.trim())
   return (
     <div
       {...rest}
       style={style}
       contentEditable={editable}
       suppressContentEditableWarning
+      data-placeholder={editable && isEmpty && placeholder ? placeholder : undefined}
     >
       {children}
     </div>
@@ -107,101 +80,85 @@ function Editable({ children, editable, style, ...rest }: { children: React.Reac
 
 function ClassicTemplate({ profile, summary, editable }: { profile: DisplayProfile; summary?: string; editable?: boolean }) {
   const { name, headline, experience, projects, education, additionalInfo, contact } = profile
+  const expItems = experience ?? []
+  const projItems = projects ?? []
   return (
     <div style={{ fontFamily: 'Georgia, serif', fontSize: 11, color: '#000', padding: 24, maxWidth: 595 }}>
       <div style={{ textAlign: 'center', marginBottom: 16 }}>
-        <Editable editable={editable} style={{ fontSize: 22, fontWeight: 700, margin: 0, letterSpacing: '0.05em', color: '#000' }}>{name}</Editable>
-        <Editable editable={editable} style={{ fontSize: 10, marginTop: 4, color: '#333' }}>{headline || '—'}</Editable>
+        <Editable editable={editable} placeholder="Your name" style={{ fontSize: 22, fontWeight: 700, margin: 0, letterSpacing: '0.05em', color: '#000' }}>{name?.trim()}</Editable>
+        <Editable editable={editable} placeholder="Your headline" style={{ fontSize: 10, marginTop: 4, color: '#333' }}>{headline?.trim()}</Editable>
         <div style={{ fontSize: 9, marginTop: 6, color: '#555' }}>
-          {contact?.email && <Editable editable={editable} style={{ display: 'inline' }}>{contact.email}</Editable>}
-          {contact?.phone && <Editable editable={editable} style={{ display: 'inline', marginLeft: 12 }}>{contact.phone}</Editable>}
-          {contact?.linkedIn && <Editable editable={editable} style={{ display: 'inline', marginLeft: 12 }}>{contact.linkedIn}</Editable>}
+          <Editable editable={editable} placeholder="Email" style={{ display: 'inline' }}>{contact?.email}</Editable>
+          <Editable editable={editable} placeholder="Phone" style={{ display: 'inline', marginLeft: 12 }}>{contact?.phone}</Editable>
+          <Editable editable={editable} placeholder="LinkedIn" style={{ display: 'inline', marginLeft: 12 }}>{contact?.linkedIn}</Editable>
         </div>
       </div>
-      {summary && (
-        <Section title="Professional Summary">
-          <Editable editable={editable} style={{ lineHeight: 1.4, color: '#333' }}>{summary}</Editable>
-        </Section>
-      )}
-      {experience && experience.length > 0 && (
-        <Section title="Experience">
-          {experience.map((e, i) => (
-            <Editable key={i} editable={editable} style={{ marginBottom: 6, lineHeight: 1.4 }}>{e}</Editable>
-          ))}
-        </Section>
-      )}
-      {projects && projects.length > 0 && (
-        <Section title="Projects">
-          {projects.map((p, i) => (
-            <Editable key={i} editable={editable} style={{ marginBottom: 6, lineHeight: 1.4 }}>{p}</Editable>
-          ))}
-        </Section>
-      )}
-      {education && education.length > 0 && (
-        <Section title="Education">
-          {education.map((e, i) => (
-            <Editable key={i} editable={editable} style={{ marginBottom: 6, lineHeight: 1.4 }}>{e}</Editable>
-          ))}
-        </Section>
-      )}
-      {additionalInfo && additionalInfo.length > 0 && (
-        <Section title="Additional Information">
-          {additionalInfo.map((a, i) => (
-            <Editable key={i} editable={editable} style={{ marginBottom: 6, lineHeight: 1.4 }}>{a}</Editable>
-          ))}
-        </Section>
-      )}
+      <Section title="Professional Summary">
+        <Editable editable={editable} placeholder="2–3 sentences about your experience and goals" style={{ lineHeight: 1.4, color: '#333' }}>{summary?.trim()}</Editable>
+      </Section>
+      <Section title="Experience">
+        {expItems.length > 0 ? expItems.map((item, i) => (
+          <ExpItemBlock key={i} item={item} editable={editable} titlePlaceholder="Job title — Company (Years)" descPlaceholder="Key achievements and responsibilities" />
+        )) : <ExpItemBlock item={{ title: '', description: '' }} editable={editable} titlePlaceholder="Job title — Company (Years)" descPlaceholder="Key achievements and responsibilities" />}
+      </Section>
+      <Section title="Projects">
+        {projItems.length > 0 ? projItems.map((item, i) => (
+          <ExpItemBlock key={i} item={item} editable={editable} titlePlaceholder="Project title" descPlaceholder="Description and outcomes" />
+        )) : <ExpItemBlock item={{ title: '', description: '' }} editable={editable} titlePlaceholder="Project title" descPlaceholder="Description and outcomes" />}
+      </Section>
+      <Section title="Education">
+        {(education ?? []).length > 0 ? education!.map((e, i) => (
+          <Editable key={i} editable={editable} style={{ marginBottom: 6, lineHeight: 1.4 }}>{e}</Editable>
+        )) : <Editable editable={editable} placeholder="Degree — University (Year)" style={{ marginBottom: 6, lineHeight: 1.4 }}></Editable>}
+      </Section>
+      <Section title="Additional Information">
+        {(additionalInfo ?? []).length > 0 ? additionalInfo!.map((a, i) => (
+          <Editable key={i} editable={editable} style={{ marginBottom: 6, lineHeight: 1.4 }}>{a}</Editable>
+        )) : <Editable editable={editable} placeholder="Certifications, languages, skills" style={{ marginBottom: 6, lineHeight: 1.4 }}></Editable>}
+      </Section>
     </div>
   )
 }
 
 function ModernTemplate({ profile, summary, editable }: { profile: DisplayProfile; summary?: string; editable?: boolean }) {
   const { name, headline, experience, projects, education, additionalInfo, contact } = profile
+  const expItems = experience ?? []
+  const projItems = projects ?? []
   return (
     <div style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontSize: 10, color: '#000', display: 'flex', maxWidth: 595 }}>
       <div style={{ width: 140, padding: 20, background: '#fff', borderRight: '1px solid #000' }}>
-        <Editable editable={editable} style={{ fontSize: 14, fontWeight: 700, margin: '0 0 8px 0', color: '#000' }}>{name}</Editable>
-        <Editable editable={editable} style={{ fontSize: 9, color: '#333', lineHeight: 1.4 }}>{headline || '—'}</Editable>
+        <Editable editable={editable} placeholder="Your name" style={{ fontSize: 14, fontWeight: 700, margin: '0 0 8px 0', color: '#000' }}>{name?.trim()}</Editable>
+        <Editable editable={editable} placeholder="Headline" style={{ fontSize: 9, color: '#333', lineHeight: 1.4 }}>{headline?.trim()}</Editable>
         <div style={{ marginTop: 16, fontSize: 9, color: '#333' }}>
-          {contact?.email && <Editable editable={editable} style={{ marginBottom: 4 }}>{contact.email}</Editable>}
-          {contact?.phone && <Editable editable={editable} style={{ marginBottom: 4 }}>{contact.phone}</Editable>}
-          {contact?.linkedIn && <Editable editable={editable} style={{ marginBottom: 4 }}>{contact.linkedIn}</Editable>}
+          <Editable editable={editable} placeholder="Email" style={{ marginBottom: 4 }}>{contact?.email}</Editable>
+          <Editable editable={editable} placeholder="Phone" style={{ marginBottom: 4 }}>{contact?.phone}</Editable>
+          <Editable editable={editable} placeholder="LinkedIn" style={{ marginBottom: 4 }}>{contact?.linkedIn}</Editable>
         </div>
       </div>
       <div style={{ flex: 1, padding: 24 }}>
-        {summary && (
-          <Section title="Professional Summary">
-            <Editable editable={editable} style={{ lineHeight: 1.4, color: '#333' }}>{summary}</Editable>
-          </Section>
-        )}
-        {experience && experience.length > 0 && (
-          <Section title="Experience">
-            {experience.map((e, i) => (
-              <Editable key={i} editable={editable} style={{ marginBottom: 6, lineHeight: 1.4 }}>{e}</Editable>
-            ))}
-          </Section>
-        )}
-        {projects && projects.length > 0 && (
-          <Section title="Projects">
-            {projects.map((p, i) => (
-              <Editable key={i} editable={editable} style={{ marginBottom: 6, lineHeight: 1.4 }}>{p}</Editable>
-            ))}
-          </Section>
-        )}
-        {education && education.length > 0 && (
-          <Section title="Education">
-            {education.map((e, i) => (
-              <Editable key={i} editable={editable} style={{ marginBottom: 6, lineHeight: 1.4 }}>{e}</Editable>
-            ))}
-          </Section>
-        )}
-        {additionalInfo && additionalInfo.length > 0 && (
-          <Section title="Additional Information">
-            {additionalInfo.map((a, i) => (
-              <Editable key={i} editable={editable} style={{ marginBottom: 6, lineHeight: 1.4 }}>{a}</Editable>
-            ))}
-          </Section>
-        )}
+        <Section title="Professional Summary">
+          <Editable editable={editable} placeholder="2–3 sentences about your experience and goals" style={{ lineHeight: 1.4, color: '#333' }}>{summary?.trim()}</Editable>
+        </Section>
+        <Section title="Experience">
+          {expItems.length > 0 ? expItems.map((item, i) => (
+            <ExpItemBlock key={i} item={item} editable={editable} titlePlaceholder="Job title — Company (Years)" descPlaceholder="Key achievements" />
+          )) : <ExpItemBlock item={{ title: '', description: '' }} editable={editable} titlePlaceholder="Job title — Company (Years)" descPlaceholder="Key achievements" />}
+        </Section>
+        <Section title="Projects">
+          {projItems.length > 0 ? projItems.map((item, i) => (
+            <ExpItemBlock key={i} item={item} editable={editable} titlePlaceholder="Project title" descPlaceholder="Description and outcomes" />
+          )) : <ExpItemBlock item={{ title: '', description: '' }} editable={editable} titlePlaceholder="Project title" descPlaceholder="Description and outcomes" />}
+        </Section>
+        <Section title="Education">
+          {(education ?? []).length > 0 ? education!.map((e, i) => (
+            <Editable key={i} editable={editable} style={{ marginBottom: 6, lineHeight: 1.4 }}>{e}</Editable>
+          )) : <Editable editable={editable} placeholder="Degree — University (Year)" style={{ marginBottom: 6, lineHeight: 1.4 }}></Editable>}
+        </Section>
+        <Section title="Additional Information">
+          {(additionalInfo ?? []).length > 0 ? additionalInfo!.map((a, i) => (
+            <Editable key={i} editable={editable} style={{ marginBottom: 6, lineHeight: 1.4 }}>{a}</Editable>
+          )) : <Editable editable={editable} placeholder="Certifications, languages, skills" style={{ marginBottom: 6, lineHeight: 1.4 }}></Editable>}
+        </Section>
       </div>
     </div>
   )
@@ -209,95 +166,79 @@ function ModernTemplate({ profile, summary, editable }: { profile: DisplayProfil
 
 function MinimalTemplate({ profile, summary, editable }: { profile: DisplayProfile; summary?: string; editable?: boolean }) {
   const { name, headline, experience, projects, education, additionalInfo, contact } = profile
+  const expItems = experience ?? []
+  const projItems = projects ?? []
   const contactStr = [contact?.email, contact?.phone, contact?.linkedIn].filter(Boolean).join(' · ')
   return (
     <div style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontSize: 11, color: '#000', padding: 32, maxWidth: 595 }}>
-      <Editable editable={editable} style={{ fontSize: 20, fontWeight: 600, margin: '0 0 4px 0', letterSpacing: '-0.02em', color: '#000' }}>{name}</Editable>
-      <Editable editable={editable} style={{ fontSize: 10, color: '#444', marginBottom: 24 }}>{headline || '—'}</Editable>
-      <Editable editable={editable} style={{ fontSize: 9, color: '#666', marginBottom: 28 }}>{contactStr}</Editable>
-      {summary && (
-        <Section title="Professional Summary">
-          <Editable editable={editable} style={{ lineHeight: 1.5, color: '#333' }}>{summary}</Editable>
-        </Section>
-      )}
-      {experience && experience.length > 0 && (
-        <Section title="Experience">
-          {experience.map((e, i) => (
-            <Editable key={i} editable={editable} style={{ marginBottom: 8, lineHeight: 1.5 }}>{e}</Editable>
-          ))}
-        </Section>
-      )}
-      {projects && projects.length > 0 && (
-        <Section title="Projects">
-          {projects.map((p, i) => (
-            <Editable key={i} editable={editable} style={{ marginBottom: 8, lineHeight: 1.5 }}>{p}</Editable>
-          ))}
-        </Section>
-      )}
-      {education && education.length > 0 && (
-        <Section title="Education">
-          {education.map((e, i) => (
-            <Editable key={i} editable={editable} style={{ marginBottom: 8, lineHeight: 1.5 }}>{e}</Editable>
-          ))}
-        </Section>
-      )}
-      {additionalInfo && additionalInfo.length > 0 && (
-        <Section title="Additional Information">
-          {additionalInfo.map((a, i) => (
-            <Editable key={i} editable={editable} style={{ marginBottom: 8, lineHeight: 1.5 }}>{a}</Editable>
-          ))}
-        </Section>
-      )}
+      <Editable editable={editable} placeholder="Your name" style={{ fontSize: 20, fontWeight: 600, margin: '0 0 4px 0', letterSpacing: '-0.02em', color: '#000' }}>{name?.trim()}</Editable>
+      <Editable editable={editable} placeholder="Headline" style={{ fontSize: 10, color: '#444', marginBottom: 24 }}>{headline?.trim()}</Editable>
+      <Editable editable={editable} placeholder="Email · Phone · LinkedIn" style={{ fontSize: 9, color: '#666', marginBottom: 28 }}>{contactStr}</Editable>
+      <Section title="Professional Summary">
+        <Editable editable={editable} placeholder="2–3 sentences about your experience and goals" style={{ lineHeight: 1.5, color: '#333' }}>{summary?.trim()}</Editable>
+      </Section>
+      <Section title="Experience">
+        {expItems.length > 0 ? expItems.map((item, i) => (
+          <ExpItemBlock key={i} item={item} editable={editable} titlePlaceholder="Job title — Company (Years)" descPlaceholder="Key achievements" style={{ marginBottom: 8 }} />
+        )) : <ExpItemBlock item={{ title: '', description: '' }} editable={editable} titlePlaceholder="Job title — Company (Years)" descPlaceholder="Key achievements" style={{ marginBottom: 8 }} />}
+      </Section>
+      <Section title="Projects">
+        {projItems.length > 0 ? projItems.map((item, i) => (
+          <ExpItemBlock key={i} item={item} editable={editable} titlePlaceholder="Project title" descPlaceholder="Description and outcomes" style={{ marginBottom: 8 }} />
+        )) : <ExpItemBlock item={{ title: '', description: '' }} editable={editable} titlePlaceholder="Project title" descPlaceholder="Description and outcomes" style={{ marginBottom: 8 }} />}
+      </Section>
+      <Section title="Education">
+        {(education ?? []).length > 0 ? education!.map((e, i) => (
+          <Editable key={i} editable={editable} style={{ marginBottom: 8, lineHeight: 1.5 }}>{e}</Editable>
+        )) : <Editable editable={editable} placeholder="Degree — University (Year)" style={{ marginBottom: 8, lineHeight: 1.5 }}></Editable>}
+      </Section>
+      <Section title="Additional Information">
+        {(additionalInfo ?? []).length > 0 ? additionalInfo!.map((a, i) => (
+          <Editable key={i} editable={editable} style={{ marginBottom: 8, lineHeight: 1.5 }}>{a}</Editable>
+        )) : <Editable editable={editable} placeholder="Certifications, languages, skills" style={{ marginBottom: 8, lineHeight: 1.5 }}></Editable>}
+      </Section>
     </div>
   )
 }
 
 function CompactTemplate({ profile, summary, editable }: { profile: DisplayProfile; summary?: string; editable?: boolean }) {
   const { name, headline, experience, projects, education, additionalInfo, contact } = profile
+  const expItems = experience ?? []
+  const projItems = projects ?? []
   return (
     <div style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontSize: 10, color: '#000', padding: 20, maxWidth: 595 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8, paddingBottom: 8 }}>
-        <Editable editable={editable} style={{ fontSize: 16, fontWeight: 700, margin: 0, color: '#000' }}>{name}</Editable>
+        <Editable editable={editable} placeholder="Your name" style={{ fontSize: 16, fontWeight: 700, margin: 0, color: '#000' }}>{name?.trim()}</Editable>
         <div style={{ fontSize: 8, color: '#333' }}>
-          {contact?.email && <Editable editable={editable} style={{ display: 'inline' }}>{contact.email}</Editable>}
-          {contact?.phone && <Editable editable={editable} style={{ display: 'inline', marginLeft: 8 }}>{contact.phone}</Editable>}
-          {contact?.linkedIn && <Editable editable={editable} style={{ display: 'inline', marginLeft: 8 }}>{contact.linkedIn}</Editable>}
+          <Editable editable={editable} placeholder="Email" style={{ display: 'inline' }}>{contact?.email}</Editable>
+          <Editable editable={editable} placeholder="Phone" style={{ display: 'inline', marginLeft: 8 }}>{contact?.phone}</Editable>
+          <Editable editable={editable} placeholder="LinkedIn" style={{ display: 'inline', marginLeft: 8 }}>{contact?.linkedIn}</Editable>
         </div>
       </div>
-      <Editable editable={editable} style={{ fontSize: 9, marginBottom: 12, color: '#444' }}>{headline || '—'}</Editable>
-      {summary && (
-        <Section title="Professional Summary">
-          <Editable editable={editable} style={{ lineHeight: 1.35, color: '#333' }}>{summary}</Editable>
-        </Section>
-      )}
-      {experience && experience.length > 0 && (
-        <Section title="Experience">
-          {experience.map((e, i) => (
-            <Editable key={i} editable={editable} style={{ marginBottom: 4, lineHeight: 1.35 }}>{e}</Editable>
-          ))}
-        </Section>
-      )}
-      {projects && projects.length > 0 && (
-        <Section title="Projects">
-          {projects.map((p, i) => (
-            <Editable key={i} editable={editable} style={{ marginBottom: 4, lineHeight: 1.35 }}>{p}</Editable>
-          ))}
-        </Section>
-      )}
-      {education && education.length > 0 && (
-        <Section title="Education">
-          {education.map((e, i) => (
-            <Editable key={i} editable={editable} style={{ marginBottom: 4, lineHeight: 1.35 }}>{e}</Editable>
-          ))}
-        </Section>
-      )}
-      {additionalInfo && additionalInfo.length > 0 && (
-        <Section title="Additional Information">
-          {additionalInfo.map((a, i) => (
-            <Editable key={i} editable={editable} style={{ marginBottom: 4, lineHeight: 1.35 }}>{a}</Editable>
-          ))}
-        </Section>
-      )}
+      <Editable editable={editable} placeholder="Headline" style={{ fontSize: 9, marginBottom: 12, color: '#444' }}>{headline?.trim()}</Editable>
+      <Section title="Professional Summary">
+        <Editable editable={editable} placeholder="2–3 sentences about your experience and goals" style={{ lineHeight: 1.35, color: '#333' }}>{summary?.trim()}</Editable>
+      </Section>
+      <Section title="Experience">
+        {expItems.length > 0 ? expItems.map((item, i) => (
+          <ExpItemBlock key={i} item={item} editable={editable} titlePlaceholder="Job title — Company (Years)" descPlaceholder="Key achievements" style={{ marginBottom: 6 }} />
+        )) : <ExpItemBlock item={{ title: '', description: '' }} editable={editable} titlePlaceholder="Job title — Company (Years)" descPlaceholder="Key achievements" style={{ marginBottom: 6 }} />}
+      </Section>
+      <Section title="Projects">
+        {projItems.length > 0 ? projItems.map((item, i) => (
+          <ExpItemBlock key={i} item={item} editable={editable} titlePlaceholder="Project title" descPlaceholder="Description and outcomes" style={{ marginBottom: 6 }} />
+        )) : <ExpItemBlock item={{ title: '', description: '' }} editable={editable} titlePlaceholder="Project title" descPlaceholder="Description and outcomes" style={{ marginBottom: 6 }} />}
+      </Section>
+      <Section title="Education">
+        {(education ?? []).length > 0 ? education!.map((e, i) => (
+          <Editable key={i} editable={editable} style={{ marginBottom: 4, lineHeight: 1.35 }}>{e}</Editable>
+        )) : <Editable editable={editable} placeholder="Degree — University (Year)" style={{ marginBottom: 4, lineHeight: 1.35 }}></Editable>}
+      </Section>
+      <Section title="Additional Information">
+        {(additionalInfo ?? []).length > 0 ? additionalInfo!.map((a, i) => (
+          <Editable key={i} editable={editable} style={{ marginBottom: 4, lineHeight: 1.35 }}>{a}</Editable>
+        )) : <Editable editable={editable} placeholder="Certifications, languages, skills" style={{ marginBottom: 4, lineHeight: 1.35 }}></Editable>}
+      </Section>
     </div>
   )
 }
@@ -356,7 +297,7 @@ export default function ResumeCreatorPage() {
       const pdfH = pdf.internal.pageSize.getHeight()
       const imgH = (canvas.height * pdfW) / canvas.width
       pdf.addImage(imgData, 'PNG', 0, 0, pdfW, imgH)
-      pdf.save(`${profile.name.replace(/\s+/g, '-')}-resume.pdf`)
+      pdf.save(`${(profile.name || 'resume').replace(/\s+/g, '-')}-resume.pdf`)
     } catch (err) {
       console.error('PDF export failed:', err)
     } finally {
@@ -387,16 +328,8 @@ export default function ResumeCreatorPage() {
     )
   }
 
-  const hasContent =
-    (profile.experience?.length ?? 0) > 0 ||
-    (profile.projects?.length ?? 0) > 0 ||
-    (profile.education?.length ?? 0) > 0 ||
-    !!profile.professionalSummary?.trim()
   const displayProfile = getDisplayProfile(profile)
-  const summary =
-    profile.professionalSummary?.trim() ||
-    (hasContent ? generateSummary(profile) : '') ||
-    FILLER_SUMMARY
+  const summary = profile.professionalSummary?.trim() ?? ''
 
   return (
     <div className="page">
@@ -404,18 +337,9 @@ export default function ResumeCreatorPage() {
         <div className="header">
           <div>
             <h2>Resume Creator</h2>
-            <div className="muted">Generate a professional CV from your profile. Choose a style and download as PDF.</div>
+            <div className="muted">Choose a style, fill in your data or type directly in the resume, then download as PDF.</div>
           </div>
         </div>
-
-        {!hasContent && (
-          <div className="error" style={{ marginBottom: 16 }}>
-            Add experience, projects, education, or a professional summary in your profile first.
-            <Link className="btn" to="/profile/me" style={{ marginLeft: 12, display: 'inline-block' }}>
-              Edit profile
-            </Link>
-          </div>
-        )}
 
         <div className="resume-template-grid" style={{ marginBottom: 24 }}>
           {TEMPLATES.map((t) => (
@@ -436,13 +360,11 @@ export default function ResumeCreatorPage() {
         </div>
 
         <div style={{ background: '#fff', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
-          {hasContent && (
-            <p className="muted" style={{ padding: '8px 16px', margin: 0, fontSize: 12, borderBottom: '1px solid var(--border)' }}>
-              Click any text to edit before downloading.
-            </p>
-          )}
+          <p className="muted" style={{ padding: '8px 16px', margin: 0, fontSize: 12, borderBottom: '1px solid var(--border)' }}>
+            Click any text to edit. Empty fields show placeholders — type to add your info.
+          </p>
           <div ref={resumeRef} style={{ background: '#fff', minHeight: 400, width: 595, maxWidth: '100%', margin: '0 auto' }}>
-            <TemplatePreview templateId={selected} profile={displayProfile} summary={summary} editable={hasContent} />
+            <TemplatePreview templateId={selected} profile={displayProfile} summary={summary} editable />
           </div>
         </div>
 
@@ -450,7 +372,7 @@ export default function ResumeCreatorPage() {
           <button
             type="button"
             onClick={handleExportPDF}
-            disabled={exporting || !hasContent}
+            disabled={exporting}
             className="btn"
             style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
           >

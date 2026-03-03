@@ -5,6 +5,7 @@ import { requireAuth } from '../middleware/auth.js'
 import { Connection } from '../models/Connection.js'
 import { Profile } from '../models/Profile.js'
 import { User } from '../models/User.js'
+import { normalizeExperience, normalizeProjects } from './profile.js'
 
 export const connectionsRouter = Router()
 
@@ -78,8 +79,8 @@ connectionsRouter.get('/:id/profile', requireAuth, async (req: Request, res: Res
       userId: otherUserId,
       name: otherUser.name,
       headline: profile.headline,
-      experience: profile.experience,
-      projects: profile.projects,
+      experience: normalizeExperience(profile.experience),
+      projects: normalizeProjects(profile.projects),
       contact,
       recommendations: profile.recommendations,
     },

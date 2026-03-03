@@ -98,8 +98,11 @@ export default function ProfilePage() {
                   <div style={{ marginTop: 14 }}>
                     <div style={{ fontWeight: 700, marginBottom: 6 }}>Experience</div>
                     <div className="list">
-                      {(profile.experience ?? []).map((x: string) => (
-                        <div key={`exp-${x}`} className="listItem">{x}</div>
+                      {(profile.experience ?? []).map((x: { title: string; description: string }, i: number) => (
+                        <div key={`exp-${i}`} className="listItem">
+                          {x.title && <div style={{ fontWeight: 600 }}>{x.title}</div>}
+                          {x.description && <div style={{ marginTop: 4 }}>{x.description}</div>}
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -109,8 +112,11 @@ export default function ProfilePage() {
                   <div style={{ marginTop: 14 }}>
                     <div style={{ fontWeight: 700, marginBottom: 6 }}>Projects</div>
                     <div className="list">
-                      {(profile.projects ?? []).map((x: string) => (
-                        <div key={`pr-${x}`} className="listItem">{x}</div>
+                      {(profile.projects ?? []).map((x: { title: string; description: string }, i: number) => (
+                        <div key={`pr-${i}`} className="listItem">
+                          {x.title && <div style={{ fontWeight: 600 }}>{x.title}</div>}
+                          {x.description && <div style={{ marginTop: 4 }}>{x.description}</div>}
+                        </div>
                       ))}
                     </div>
                   </div>

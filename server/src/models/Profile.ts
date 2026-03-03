@@ -6,8 +6,14 @@ const profileSchema = new mongoose.Schema(
     cvName: { type: String, default: '', trim: true },
     headline: { type: String, default: '', trim: true },
     professionalSummary: { type: String, default: '', trim: true },
-    experience: { type: [String], default: [] },
-    projects: { type: [String], default: [] },
+    experience: {
+      type: [{ title: { type: String, default: '', trim: true }, description: { type: String, default: '', trim: true } }],
+      default: [],
+    },
+    projects: {
+      type: [{ title: { type: String, default: '', trim: true }, description: { type: String, default: '', trim: true } }],
+      default: [],
+    },
     education: { type: [String], default: [] },
     additionalInfo: { type: [String], default: [] },
     contact: {
