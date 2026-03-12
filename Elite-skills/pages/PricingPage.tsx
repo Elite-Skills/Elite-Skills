@@ -87,14 +87,14 @@ export default function PricingPage() {
               {token ? (
                 <Link
                   to="/checker"
-                  className="block w-full py-3 px-6 bg-elite-gold text-black font-bold text-center rounded hover:bg-elite-gold-dim transition-colors"
+                  className="block w-full py-3 px-6 bg-elite-gold font-bold text-center rounded hover:bg-elite-gold-dim transition-colors !text-black hover:!text-black"
                 >
                   Go to Dashboard
                 </Link>
               ) : (
                 <Link
                   to="/login"
-                  className="block w-full py-3 px-6 bg-elite-gold text-black font-bold text-center rounded hover:bg-elite-gold-dim transition-colors"
+                  className="block w-full py-3 px-6 bg-elite-gold font-bold text-center rounded hover:bg-elite-gold-dim transition-colors !text-black hover:!text-black"
                 >
                   Get Accelerator — €49
                 </Link>

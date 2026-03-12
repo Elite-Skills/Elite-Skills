@@ -168,11 +168,11 @@ export default function ProfileMePage() {
           </label>
 
           <div style={{ marginTop: 16 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
               <div style={{ fontWeight: 700 }}>Experience</div>
-              <button type="button" onClick={addExperience} className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                <Plus size={16} />
-                Add Experience
+              <button type="button" onClick={addExperience} className="btn secondary btn-add-profile">
+                <Plus size={14} />
+                <span className="btn-add-profile-text">Add Experience</span>
               </button>
             </div>
             <div style={{ display: 'grid', gap: 12 }}>
@@ -204,11 +204,11 @@ export default function ProfileMePage() {
           </div>
 
           <div style={{ marginTop: 16 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
               <div style={{ fontWeight: 700 }}>Projects</div>
-              <button type="button" onClick={addProject} className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                <Plus size={16} />
-                Add Project
+              <button type="button" onClick={addProject} className="btn secondary btn-add-profile">
+                <Plus size={14} />
+                <span className="btn-add-profile-text">Add Project</span>
               </button>
             </div>
             <div style={{ display: 'grid', gap: 12 }}>

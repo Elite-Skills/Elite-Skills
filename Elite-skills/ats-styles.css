@@ -402,6 +402,22 @@
   }
 }
 
+/* Profile: Add Experience / Add Project – compact on mobile */
+.ats-app .btn-add-profile {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+@media (min-width: 640px) {
+  .ats-app .btn-add-profile {
+    padding: 10px 12px;
+    font-size: 1rem;
+  }
+}
+
 /* Profile: experience/project item – flex wrap on mobile */
 .ats-app .profile-item-row {
   display: flex;

@@ -176,8 +176,8 @@ const LandingPage: React.FC = () => {
              <span className="text-[10px] uppercase tracking-widest text-elite-gold font-bold">Financial Analysis</span>
           </div>
           <h2 className="text-4xl lg:text-5xl font-serif mb-12">The Investment Case</h2>
-          <div className="bg-elite-gray border border-white/10 p-10 rounded-2xl shadow-2xl relative">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center text-left">
+          <div className="bg-elite-gray border border-white/10 p-6 sm:p-10 rounded-2xl shadow-2xl relative">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center text-left">
               <div className="space-y-8">
                 <div>
                   <label className="block text-[10px] uppercase tracking-[0.2em] text-elite-text-muted mb-3 font-bold">Investment Cost</label>
@@ -207,9 +207,9 @@ const LandingPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="bg-elite-gold/5 p-10 rounded-xl border border-elite-gold/10 text-center flex flex-col justify-center">
+              <div className="bg-elite-gold/5 p-6 sm:p-10 rounded-xl border border-elite-gold/10 text-center flex flex-col justify-center min-w-0 overflow-hidden">
                 <span className="text-[10px] uppercase tracking-[0.4em] text-elite-gold mb-4 font-bold">Expected ROI</span>
-                <div className="text-7xl font-bold text-white mb-2 tracking-tighter">{roi.toLocaleString()}x</div>
+                <div className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-2 tracking-tighter break-words">{roi.toLocaleString()}x</div>
                 <p className="text-[10px] text-gray-500 uppercase tracking-widest">Return on capital invested</p>
               </div>
             </div>
