@@ -36,11 +36,11 @@ export default function PricingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Free tier */}
-            <div className="bento-card p-8 rounded-xl border border-white/10">
+            <div className="bento-card p-8 rounded-xl border border-white/10 flex flex-col">
               <h3 className="text-xl font-serif font-bold text-white mb-2">Free</h3>
               <p className="text-elite-text-muted text-sm mb-6">Get started with limited access</p>
               <div className="text-3xl font-bold text-white mb-6">€0</div>
-              <ul className="space-y-4 mb-8">
+              <ul className="space-y-4 flex-grow mb-8">
                 {freeFeatures.map((f) => (
                   <li key={f} className="flex items-center gap-3 text-elite-text-muted text-sm">
                     <Check className="w-5 h-5 text-elite-gold shrink-0" />
@@ -51,14 +51,14 @@ export default function PricingPage() {
               {token ? (
                 <Link
                   to="/checker"
-                  className="block w-full py-3 px-6 border border-white/20 text-white text-center rounded hover:border-elite-gold hover:text-elite-gold transition-colors"
+                  className="pricing-cta-btn block w-full py-3 px-6 border border-white/20 text-white text-center rounded hover:border-elite-gold hover:text-elite-gold transition-colors mt-auto"
                 >
                   Go to Dashboard
                 </Link>
               ) : (
                 <Link
                   to="/register"
-                  className="block w-full py-3 px-6 border border-white/20 text-white text-center rounded hover:border-elite-gold hover:text-elite-gold transition-colors"
+                  className="pricing-cta-btn block w-full py-3 px-6 border border-white/20 text-white text-center rounded hover:border-elite-gold hover:text-elite-gold transition-colors mt-auto"
                 >
                   Get Free Access
                 </Link>
@@ -66,7 +66,7 @@ export default function PricingPage() {
             </div>
 
             {/* Accelerator tier */}
-            <div className="bento-card p-8 rounded-xl border-2 border-elite-gold/50 relative">
+            <div className="bento-card p-8 rounded-xl border-2 border-elite-gold/50 relative flex flex-col">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-elite-gold text-black text-xs font-bold uppercase tracking-widest rounded">
                 Most Popular
               </div>
@@ -76,7 +76,7 @@ export default function PricingPage() {
                 <span className="text-2xl text-gray-500 line-through">€249</span>
                 <span className="text-4xl font-bold text-elite-gold">€49</span>
               </div>
-              <ul className="space-y-4 mb-8">
+              <ul className="space-y-4 flex-grow mb-8">
                 {features.map((f) => (
                   <li key={f} className="flex items-center gap-3 text-elite-text-muted text-sm">
                     <Check className="w-5 h-5 text-elite-gold shrink-0" />
@@ -87,14 +87,14 @@ export default function PricingPage() {
               {token ? (
                 <Link
                   to="/checker"
-                  className="block w-full py-3 px-6 bg-elite-gold font-bold text-center rounded hover:bg-elite-gold-dim transition-colors !text-black hover:!text-black"
+                  className="pricing-cta-btn block w-full py-3 px-6 bg-elite-gold text-black font-bold text-center rounded hover:bg-elite-gold-dim transition-colors mt-auto"
                 >
                   Go to Dashboard
                 </Link>
               ) : (
                 <Link
                   to="/login"
-                  className="block w-full py-3 px-6 bg-elite-gold font-bold text-center rounded hover:bg-elite-gold-dim transition-colors !text-black hover:!text-black"
+                  className="pricing-cta-btn block w-full py-3 px-6 bg-elite-gold text-black font-bold text-center rounded hover:bg-elite-gold-dim transition-colors mt-auto"
                 >
                   Get Accelerator — €49
                 </Link>

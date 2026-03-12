@@ -35,6 +35,12 @@
   color: #F2D06B;
 }
 
+/* Pricing CTA: gold bg buttons must have black text (override link color) */
+.pricing-cta-btn,
+.pricing-cta-btn:hover {
+  color: #000 !important;
+}
+
 .ats-app .dashboard-nav-btn,
 .ats-app .dashboard-nav-btn:hover {
   color: var(--elite-black) !important;
