@@ -2,8 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { listReferrals, type ReferralPost } from '../api'
+import { useAuth } from '../state/AuthContext'
 
 export default function ReferralsPage() {
+  const { user, loading: authLoading } = useAuth()
+  const canCreatePost = Boolean(user?.canCreateReferral)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [posts, setPosts] = useState<ReferralPost[]>([])
@@ -44,9 +47,13 @@ export default function ReferralsPage() {
             <h2 style={{ marginBottom: 6 }}>Referral posts</h2>
             <div className="muted">Browse referrals posted by users. Use tags/search to filter.</div>
           </div>
-          <Link className="btn" to="/referrals/new">
-            Create post
-          </Link>
+          {authLoading ? null : canCreatePost ? (
+            <Link className="btn" to="/referrals/new">
+              Create post
+            </Link>
+          ) : (
+            <span className="muted" style={{ fontSize: 13 }}>Only admins can create posts</span>
+          )}
         </div>
 
         <div className="row" style={{ marginTop: 14 }}>

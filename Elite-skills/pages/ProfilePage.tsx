@@ -75,7 +75,7 @@ export default function ProfilePage() {
           <div style={{ marginTop: 16 }} className="profile-skeleton">
             <div className="shimmer h-6 w-48 rounded mb-4" />
             <div className="shimmer h-4 w-64 rounded mb-8" />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
+            <div className="profile-skeleton-metrics" style={{ marginBottom: 24 }}>
               <div className="shimmer h-16 rounded" />
               <div className="shimmer h-16 rounded" />
               <div className="shimmer h-16 rounded" />

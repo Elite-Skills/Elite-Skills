@@ -178,16 +178,15 @@ export default function ProfileMePage() {
             <div style={{ display: 'grid', gap: 12 }}>
               {experience.map((e, i) => (
                 <div key={i} className="listItem" style={{ padding: 14 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                  <div className="profile-item-row" style={{ marginBottom: 8 }}>
                     <input
                       className="input"
                       value={e.title}
                       onChange={(ev) => updateExperience(i, 'title', ev.target.value)}
                       placeholder="Job title — Company (Years)"
-                      style={{ flex: 1, marginRight: 8 }}
                     />
                     {experience.length >= 1 && (
-                      <button type="button" onClick={() => removeExperience(i)} className="btn secondary" style={{ padding: 8 }} aria-label="Remove">
+                      <button type="button" onClick={() => removeExperience(i)} className="btn secondary" style={{ padding: 8, flexShrink: 0 }} aria-label="Remove">
                         <Trash2 size={16} />
                       </button>
                     )}
@@ -215,16 +214,15 @@ export default function ProfileMePage() {
             <div style={{ display: 'grid', gap: 12 }}>
               {projects.map((p, i) => (
                 <div key={i} className="listItem" style={{ padding: 14 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                  <div className="profile-item-row" style={{ marginBottom: 8 }}>
                     <input
                       className="input"
                       value={p.title}
                       onChange={(ev) => updateProject(i, 'title', ev.target.value)}
                       placeholder="Project title"
-                      style={{ flex: 1, marginRight: 8 }}
                     />
                     {projects.length >= 1 && (
-                      <button type="button" onClick={() => removeProject(i)} className="btn secondary" style={{ padding: 8 }} aria-label="Remove">
+                      <button type="button" onClick={() => removeProject(i)} className="btn secondary" style={{ padding: 8, flexShrink: 0 }} aria-label="Remove">
                         <Trash2 size={16} />
                       </button>
                     )}
@@ -275,7 +273,7 @@ export default function ProfileMePage() {
             <div style={{ fontWeight: 700, marginBottom: 8 }}>Contact visibility</div>
             <div className="muted" style={{ marginBottom: 10 }}>You control whether these fields are visible after connecting.</div>
 
-            <div className="row" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+            <div className="row profile-contact-visibility">
               <label className="label" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'inherit' }}>
                 <input type="checkbox" checked={showEmail} onChange={(e) => setShowEmail(e.target.checked)} />
                 Show email

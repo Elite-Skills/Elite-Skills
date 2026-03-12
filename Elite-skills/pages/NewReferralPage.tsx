@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { createReferralPost } from '../api'
+import { useAuth } from '../state/AuthContext'
 
 function splitCsv(s: string): string[] {
   return s
@@ -19,6 +20,7 @@ function splitLines(s: string): string[] {
 
 export default function NewReferralPage() {
   const navigate = useNavigate()
+  const { user, loading: authLoading } = useAuth()
 
   const [company, setCompany] = useState('')
   const [roleTitle, setRoleTitle] = useState('')
@@ -53,6 +55,32 @@ export default function NewReferralPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (authLoading) {
+    return (
+      <div className="page">
+        <div className="card">
+          <div className="muted">Loading…</div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user?.canCreateReferral) {
+    return (
+      <div className="page">
+        <div className="card">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+            <h2 style={{ margin: 0 }}>Create referral post</h2>
+            <Link className="btn secondary" to="/referrals">
+              Back
+            </Link>
+          </div>
+          <p className="muted" style={{ marginTop: 16 }}>Only admins can create posts.</p>
+        </div>
+      </div>
+    )
   }
 
   return (

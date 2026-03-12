@@ -7,6 +7,24 @@ import { User } from '../models/User.js'
 import { requireAuth } from '../middleware/auth.js'
 import { validateRegisterInput, validateLoginInput } from '../utils/sanitize.js'
 
+function getAdminEmails(): Set<string> {
+  const raw = process.env.ADMIN_EMAILS ?? ''
+  return new Set(raw.split(',').map((e) => e.trim().toLowerCase()).filter(Boolean))
+}
+
+function isAdminEmail(email: string): boolean {
+  const adminEmails = getAdminEmails()
+  if (adminEmails.size === 0) return false
+  return adminEmails.has(email.trim().toLowerCase())
+}
+
+/** Matches referrals route: when ADMIN_EMAILS empty, all can post; else only admins */
+function canCreateReferral(email: string): boolean {
+  const adminEmails = getAdminEmails()
+  if (adminEmails.size === 0) return true
+  return adminEmails.has(email.trim().toLowerCase())
+}
+
 export const authRouter = Router()
 
 function signToken(userId: string): string {
@@ -36,7 +54,16 @@ authRouter.post('/register', async (req: Request, res: Response) => {
   const user = await User.create({ name, email, passwordHash })
 
   const token = signToken(String(user._id))
-  res.json({ token, user: { id: String(user._id), name: user.name, email: user.email } })
+  res.json({
+    token,
+    user: {
+      id: String(user._id),
+      name: user.name,
+      email: user.email,
+      isAdmin: isAdminEmail(user.email),
+      canCreateReferral: canCreateReferral(user.email),
+    },
+  })
 })
 
 authRouter.post('/login', async (req: Request, res: Response) => {
@@ -60,7 +87,16 @@ authRouter.post('/login', async (req: Request, res: Response) => {
   }
 
   const token = signToken(String(user._id))
-  res.json({ token, user: { id: String(user._id), name: user.name, email: user.email } })
+  res.json({
+    token,
+    user: {
+      id: String(user._id),
+      name: user.name,
+      email: user.email,
+      isAdmin: isAdminEmail(user.email),
+      canCreateReferral: canCreateReferral(user.email),
+    },
+  })
 })
 
 authRouter.get('/me', requireAuth, async (req: Request, res: Response) => {
@@ -70,5 +106,13 @@ authRouter.get('/me', requireAuth, async (req: Request, res: Response) => {
     return
   }
 
-  res.json({ user: { id: String(user._id), name: user.name, email: user.email } })
+  res.json({
+    user: {
+      id: String(user._id),
+      name: user.name,
+      email: user.email,
+      isAdmin: isAdminEmail(user.email),
+      canCreateReferral: canCreateReferral(user.email),
+    },
+  })
 })

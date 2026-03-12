@@ -185,18 +185,28 @@
 }
 
 .ats-app .main {
-  padding: 28px 18px;
+  padding: 20px 12px;
   background: var(--elite-black);
+  overflow-x: hidden;
+}
+
+@media (min-width: 640px) {
+  .ats-app .main {
+    padding: 28px 18px;
+  }
 }
 
 .ats-app .mainInner {
   max-width: 1100px;
   margin: 0 auto;
+  min-width: 0;
 }
 
 .ats-app .page {
   display: grid;
   gap: 16px;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .ats-app .header {
@@ -225,9 +235,17 @@
   background: var(--elite-gray);
   border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 18px;
+  padding: 14px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   transition: border-color 0.2s;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+@media (min-width: 640px) {
+  .ats-app .card {
+    padding: 18px;
+  }
 }
 
 .ats-app .card:hover {
@@ -372,8 +390,53 @@
   margin-top: 14px;
 }
 
+@media (min-width: 640px) {
+  .ats-app .row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (min-width: 820px) {
   .ats-app .row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Profile: experience/project item – flex wrap on mobile */
+.ats-app .profile-item-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.ats-app .profile-item-row .input {
+  flex: 1;
+  min-width: 120px;
+}
+
+/* Profile: skeleton metrics – 1 col mobile */
+.ats-app .profile-skeleton-metrics {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .ats-app .profile-skeleton-metrics {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Profile: contact visibility row – stack on mobile */
+.ats-app .profile-contact-visibility {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .ats-app .profile-contact-visibility {
     grid-template-columns: repeat(3, 1fr);
   }
 }
@@ -497,6 +560,8 @@
   padding: 10px 12px;
   border-radius: 14px;
   color: var(--text);
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .ats-app .table {
@@ -582,6 +647,53 @@
   }
 }
 
+@media (max-width: 480px) {
+  .ats-app .resume-template-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Resume Creator: container scrollable on mobile */
+.ats-app .resume-preview-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 8px;
+}
+
+.ats-app .resume-preview-inner {
+  width: 100%;
+  max-width: 595px;
+  margin: 0 auto;
+  background: #fff;
+  min-height: 400px;
+  box-sizing: border-box;
+}
+
+/* Modern template: stack sidebar on mobile */
+@media (max-width: 600px) {
+  .ats-app .resume-modern-layout {
+    flex-direction: column !important;
+  }
+  .ats-app .resume-modern-sidebar {
+    width: 100% !important;
+    border-right: none !important;
+    border-bottom: 1px solid #000 !important;
+    padding: 16px !important;
+  }
+  .ats-app .resume-modern-main {
+    padding: 16px !important;
+  }
+}
+
+/* Compact template: stack header on mobile */
+@media (max-width: 500px) {
+  .ats-app .resume-compact-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+}
+
 /* Editable resume content */
 .ats-app [contenteditable='true'] {
   outline: none;
@@ -604,4 +716,22 @@
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+/* Boardroom chat: responsive height, no overflow (used in dashboard + landing) */
+.boardroom-chat {
+  min-height: 320px;
+  height: min(500px, 70vh);
+}
+
+@media (min-width: 640px) {
+  .boardroom-chat {
+    height: 450px;
+  }
+}
+
+@media (min-width: 768px) {
+  .boardroom-chat {
+    height: 500px;
+  }
 }

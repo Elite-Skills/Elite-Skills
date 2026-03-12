@@ -82,8 +82,8 @@ const AIChatSimulator: React.FC = () => {
   };
 
   return (
-    <div className="relative max-w-3xl mx-auto bento-card p-6 md:p-10 rounded-lg overflow-hidden flex flex-col h-[500px]">
-      <div className="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
+    <div className="relative w-full max-w-3xl mx-auto bento-card boardroom-chat p-4 sm:p-6 md:p-10 rounded-lg overflow-hidden flex flex-col">
+      <div className="flex items-center gap-3 mb-4 sm:mb-6 border-b border-white/10 pb-3 sm:pb-4 shrink-0">
         <div className="bg-elite-gold/10 p-2 rounded-full">
             <Briefcase className="w-5 h-5 text-elite-gold" />
         </div>
@@ -93,16 +93,16 @@ const AIChatSimulator: React.FC = () => {
         </div>
       </div>
 
-      <div ref={scrollRef} className="flex-grow overflow-y-auto mb-6 custom-scrollbar pr-2 space-y-4">
+      <div ref={scrollRef} className="flex-grow overflow-y-auto mb-4 sm:mb-6 custom-scrollbar pr-1 sm:pr-2 space-y-3 sm:space-y-4 min-h-0">
         {messages.map((msg, idx) => (
           <div 
             key={idx} 
             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
-            <div className={`max-w-[80%] p-4 rounded-lg text-sm ${
+            <div className={`max-w-[85%] sm:max-w-[80%] p-3 sm:p-4 rounded-lg text-sm ${
               msg.role === 'user' 
-                ? 'bg-elite-gold/10 border border-elite-gold/20 text-white ml-12' 
-                : 'bg-white/5 border border-white/10 text-gray-300 mr-12'
+                ? 'bg-elite-gold/10 border border-elite-gold/20 text-white ml-2 sm:ml-12' 
+                : 'bg-white/5 border border-white/10 text-gray-300 mr-2 sm:mr-12'
             }`}>
               <span className={`block font-bold text-[10px] uppercase tracking-widest mb-1 ${msg.role === 'user' ? 'text-elite-gold text-right' : 'text-elite-text-muted'}`}>
                 {msg.role === 'user' ? 'Candidate' : 'Senior MD'}
@@ -124,7 +124,7 @@ const AIChatSimulator: React.FC = () => {
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-white/5 border border-white/10 p-4 rounded-lg mr-12 w-full max-w-[60%]">
+            <div className="bg-white/5 border border-white/10 p-3 sm:p-4 rounded-lg mr-2 sm:mr-12 w-full max-w-[85%] sm:max-w-[60%]">
               <div className="shimmer h-4 w-full rounded"></div>
             </div>
           </div>
@@ -155,25 +155,25 @@ const AIChatSimulator: React.FC = () => {
         </div>
       )}
       {!hitLimit && (
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 shrink-0">
           <input 
             type="text" 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Answer the technical question..." 
-            className="flex-grow bg-white/5 border border-white/10 rounded-sm px-4 py-3 text-sm focus:outline-none focus:border-elite-gold transition-colors text-white"
+            className="flex-grow min-w-0 bg-white/5 border border-white/10 rounded-sm px-4 py-3 text-sm focus:outline-none focus:border-elite-gold transition-colors text-white"
           />
           <button 
             onClick={handleSend}
             disabled={isLoading}
-            className="bg-elite-gold text-black px-6 py-3 font-bold rounded-sm text-sm hover:bg-white transition-all flex items-center gap-2"
+            className="bg-elite-gold text-black px-6 py-3 font-bold rounded-sm text-sm hover:bg-white transition-all flex items-center justify-center gap-2 shrink-0"
           >
             {isLoading ? 'Thinking...' : <><Send className="w-4 h-4" /> Test Me</>}
           </button>
         </div>
       )}
-      <p className="text-[10px] text-gray-500 mt-4 text-center italic">Powered by Gemini 3 Flash. Unlimited access for Accelerator members.</p>
+      <p className="text-[10px] text-gray-500 mt-3 sm:mt-4 text-center italic shrink-0">Powered by Gemini 3 Flash. Unlimited access for Accelerator members.</p>
     </div>
   );
 };

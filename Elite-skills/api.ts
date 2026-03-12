@@ -3,7 +3,7 @@ const PROD_FALLBACK_BASE = typeof window !== 'undefined' ? window.location.origi
 export const API_BASE =
   import.meta.env.VITE_API_BASE ?? (import.meta.env.DEV ? 'http://localhost:5000' : PROD_FALLBACK_BASE)
 
-export type AuthUser = { id: string; name: string; email: string }
+export type AuthUser = { id: string; name: string; email: string; isAdmin?: boolean; canCreateReferral?: boolean }
 
 export function getToken(): string | null {
   return localStorage.getItem('token')

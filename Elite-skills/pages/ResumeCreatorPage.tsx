@@ -125,8 +125,8 @@ function ModernTemplate({ profile, summary, editable }: { profile: DisplayProfil
   const expItems = experience ?? []
   const projItems = projects ?? []
   return (
-    <div style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontSize: 10, color: '#000', display: 'flex', maxWidth: 595 }}>
-      <div style={{ width: 140, padding: 20, background: '#fff', borderRight: '1px solid #000' }}>
+    <div className="resume-modern-layout" style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontSize: 10, color: '#000', display: 'flex', maxWidth: 595 }}>
+      <div className="resume-modern-sidebar" style={{ width: 140, padding: 20, background: '#fff', borderRight: '1px solid #000' }}>
         <Editable editable={editable} placeholder="Your name" style={{ fontSize: 14, fontWeight: 700, margin: '0 0 8px 0', color: '#000' }}>{name?.trim()}</Editable>
         <Editable editable={editable} placeholder="Headline" style={{ fontSize: 9, color: '#333', lineHeight: 1.4 }}>{headline?.trim()}</Editable>
         <div style={{ marginTop: 16, fontSize: 9, color: '#333' }}>
@@ -135,7 +135,7 @@ function ModernTemplate({ profile, summary, editable }: { profile: DisplayProfil
           <Editable editable={editable} placeholder="LinkedIn" style={{ marginBottom: 4 }}>{contact?.linkedIn}</Editable>
         </div>
       </div>
-      <div style={{ flex: 1, padding: 24 }}>
+      <div className="resume-modern-main" style={{ flex: 1, padding: 24 }}>
         <Section title="Professional Summary">
           <Editable editable={editable} placeholder="2–3 sentences about your experience and goals" style={{ lineHeight: 1.4, color: '#333' }}>{summary?.trim()}</Editable>
         </Section>
@@ -207,7 +207,7 @@ function CompactTemplate({ profile, summary, editable }: { profile: DisplayProfi
   const projItems = projects ?? []
   return (
     <div style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontSize: 10, color: '#000', padding: 20, maxWidth: 595 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8, paddingBottom: 8 }}>
+      <div className="resume-compact-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8, paddingBottom: 8 }}>
         <Editable editable={editable} placeholder="Your name" style={{ fontSize: 16, fontWeight: 700, margin: 0, color: '#000' }}>{name?.trim()}</Editable>
         <div style={{ fontSize: 8, color: '#333' }}>
           <Editable editable={editable} placeholder="Email" style={{ display: 'inline' }}>{contact?.email}</Editable>
@@ -359,16 +359,16 @@ export default function ResumeCreatorPage() {
           ))}
         </div>
 
-        <div style={{ background: '#fff', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
+        <div className="resume-preview-wrap" style={{ background: '#fff', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
           <p className="muted" style={{ padding: '8px 16px', margin: 0, fontSize: 12, borderBottom: '1px solid var(--border)' }}>
             Click any text to edit. Empty fields show placeholders — type to add your info.
           </p>
-          <div ref={resumeRef} style={{ background: '#fff', minHeight: 400, width: 595, maxWidth: '100%', margin: '0 auto' }}>
+          <div ref={resumeRef} className="resume-preview-inner">
             <TemplatePreview templateId={selected} profile={displayProfile} summary={summary} editable />
           </div>
         </div>
 
-        <div style={{ marginTop: 20, display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div style={{ marginTop: 20, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
           <button
             type="button"
             onClick={handleExportPDF}
