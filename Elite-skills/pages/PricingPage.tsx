@@ -51,14 +51,14 @@ export default function PricingPage() {
               {token ? (
                 <Link
                   to="/checker"
-                  className="pricing-cta-btn block w-full py-3 px-6 border border-white/20 text-white text-center rounded hover:border-elite-gold hover:text-elite-gold transition-colors mt-auto"
+                  className="block w-full py-3 px-6 border border-white/20 text-white text-center rounded hover:border-elite-gold hover:text-elite-gold transition-colors mt-auto"
                 >
                   Go to Dashboard
                 </Link>
               ) : (
                 <Link
                   to="/register"
-                  className="pricing-cta-btn block w-full py-3 px-6 border border-white/20 text-white text-center rounded hover:border-elite-gold hover:text-elite-gold transition-colors mt-auto"
+                  className="block w-full py-3 px-6 border border-white/20 text-elite-gold text-center rounded hover:border-elite-gold hover:text-elite-gold transition-colors mt-auto"
                 >
                   Get Free Access
                 </Link>
