@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 
 import { AuthProvider } from './state/AuthContext';
 import { RealtimeProvider } from './state/RealtimeContext';
+import { ContactProvider } from './state/ContactContext';
 import App from './App';
 import './ats-styles.css';
 
@@ -18,7 +19,9 @@ root.render(
     <BrowserRouter>
       <AuthProvider>
         <RealtimeProvider>
-          <App />
+          <ContactProvider>
+            <App />
+          </ContactProvider>
         </RealtimeProvider>
       </AuthProvider>
     </BrowserRouter>

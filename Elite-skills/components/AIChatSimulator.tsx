@@ -5,7 +5,7 @@ import { boardroomChat } from '../api';
 import { Send, Briefcase } from 'lucide-react';
 import { useAuth } from '../state/AuthContext';
 
-const MESSAGE_LIMIT_GUEST = 5;
+const MESSAGE_LIMIT_GUEST = 3;
 const STORAGE_KEY = 'boardroom_guest_sent';
 const LIMIT_MESSAGE = "You've used your free messages. Log in for unlimited access.";
 

@@ -3,7 +3,13 @@ import type { Request, Response } from 'express'
 
 import { requireAuth } from '../middleware/auth.js'
 import { ReferralPost } from '../models/ReferralPost.js'
+import { User } from '../models/User.js'
 import { escapeRegex } from '../utils/sanitize.js'
+
+function getAdminEmails(): Set<string> {
+  const raw = process.env.ADMIN_EMAILS ?? ''
+  return new Set(raw.split(',').map((e) => e.trim().toLowerCase()).filter(Boolean))
+}
 
 export const referralsRouter = Router()
 
@@ -44,6 +50,16 @@ referralsRouter.get('/', requireAuth, async (req: Request, res: Response) => {
 })
 
 referralsRouter.post('/', requireAuth, async (req: Request, res: Response) => {
+  const adminEmails = getAdminEmails()
+  if (adminEmails.size > 0) {
+    const user = await User.findById(req.userId).select({ email: 1 })
+    const email = user?.email?.trim().toLowerCase() ?? ''
+    if (!adminEmails.has(email)) {
+      res.status(403).json({ error: 'Only admin accounts can post referrals' })
+      return
+    }
+  }
+
   const company = String(req.body?.company ?? '').trim()
   const roleTitle = String(req.body?.roleTitle ?? '').trim()
   const description = String(req.body?.description ?? '').trim()

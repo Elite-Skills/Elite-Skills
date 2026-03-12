@@ -97,20 +97,19 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </Icon>
       ),
     },
+    // Connections and Chat hidden for now
+    // {
+    //   to: '/connections',
+    //   label: 'Connections',
+    //   ...
+    // },
     {
-      to: '/connections',
-      label: 'Connections',
+      to: '/boardroom',
+      label: 'Boardroom',
       icon: (
         <Icon>
           <path
-            d="M16 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3Zm-8 0a3 3 0 1 0-3-3 3 3 0 0 0 3 3Z"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M2 21v-1c0-2.21 2.686-4 6-4m14 5v-1c0-2.21-2.686-4-6-4"
+            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
             stroke="currentColor"
             strokeWidth="2"
             strokeLinecap="round"

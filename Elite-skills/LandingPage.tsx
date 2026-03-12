@@ -4,13 +4,13 @@ import AIChatSimulator from './components/AIChatSimulator';
 import FunnelChart from './components/FunnelChart';
 import StrategyGenerator from './components/StrategyGenerator';
 import LandingNavbar from './components/LandingNavbar';
-import ContactFormModal from './components/ContactFormModal';
 import { Calculator, ChevronRight, GraduationCap, TrendingUp, Globe, Award } from 'lucide-react';
 import { useAuth } from './state/AuthContext';
+import { useContact } from './state/ContactContext';
 
 const LandingPage: React.FC = () => {
   const [salary, setSalary] = useState(120000);
-  const [contactOpen, setContactOpen] = useState(false);
+  const { openContact } = useContact();
   const { token } = useAuth();
   const { hash } = useLocation();
 
@@ -59,7 +59,7 @@ const LandingPage: React.FC = () => {
               ) : (
                 <>
                   <Link
-                    to="/login"
+                    to="/pricing"
                     className="px-10 py-5 bg-elite-gold text-black font-bold text-lg rounded-sm hover:bg-white transition-all duration-300 shadow-[0_0_40px_rgba(212,175,55,0.2)] text-center"
                   >
                     Accelerator Bundle — <span className="line-through opacity-70">€249</span> <span className="text-black font-extrabold">€49</span>
@@ -226,7 +226,7 @@ const LandingPage: React.FC = () => {
               </Link>
             ) : (
               <Link
-                to="/login"
+                to="/pricing"
                 className="group relative bg-elite-gold text-black font-bold py-6 px-16 rounded-sm text-xl shadow-[0_0_40px_rgba(212,175,55,0.4)] hover:shadow-[0_0_60px_rgba(212,175,55,0.6)] transition-all transform hover:scale-[1.02] inline-block"
               >
                 <div className="absolute inset-0 border border-white/20 translate-x-1 translate-y-1 group-hover:translate-x-0 group-hover:translate-y-0 transition-all"></div>
@@ -256,7 +256,7 @@ const LandingPage: React.FC = () => {
                 <li><button onClick={() => scrollToSection('problem')} className="hover:text-white transition-colors">Success Rates</button></li>
                 <li><button onClick={() => scrollToSection('accelerator')} className="hover:text-white transition-colors">Technical Vault</button></li>
                 <li><button onClick={() => scrollToSection('ai-demo')} className="hover:text-white transition-colors">MD Simulation</button></li>
-                <li><button onClick={() => setContactOpen(true)} className="hover:text-elite-gold transition-colors">Contact Us</button></li>
+                <li><button onClick={openContact} className="hover:text-elite-gold transition-colors">Contact Us</button></li>
               </ul>
             </div>
             <div>
@@ -277,7 +277,6 @@ const LandingPage: React.FC = () => {
           </div>
         </div>
       </footer>
-      <ContactFormModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
     </div>
   );
 };

@@ -2,7 +2,7 @@ import { Router, type Request, type Response } from 'express'
 import { optionalAuth } from '../middleware/optionalAuth.js'
 import { GoogleGenAI } from '@google/genai'
 
-const MESSAGE_LIMIT_GUEST = 5
+const MESSAGE_LIMIT_GUEST = 3
 const guestUsage = new Map<string, number>()
 
 function getClientId(req: Request): string {

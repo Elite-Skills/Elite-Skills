@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { useAuth } from '../state/AuthContext'
+import { useContact } from '../state/ContactContext'
 
 function scrollToSection(id: string) {
   const el = document.getElementById(id)
@@ -13,10 +14,12 @@ const navLinks = [
   { id: 'accelerator', label: 'The Accelerator' },
   { id: 'ai-demo', label: '✨ AI Simulation', highlight: true },
   { id: 'roi', label: 'ROI' },
+  { id: 'contact', label: 'Contact Us', isContact: true },
 ]
 
 export default function LandingNavbar() {
   const { token } = useAuth()
+  const { openContact } = useContact()
   const location = useLocation()
   const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -24,6 +27,11 @@ export default function LandingNavbar() {
 
   const handleNavClick = (e: React.MouseEvent, sectionId: string) => {
     setMobileOpen(false)
+    if (sectionId === 'contact') {
+      e.preventDefault()
+      openContact()
+      return
+    }
     if (isLanding) {
       e.preventDefault()
       scrollToSection(sectionId)
@@ -44,11 +52,11 @@ export default function LandingNavbar() {
               <span className="text-elite-gold">ELITE</span> SKILLS
             </Link>
           </div>
-          <div className="hidden md:flex space-x-8 text-xs uppercase tracking-[0.2em] text-elite-text-muted">
+          <div className="hidden md:flex space-x-5 text-xs uppercase tracking-[0.2em] text-elite-text-muted">
             {navLinks.map(({ id, label, highlight }) => (
               <Link
                 key={id}
-                to={`/#${id}`}
+                to={id === 'contact' ? '#' : `/#${id}`}
                 onClick={(e) => handleNavClick(e, id)}
                 className={`hover:text-elite-gold transition-colors ${highlight ? 'font-bold text-elite-gold' : ''}`}
               >
@@ -74,7 +82,7 @@ export default function LandingNavbar() {
             </Link>
           ) : (
             <Link
-              to="/register"
+              to="/pricing"
               className="bg-elite-gold hover:bg-elite-gold-dim text-black font-bold px-6 py-2 rounded-sm transition-all text-xs uppercase tracking-widest shrink-0"
             >
               Get Access
@@ -87,7 +95,7 @@ export default function LandingNavbar() {
             {navLinks.map(({ id, label, highlight }) => (
               <Link
                 key={id}
-                to={`/#${id}`}
+                to={id === 'contact' ? '#' : `/#${id}`}
                 onClick={(e) => handleNavClick(e, id)}
                 className={`py-2 text-xs uppercase tracking-[0.2em] hover:text-elite-gold transition-colors ${highlight ? 'font-bold text-elite-gold' : 'text-elite-text-muted'}`}
               >

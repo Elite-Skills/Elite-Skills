@@ -1,9 +1,12 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import LandingPage from './LandingPage';
+import ContactFormModal from './components/ContactFormModal';
+import { useContact } from './state/ContactContext';
 import { useAuth } from './state/AuthContext';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import PricingPage from './pages/PricingPage';
 import CheckerPage from './pages/CheckerPage';
 import ReferralsPage from './pages/ReferralsPage';
 import NewReferralPage from './pages/NewReferralPage';
@@ -16,6 +19,7 @@ import ConnectionProfilePage from './pages/ConnectionProfilePage';
 import ChatPage from './pages/ChatPage';
 import NotificationsPage from './pages/NotificationsPage';
 import ResumeCreatorPage from './pages/ResumeCreatorPage';
+import BoardroomPage from './pages/BoardroomPage';
 import ProtectedRoute from './state/ProtectedRoute';
 
 function LandingOrRedirect() {
@@ -25,11 +29,14 @@ function LandingOrRedirect() {
 }
 
 export default function App() {
+  const { isOpen, closeContact } = useContact()
   return (
+    <>
     <Routes>
       <Route path="/" element={<LandingOrRedirect />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/pricing" element={<PricingPage />} />
       <Route
         path="/checker"
         element={
@@ -103,6 +110,14 @@ export default function App() {
         }
       />
       <Route
+        path="/boardroom"
+        element={
+          <ProtectedRoute>
+            <BoardroomPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/resume-creator"
         element={
           <ProtectedRoute>
@@ -128,5 +143,7 @@ export default function App() {
       />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    <ContactFormModal isOpen={isOpen} onClose={closeContact} />
+    </>
   );
 }
