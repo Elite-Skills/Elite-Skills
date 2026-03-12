@@ -132,9 +132,25 @@ export default function ProfileMePage() {
         <h2>My profile</h2>
         <div className="muted">Edit your public headline and what becomes visible after connecting.</div>
 
-        {loading ? <div className="muted" style={{ marginTop: 12 }}>Loading…</div> : null}
         {error ? <div className="error" style={{ marginTop: 12 }}>{error}</div> : null}
 
+        {loading ? (
+          <div style={{ marginTop: 16 }} className="profile-skeleton">
+            <div className="shimmer h-10 w-full rounded mb-4" />
+            <div className="shimmer h-10 w-full rounded mb-4" />
+            <div className="shimmer h-24 w-full rounded mb-6" />
+            <div className="shimmer h-4 w-24 rounded mb-3" />
+            <div className="shimmer h-20 rounded mb-2" />
+            <div className="shimmer h-20 rounded mb-2" />
+            <div className="shimmer h-20 rounded mb-6" />
+            <div className="shimmer h-4 w-20 rounded mb-3" />
+            <div className="shimmer h-20 rounded mb-2" />
+            <div className="shimmer h-20 rounded mb-6" />
+            <div className="shimmer h-24 w-full rounded mb-4" />
+            <div className="shimmer h-24 w-full rounded mb-4" />
+            <div className="shimmer h-10 w-32 rounded" />
+          </div>
+        ) : (
         <div className="form">
           <label className="label">
             Name (for CV)
@@ -279,6 +295,7 @@ export default function ProfileMePage() {
             {saving ? 'Saving…' : 'Save profile'}
           </button>
         </div>
+        )}
       </div>
     </div>
   )

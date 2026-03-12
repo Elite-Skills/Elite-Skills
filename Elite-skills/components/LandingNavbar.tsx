@@ -13,8 +13,8 @@ const navLinks = [
   { id: 'problem', label: 'The Reality' },
   { id: 'accelerator', label: 'The Accelerator' },
   { id: 'ai-demo', label: '✨ AI Simulation', highlight: true },
-  { id: 'roi', label: 'ROI' },
-  { id: 'contact', label: 'Contact Us', isContact: true },
+  { id: 'contact', label: 'Contact Us' },
+  { id: 'roi', label: 'ROI', highlight: true },
 ]
 
 export default function LandingNavbar() {
@@ -52,8 +52,8 @@ export default function LandingNavbar() {
               <span className="text-elite-gold">ELITE</span> SKILLS
             </Link>
           </div>
-          <div className="hidden md:flex space-x-5 text-xs uppercase tracking-[0.2em] text-elite-text-muted">
-            {navLinks.map(({ id, label, highlight }) => (
+          <div className="hidden md:flex items-center space-x-5 text-xs uppercase tracking-[0.2em] text-elite-text-muted">
+            {navLinks.slice(0, -1).map(({ id, label, highlight }) => (
               <Link
                 key={id}
                 to={id === 'contact' ? '#' : `/#${id}`}
@@ -63,6 +63,14 @@ export default function LandingNavbar() {
                 {label}
               </Link>
             ))}
+            <Link
+              key={navLinks[navLinks.length - 1].id}
+              to={`/#${navLinks[navLinks.length - 1].id}`}
+              onClick={(e) => handleNavClick(e, navLinks[navLinks.length - 1].id)}
+              className="ml-4 pl-4 border-l border-white/20 font-bold text-elite-gold hover:text-elite-gold-dim transition-colors"
+            >
+              {navLinks[navLinks.length - 1].label}
+            </Link>
           </div>
           <div className="flex items-center gap-2">
             <button

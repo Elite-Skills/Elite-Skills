@@ -69,12 +69,28 @@ export default function ProfilePage() {
           </Link>
         </div>
 
-        {loading ? <div className="muted" style={{ marginTop: 12 }}>Loading…</div> : null}
         {error ? <div className="error" style={{ marginTop: 12 }}>{error}</div> : null}
 
-        {!profile ? null : (
-          <>
-            <div style={{ marginTop: 12, fontWeight: 800, fontSize: 18 }}>{profile.name}</div>
+        {loading ? (
+          <div style={{ marginTop: 16 }} className="profile-skeleton">
+            <div className="shimmer h-6 w-48 rounded mb-4" />
+            <div className="shimmer h-4 w-64 rounded mb-8" />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
+              <div className="shimmer h-16 rounded" />
+              <div className="shimmer h-16 rounded" />
+              <div className="shimmer h-16 rounded" />
+            </div>
+            <div className="shimmer h-4 w-24 rounded mb-3" />
+            <div className="shimmer h-20 rounded mb-2" />
+            <div className="shimmer h-20 rounded mb-2" />
+            <div className="shimmer h-20 rounded mb-6" />
+            <div className="shimmer h-4 w-24 rounded mb-3" />
+            <div className="shimmer h-20 rounded mb-2" />
+            <div className="shimmer h-20 rounded" />
+          </div>
+        ) : !profile ? null : (
+          <div style={{ marginTop: 12, animation: 'fadeIn 0.3s ease-out' }}>
+            <div style={{ fontWeight: 800, fontSize: 18 }}>{profile.name}</div>
             <div className="muted" style={{ marginTop: 6 }}>{profile.headline || '—'}</div>
 
             {'connected' in profile && profile.connected ? (
@@ -186,7 +202,7 @@ export default function ProfilePage() {
                 </div>
               </div>
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>

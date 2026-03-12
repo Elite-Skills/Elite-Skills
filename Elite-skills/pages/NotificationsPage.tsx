@@ -62,14 +62,9 @@ export default function NotificationsPage() {
   return (
     <div className="page">
       <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-          <div>
-            <h2 style={{ marginBottom: 6 }}>Notifications</h2>
-            <div className="muted">Updates about requests, chat messages, and recommendations.</div>
-          </div>
-          <Link className="btn secondary" to="/connections">
-            Connections
-          </Link>
+        <div>
+          <h2 style={{ marginBottom: 6 }}>Notifications</h2>
+          <div className="muted">Updates about requests and recommendations.</div>
         </div>
 
         <div style={{ display: 'flex', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
