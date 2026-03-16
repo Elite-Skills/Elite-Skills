@@ -74,7 +74,7 @@ export default function PricingPage() {
               <p className="text-elite-text-muted text-sm mb-6">Full access to all resources</p>
               <div className="flex items-baseline gap-2 mb-6">
                 <span className="text-2xl text-gray-500 line-through">€249</span>
-                <span className="text-4xl font-bold text-elite-gold">€49</span>
+                <span className="text-4xl font-bold text-elite-gold">€99</span>
               </div>
               <ul className="space-y-4 flex-grow mb-8">
                 {features.map((f) => (
@@ -96,7 +96,7 @@ export default function PricingPage() {
                   to="/login"
                   className="pricing-cta-btn block w-full py-3 px-6 bg-elite-gold text-black font-bold text-center rounded hover:bg-elite-gold-dim transition-colors mt-auto"
                 >
-                  Get Accelerator — €49
+                  Get Accelerator — €99
                 </Link>
               )}
             </div>

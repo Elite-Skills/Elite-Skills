@@ -27,7 +27,7 @@ const LandingPage: React.FC = () => {
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const roi = Math.floor((salary - 49) / 49);
+  const roi = Math.floor((salary - 99) / 99);
 
   return (
     <div className="min-h-screen">
@@ -62,7 +62,7 @@ const LandingPage: React.FC = () => {
                     to="/pricing"
                     className="px-10 py-5 bg-elite-gold text-black font-bold text-lg rounded-sm hover:bg-white transition-all duration-300 shadow-[0_0_40px_rgba(212,175,55,0.2)] text-center"
                   >
-                    Accelerator Bundle — <span className="line-through opacity-70">€249</span> <span className="text-black font-extrabold">€49</span>
+                    Accelerator Bundle — <span className="line-through opacity-70">€249</span> <span className="text-black font-extrabold">€99</span>
                   </Link>
                   <button
                     onClick={() => scrollToSection('ai-demo')}
@@ -183,7 +183,7 @@ const LandingPage: React.FC = () => {
                   <label className="block text-[10px] uppercase tracking-[0.2em] text-elite-text-muted mb-3 font-bold">Investment Cost</label>
                   <div className="text-5xl font-serif">
                     <span className="line-through text-gray-500">€249</span>{' '}
-                    <span className="text-elite-gold font-bold">€49</span>
+                    <span className="text-elite-gold font-bold">€99</span>
                   </div>
                 </div>
                 <div>
@@ -230,7 +230,7 @@ const LandingPage: React.FC = () => {
                 className="group relative bg-elite-gold text-black font-bold py-6 px-16 rounded-sm text-xl shadow-[0_0_40px_rgba(212,175,55,0.4)] hover:shadow-[0_0_60px_rgba(212,175,55,0.6)] transition-all transform hover:scale-[1.02] inline-block"
               >
                 <div className="absolute inset-0 border border-white/20 translate-x-1 translate-y-1 group-hover:translate-x-0 group-hover:translate-y-0 transition-all"></div>
-                Get The Elite Skills Bundle — <span className="line-through opacity-70">€249</span> <span className="font-extrabold">€49</span>
+                Get The Elite Skills Bundle — <span className="line-through opacity-70">€249</span> <span className="font-extrabold">€99</span>
               </Link>
             )}
             <p className="mt-6 text-xs text-gray-600 uppercase tracking-[0.3em]">Instant Access • PDF Guide • AI Simulator • Strategy Vault</p>
