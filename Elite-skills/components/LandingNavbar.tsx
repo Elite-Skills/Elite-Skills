@@ -73,12 +73,6 @@ export default function LandingNavbar() {
             </Link>
           </div>
           <div className="flex items-center gap-2">
-            <Link
-              to="/blog"
-              className="hidden sm:inline text-xs uppercase tracking-[0.2em] text-elite-text-muted hover:text-elite-gold transition-colors"
-            >
-              Blog
-            </Link>
             <button
               type="button"
               onClick={() => setMobileOpen((o) => !o)}
@@ -88,20 +82,26 @@ export default function LandingNavbar() {
               {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
             {token ? (
-            <Link
-              to="/checker"
-              className="dashboard-nav-btn bg-elite-gold hover:bg-elite-gold-dim text-black font-bold px-6 py-2 rounded-sm transition-all text-xs uppercase tracking-widest shrink-0"
-            >
-              Dashboard
-            </Link>
-          ) : (
-            <Link
-              to="/pricing"
-              className="bg-elite-gold hover:bg-elite-gold-dim text-black font-bold px-6 py-2 rounded-sm transition-all text-xs uppercase tracking-widest shrink-0"
-            >
-              Get Access
-            </Link>
+              <Link
+                to="/checker"
+                className="dashboard-nav-btn bg-elite-gold hover:bg-elite-gold-dim text-black font-bold px-6 py-2 rounded-sm transition-all text-xs uppercase tracking-widest shrink-0"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                to="/pricing"
+                className="bg-elite-gold hover:bg-elite-gold-dim text-black font-bold px-6 py-2 rounded-sm transition-all text-xs uppercase tracking-widest shrink-0"
+              >
+                Get Access
+              </Link>
             )}
+            <Link
+              to="/blog"
+              className="hidden sm:inline ml-6 pl-6 border-l border-white/20 text-xs uppercase tracking-[0.2em] text-elite-text-muted hover:text-elite-gold transition-colors"
+            >
+              Blog
+            </Link>
           </div>
         </div>
         {mobileOpen && (
