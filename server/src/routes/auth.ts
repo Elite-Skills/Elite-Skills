@@ -51,7 +51,8 @@ authRouter.post('/register', async (req: Request, res: Response) => {
   }
 
   const passwordHash = await bcrypt.hash(password, 12)
-  const user = await User.create({ name, email, passwordHash })
+  const isAdmin = isAdminEmail(email)
+  const user = await User.create({ name, email, passwordHash, isAdmin })
 
   const token = signToken(String(user._id))
   res.json({
@@ -60,7 +61,7 @@ authRouter.post('/register', async (req: Request, res: Response) => {
       id: String(user._id),
       name: user.name,
       email: user.email,
-      isAdmin: isAdminEmail(user.email),
+      isAdmin: isAdmin || (user as { isAdmin?: boolean }).isAdmin,
       canCreateReferral: canCreateReferral(user.email),
     },
   })
@@ -86,6 +87,7 @@ authRouter.post('/login', async (req: Request, res: Response) => {
     return
   }
 
+  const u = user as { isAdmin?: boolean }
   const token = signToken(String(user._id))
   res.json({
     token,
@@ -93,7 +95,7 @@ authRouter.post('/login', async (req: Request, res: Response) => {
       id: String(user._id),
       name: user.name,
       email: user.email,
-      isAdmin: isAdminEmail(user.email),
+      isAdmin: u.isAdmin === true || isAdminEmail(user.email),
       canCreateReferral: canCreateReferral(user.email),
     },
   })
@@ -106,12 +108,13 @@ authRouter.get('/me', requireAuth, async (req: Request, res: Response) => {
     return
   }
 
+  const u = user as { isAdmin?: boolean }
   res.json({
     user: {
       id: String(user._id),
       name: user.name,
       email: user.email,
-      isAdmin: isAdminEmail(user.email),
+      isAdmin: u.isAdmin === true || isAdminEmail(user.email),
       canCreateReferral: canCreateReferral(user.email),
     },
   })

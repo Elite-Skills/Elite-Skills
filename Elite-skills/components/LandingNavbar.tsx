@@ -73,6 +73,12 @@ export default function LandingNavbar() {
             </Link>
           </div>
           <div className="flex items-center gap-2">
+            <Link
+              to="/blog"
+              className="hidden sm:inline text-xs uppercase tracking-[0.2em] text-elite-text-muted hover:text-elite-gold transition-colors"
+            >
+              Blog
+            </Link>
             <button
               type="button"
               onClick={() => setMobileOpen((o) => !o)}
@@ -110,6 +116,9 @@ export default function LandingNavbar() {
                 {label}
               </Link>
             ))}
+            <Link to="/blog" className="py-2 text-xs uppercase tracking-[0.2em] text-elite-text-muted hover:text-elite-gold transition-colors">
+              Blog
+            </Link>
           </div>
         )}
       </div>

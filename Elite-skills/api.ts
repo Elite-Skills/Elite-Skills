@@ -358,3 +358,68 @@ export async function fetchStrategy(bank: string): Promise<{ response: string }>
     body: JSON.stringify({ bank }),
   })
 }
+
+export type BlogPostListItem = {
+  id: string
+  title: string
+  slug: string
+  excerpt: string
+  publishedAt: string
+  authorName: string
+}
+
+export type BlogPostDetail = BlogPostListItem & {
+  content: string
+  mediaUrls: string[]
+  authorUserId: string
+  metaTitle: string
+  metaDescription: string
+}
+
+export async function listBlogs(params?: { q?: string; limit?: number }): Promise<{ posts: BlogPostListItem[] }> {
+  const qs = new URLSearchParams()
+  if (params?.q) qs.set('q', params.q)
+  if (params?.limit) qs.set('limit', String(params.limit))
+  const suffix = qs.toString() ? `?${qs}` : ''
+  return request(`/api/blogs${suffix}`)
+}
+
+export async function getBlogBySlug(slug: string): Promise<{ post: BlogPostDetail }> {
+  return request(`/api/blogs/by-slug/${encodeURIComponent(slug)}`)
+}
+
+export async function getBlogPost(id: string): Promise<{ post: BlogPostDetail & { status?: string } }> {
+  return request(`/api/blogs/${encodeURIComponent(id)}`)
+}
+
+export async function createBlogPost(payload: {
+  title: string
+  content: string
+  excerpt?: string
+  metaTitle?: string
+  metaDescription?: string
+  mediaUrls?: string[]
+  status?: 'draft' | 'published'
+}): Promise<{ id: string; slug: string }> {
+  return request('/api/blogs', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+}
+
+export async function updateBlogPost(id: string, payload: {
+  title?: string
+  content?: string
+  excerpt?: string
+  metaTitle?: string
+  metaDescription?: string
+  mediaUrls?: string[]
+  status?: 'draft' | 'published'
+}): Promise<{ id: string; slug: string }> {
+  return request(`/api/blogs/${encodeURIComponent(id)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+}

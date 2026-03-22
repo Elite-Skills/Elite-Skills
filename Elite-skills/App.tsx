@@ -20,6 +20,9 @@ import ChatPage from './pages/ChatPage';
 import NotificationsPage from './pages/NotificationsPage';
 import ResumeCreatorPage from './pages/ResumeCreatorPage';
 import BoardroomPage from './pages/BoardroomPage';
+import BlogListPage from './pages/BlogListPage';
+import BlogDetailPage from './pages/BlogDetailPage';
+import BlogEditPage from './pages/BlogEditPage';
 import ProtectedRoute from './state/ProtectedRoute';
 
 function LandingOrRedirect() {
@@ -37,6 +40,10 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/pricing" element={<PricingPage />} />
+      <Route path="/blog" element={<BlogListPage />} />
+      <Route path="/blog/new" element={<BlogEditPage />} />
+      <Route path="/blog/edit/:id" element={<BlogEditPage />} />
+      <Route path="/blog/:slug" element={<BlogDetailPage />} />
       <Route
         path="/checker"
         element={

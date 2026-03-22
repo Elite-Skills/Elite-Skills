@@ -30,6 +30,7 @@ import { notificationsRouter } from './routes/notifications.js'
 import { boardroomRouter } from './routes/boardroom.js'
 import { strategyRouter } from './routes/strategy.js'
 import { contactRouter } from './routes/contact.js'
+import { blogsRouter } from './routes/blogs.js'
 import { setupSocketIo } from './socket.js'
 
 const app = express()
@@ -107,6 +108,7 @@ app.use('/api/notifications', notificationsRouter)
 app.use('/api/boardroom', boardroomRouter)
 app.use('/api/strategy', strategyRouter)
 app.use('/api/contact', contactRouter)
+app.use('/api/blogs', blogsRouter)
 
 app.use('/api', (_req: Request, res: Response) => {
   res.status(404).json({ error: 'Not found' })
