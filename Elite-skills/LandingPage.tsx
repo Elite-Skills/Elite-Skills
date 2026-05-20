@@ -4,9 +4,10 @@ import AIChatSimulator from './components/AIChatSimulator';
 import FunnelChart from './components/FunnelChart';
 import StrategyGenerator from './components/StrategyGenerator';
 import LandingNavbar from './components/LandingNavbar';
-import { Calculator, ChevronRight, GraduationCap, TrendingUp, Globe, Award } from 'lucide-react';
+import { Calculator, ChevronRight, GraduationCap, TrendingUp, Globe, Award, Instagram, Linkedin } from 'lucide-react';
 import { useAuth } from './state/AuthContext';
 import { useContact } from './state/ContactContext';
+import { ELITE_SKILLS_INSTAGRAM, ELITE_SKILLS_LINKEDIN } from './socialLinks';
 
 const LandingPage: React.FC = () => {
   const [salary, setSalary] = useState(120000);
@@ -249,6 +250,27 @@ const LandingPage: React.FC = () => {
               <p className="text-elite-text-muted text-sm max-w-sm leading-relaxed">
                 The leading professional training resource for aspiring bulge bracket and elite boutique investment bankers. Created by alumni from HEC, LBS, and Goldman Sachs.
               </p>
+              <div className="flex flex-wrap items-center gap-4 mt-8">
+                <span className="text-white text-[10px] uppercase tracking-widest font-bold w-full sm:w-auto">Follow</span>
+                <a
+                  href={ELITE_SKILLS_INSTAGRAM}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-elite-text-muted text-xs hover:text-elite-gold transition-colors"
+                >
+                  <Instagram className="w-4 h-4" aria-hidden />
+                  Instagram
+                </a>
+                <a
+                  href={ELITE_SKILLS_LINKEDIN}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-elite-text-muted text-xs hover:text-elite-gold transition-colors"
+                >
+                  <Linkedin className="w-4 h-4" aria-hidden />
+                  LinkedIn
+                </a>
+              </div>
             </div>
             <div>
               <h4 className="text-white text-[10px] uppercase tracking-widest mb-6 font-bold">Resources</h4>

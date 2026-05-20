@@ -1,13 +1,17 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Menu, X } from 'lucide-react'
+import { Instagram, Linkedin, Menu, X } from 'lucide-react'
 import { useAuth } from '../state/AuthContext'
 import { useContact } from '../state/ContactContext'
+import { ELITE_SKILLS_INSTAGRAM, ELITE_SKILLS_LINKEDIN } from '../socialLinks'
 
 function scrollToSection(id: string) {
   const el = document.getElementById(id)
   if (el) el.scrollIntoView({ behavior: 'smooth' })
 }
+
+const WHATSAPP_GET_ACCESS =
+  'https://api.whatsapp.com/send/?phone=447441428122'
 
 const navLinks = [
   { id: 'problem', label: 'The Reality' },
@@ -89,19 +93,35 @@ export default function LandingNavbar() {
                 Dashboard
               </Link>
             ) : (
-              <Link
-                to="/pricing"
+              <a
+                href={WHATSAPP_GET_ACCESS}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="bg-elite-gold hover:bg-elite-gold-dim text-black font-bold px-6 py-2 rounded-sm transition-all text-xs uppercase tracking-widest shrink-0"
               >
                 Get Access
-              </Link>
+              </a>
             )}
-            <Link
-              to="/blog"
-              className="hidden sm:inline ml-6 pl-6 border-l border-white/20 text-xs uppercase tracking-[0.2em] text-elite-text-muted hover:text-elite-gold transition-colors"
-            >
-              Blog
-            </Link>
+            <div className="flex items-center gap-3 ml-3 sm:ml-4 pl-3 sm:pl-4 border-l border-white/20">
+              <a
+                href={ELITE_SKILLS_INSTAGRAM}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-elite-text-muted hover:text-elite-gold transition-colors p-1"
+                aria-label="Elite Skills on Instagram"
+              >
+                <Instagram className="w-5 h-5" aria-hidden />
+              </a>
+              <a
+                href={ELITE_SKILLS_LINKEDIN}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-elite-text-muted hover:text-elite-gold transition-colors p-1"
+                aria-label="Elite Skills on LinkedIn"
+              >
+                <Linkedin className="w-5 h-5" aria-hidden />
+              </a>
+            </div>
           </div>
         </div>
         {mobileOpen && (
@@ -116,9 +136,24 @@ export default function LandingNavbar() {
                 {label}
               </Link>
             ))}
-            <Link to="/blog" className="py-2 text-xs uppercase tracking-[0.2em] text-elite-text-muted hover:text-elite-gold transition-colors">
-              Blog
-            </Link>
+            <div className="flex items-center gap-6 pt-2 border-t border-white/10">
+              <a
+                href={ELITE_SKILLS_INSTAGRAM}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs uppercase tracking-[0.2em] text-elite-text-muted hover:text-elite-gold transition-colors"
+              >
+                Instagram
+              </a>
+              <a
+                href={ELITE_SKILLS_LINKEDIN}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs uppercase tracking-[0.2em] text-elite-text-muted hover:text-elite-gold transition-colors"
+              >
+                LinkedIn
+              </a>
+            </div>
           </div>
         )}
       </div>
