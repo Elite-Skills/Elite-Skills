@@ -4,7 +4,7 @@ import LandingNavbar from '../components/LandingNavbar'
 import { useAuth } from '../state/AuthContext'
 
 export default function PricingPage() {
-  const { token } = useAuth()
+  const { token, user } = useAuth()
 
   const features = [
     'Full PDF guide (100+ questions)',
@@ -48,12 +48,16 @@ export default function PricingPage() {
                   </li>
                 ))}
               </ul>
-              {token ? (
+              {token && user?.plan === 'paid' ? (
+                <p className="text-elite-text-muted text-sm text-center mt-auto">
+                  You&apos;re on Accelerator — ATS checker, resume creator, and unlimited boardroom are unlocked.
+                </p>
+              ) : token && user?.plan === 'free' ? (
                 <Link
-                  to="/checker"
+                  to="/boardroom"
                   className="block w-full py-3 px-6 border border-white/20 text-white text-center rounded hover:border-elite-gold hover:text-elite-gold transition-colors mt-auto"
                 >
-                  Go to Dashboard
+                  Open AI Boardroom (free tier)
                 </Link>
               ) : (
                 <Link
@@ -84,19 +88,19 @@ export default function PricingPage() {
                   </li>
                 ))}
               </ul>
-              {token ? (
+              {token && user?.plan === 'paid' ? (
                 <Link
                   to="/checker"
                   className="pricing-cta-btn block w-full py-3 px-6 bg-elite-gold text-black font-bold text-center rounded hover:bg-elite-gold-dim transition-colors mt-auto"
                 >
-                  Go to Dashboard
+                  Open ATS Checker
                 </Link>
               ) : (
                 <Link
-                  to="/login"
+                  to={token ? '/pricing' : '/login'}
                   className="pricing-cta-btn block w-full py-3 px-6 bg-elite-gold text-black font-bold text-center rounded hover:bg-elite-gold-dim transition-colors mt-auto"
                 >
-                  Get Accelerator — €99
+                  {token ? 'Get Upgraded' : 'Get Accelerator — €99'}
                 </Link>
               )}
             </div>

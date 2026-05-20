@@ -16,14 +16,24 @@ const WHATSAPP_GET_ACCESS =
 const navPrimaryCtaClassName =
   'bg-elite-gold hover:bg-elite-gold-dim text-black font-bold px-6 py-2 rounded-sm transition-all text-xs uppercase tracking-widest shrink-0'
 
-function NavPrimaryCta({ token }: { token: string | null }) {
+function NavPrimaryCta({ token, plan }: { token: string | null; plan?: 'free' | 'paid' }) {
   if (token) {
+    if (plan === 'paid') {
+      return (
+        <Link
+          to="/checker"
+          className={`dashboard-nav-btn ${navPrimaryCtaClassName}`}
+        >
+          Dashboard
+        </Link>
+      )
+    }
     return (
       <Link
-        to="/checker"
+        to="/pricing"
         className={`dashboard-nav-btn ${navPrimaryCtaClassName}`}
       >
-        Dashboard
+        Get Upgraded
       </Link>
     )
   }
@@ -48,7 +58,7 @@ const navLinks = [
 ]
 
 export default function LandingNavbar() {
-  const { token } = useAuth()
+  const { token, user } = useAuth()
   const { openContact } = useContact()
   const location = useLocation()
   const navigate = useNavigate()
@@ -109,11 +119,11 @@ export default function LandingNavbar() {
             </Link>
           </div>
           <div className="flex min-w-0 flex-1 justify-center md:hidden">
-            <NavPrimaryCta token={token} />
+            <NavPrimaryCta token={token} plan={user?.plan} />
           </div>
           <div className="relative z-10 flex shrink-0 items-center gap-3 pr-3 sm:pr-4 md:gap-2 md:pr-0">
             <div className="hidden md:block">
-              <NavPrimaryCta token={token} />
+              <NavPrimaryCta token={token} plan={user?.plan} />
             </div>
             <button
               type="button"

@@ -1,7 +1,10 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { fetchStrategy } from '../api';
 import { ShieldCheck, Target, ChevronDown } from 'lucide-react';
+import { SAMPLE_STRATEGY_BANKS } from '../lib/planLimits';
+import { useAuth } from '../state/AuthContext';
 
 /** Parses strategy text: **bold** titles, proper paragraphs */
 function formatStrategyText(text: string) {
@@ -23,19 +26,24 @@ function formatStrategyText(text: string) {
   });
 }
 
-const banks = [
+const ALL_STRATEGY_BANKS = [
   "Lazard (Paris)",
   "Rothschild & Co (London)",
   "Goldman Sachs (M&A)",
   "Morgan Stanley (NYC)",
   "Perella Weinberg Partners",
-  "Centerview Partners"
-];
+  "Centerview Partners",
+] as const;
 
 const AI_TIRED_MESSAGE = "**The AI is taking a quick break.** It'll be back soon—try again in a moment!";
 
 const isErrorResponse = (text: string) =>
   text.includes('Temporary service limit') || text.includes('high demand') || text.includes('503') || text.includes('taking a quick break');
+
+const isPlanLimitMessage = (msg: string) =>
+  msg.includes('free_plan_limit') ||
+  msg.includes('Sample strategy templates') ||
+  /sample strategy|free plan|upgrade to/i.test(msg);
 
 async function fetchStrategyWithRetry(bank: string, maxAttempts = 2): Promise<string> {
   let lastError: unknown;
@@ -53,13 +61,27 @@ async function fetchStrategyWithRetry(bank: string, maxAttempts = 2): Promise<st
 }
 
 const StrategyGenerator: React.FC = () => {
-  const [selectedBank, setSelectedBank] = useState(banks[0]);
+  const { token, user } = useAuth();
+  const selectableBanks = useMemo(() => {
+    if (!token) return [...SAMPLE_STRATEGY_BANKS];
+    if (user?.plan === 'paid') return [...ALL_STRATEGY_BANKS];
+    return [...SAMPLE_STRATEGY_BANKS];
+  }, [token, user?.plan]);
+
+  const [selectedBank, setSelectedBank] = useState(() => selectableBanks[0] ?? ALL_STRATEGY_BANKS[0]);
   const [strategy, setStrategy] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [planError, setPlanError] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const strategyCardRef = useRef<HTMLDivElement>(null);
   const cacheRef = useRef<Map<string, string>>(new Map());
+
+  useEffect(() => {
+    if (!selectableBanks.includes(selectedBank)) {
+      setSelectedBank(selectableBanks[0] ?? ALL_STRATEGY_BANKS[0]);
+    }
+  }, [selectableBanks, selectedBank]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -80,6 +102,11 @@ const StrategyGenerator: React.FC = () => {
   }, [strategy, isLoading]);
 
   const handleGenerate = async () => {
+    setPlanError(null);
+    if (!token) {
+      setPlanError('Sign in to generate firm strategies.');
+      return;
+    }
     if (cacheRef.current.has(selectedBank)) {
       setStrategy(cacheRef.current.get(selectedBank)!);
       return;
@@ -97,13 +124,20 @@ const StrategyGenerator: React.FC = () => {
         throw new Error('Failed to load');
       }
     } catch (err) {
-      setStrategy(AI_TIRED_MESSAGE);
+      const msg = err instanceof Error ? err.message : String(err);
+      if (isPlanLimitMessage(msg)) {
+        setPlanError('That firm is available on Accelerator. Free accounts can use the sample firms in the list.');
+        setStrategy(null);
+      } else {
+        setStrategy(AI_TIRED_MESSAGE);
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   const showOutput = strategy || isLoading;
+  const generateDisabled = isLoading || !token;
 
   return (
     <>
@@ -112,7 +146,18 @@ const StrategyGenerator: React.FC = () => {
           <Target className="h-4 w-4 text-elite-gold" />
           <h3 className="font-serif text-lg text-white md:text-xl">✨ AI Strategy Gen</h3>
         </div>
-        <p className="mb-4 text-xs text-elite-text-muted md:mb-6">Generate a bespoke recruitment strategy for your target firm.</p>
+        <p className="mb-4 text-xs text-elite-text-muted md:mb-6">
+          Generate a bespoke recruitment strategy for your target firm. Free accounts include sample firms only.
+        </p>
+
+        {!token && (
+          <p className="mb-3 rounded-sm border border-elite-gold/30 bg-elite-gold/5 px-3 py-2 text-[11px] text-elite-text-muted">
+            <Link to="/login" className="font-semibold text-elite-gold underline hover:text-elite-gold-dim">
+              Sign in
+            </Link>
+            {' '}to run AI Strategy Gen. You can still preview the sample firm list below.
+          </p>
+        )}
         
         <div className="space-y-4 flex-grow">
           <div className="relative" ref={dropdownRef}>
@@ -126,7 +171,7 @@ const StrategyGenerator: React.FC = () => {
             </button>
             {isOpen && (
               <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-elite-gray border border-white/10 rounded-sm shadow-xl overflow-hidden">
-                {banks.map(bank => (
+                {selectableBanks.map(bank => (
                   <button
                     key={bank}
                     type="button"
@@ -147,10 +192,19 @@ const StrategyGenerator: React.FC = () => {
             )}
           </div>
 
+          {planError && (
+            <p className="text-[11px] text-amber-200/90">
+              {planError}{' '}
+              <Link to="/pricing" className="font-semibold text-elite-gold underline hover:text-elite-gold-dim">
+                View pricing
+              </Link>
+            </p>
+          )}
+
           <button 
             onClick={handleGenerate}
-            disabled={isLoading}
-            className="w-full bg-white/10 border border-white/20 text-xs py-3 font-semibold uppercase tracking-widest hover:bg-elite-gold hover:text-black transition-all flex items-center justify-center gap-2"
+            disabled={generateDisabled}
+            className="w-full bg-white/10 border border-white/20 text-xs py-3 font-semibold uppercase tracking-widest hover:bg-elite-gold hover:text-black transition-all flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? 'Analyzing...' : 'Build Strategy'}
           </button>

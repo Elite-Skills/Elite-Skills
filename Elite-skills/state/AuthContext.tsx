@@ -1,13 +1,14 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 import type { AuthUser } from '../api'
-import { getToken, me, setToken as persistToken } from '../api'
+import { clearApiCaches, getToken, me, normalizeAuthUser, setToken as persistToken } from '../api'
 
 type AuthState = {
   user: AuthUser | null
   token: string | null
   loading: boolean
   setAuth: (payload: { token: string; user: AuthUser } | null) => void
+  patchUser: (patch: Partial<AuthUser>) => void
   logout: () => void
 }
 
@@ -35,11 +36,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Auth timeout')), ms))
         const data = await Promise.race([me(), timeout(8000)])
         if (!cancelled) {
-          setUser(data.user)
+          setUser(normalizeAuthUser(data.user))
           setLoading(false)
         }
       } catch {
         if (!cancelled) {
+          clearApiCaches()
           persistToken(null)
           setToken(null)
           setUser(null)
@@ -55,12 +57,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [token])
 
+  const patchUser = useCallback((patch: Partial<AuthUser>) => {
+    setUser((u) => (u ? { ...u, ...patch } : u))
+  }, [])
+
   const value = useMemo<AuthState>(
     () => ({
       user,
       token,
       loading,
       setAuth: (payload: { token: string; user: AuthUser } | null) => {
+        clearApiCaches()
         if (!payload) {
           persistToken(null)
           setToken(null)
@@ -69,15 +76,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         persistToken(payload.token)
         setToken(payload.token)
-        setUser(payload.user)
+        setUser(normalizeAuthUser(payload.user))
       },
+      patchUser,
       logout: () => {
+        clearApiCaches()
         persistToken(null)
         setToken(null)
         setUser(null)
       },
     }),
-    [loading, token, user]
+    [loading, patchUser, token, user]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

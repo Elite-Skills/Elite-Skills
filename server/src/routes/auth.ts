@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken'
 import { User } from '../models/User.js'
 import { requireAuth } from '../middleware/auth.js'
 import { validateRegisterInput, validateLoginInput } from '../utils/sanitize.js'
+import { FREE_BOARDROOM_AI_MESSAGES } from '../utils/planLimits.js'
 
 function getAdminEmails(): Set<string> {
   const raw = process.env.ADMIN_EMAILS ?? ''
@@ -36,6 +37,16 @@ function signToken(userId: string): string {
   return jwt.sign({}, secret, { subject: userId, expiresIn: '7d' })
 }
 
+function userPlan(user: { plan?: string }): 'free' | 'paid' {
+  return user.plan === 'paid' ? 'paid' : 'free'
+}
+
+function boardroomRemainingForUser(user: { plan?: string; boardroomMessagesUsed?: number }): number | null {
+  if (userPlan(user) === 'paid') return null
+  const used = user.boardroomMessagesUsed ?? 0
+  return Math.max(0, FREE_BOARDROOM_AI_MESSAGES - used)
+}
+
 authRouter.post('/register', async (req: Request, res: Response) => {
   const validated = validateRegisterInput(req.body)
   if ('error' in validated) {
@@ -52,7 +63,7 @@ authRouter.post('/register', async (req: Request, res: Response) => {
 
   const passwordHash = await bcrypt.hash(password, 12)
   const isAdmin = isAdminEmail(email)
-  const user = await User.create({ name, email, passwordHash, isAdmin })
+  const user = await User.create({ name, email, passwordHash, isAdmin, plan: 'free' })
 
   const token = signToken(String(user._id))
   res.json({
@@ -63,6 +74,8 @@ authRouter.post('/register', async (req: Request, res: Response) => {
       email: user.email,
       isAdmin: isAdmin || (user as { isAdmin?: boolean }).isAdmin,
       canCreateReferral: canCreateReferral(user.email),
+      plan: userPlan(user),
+      boardroomRemaining: boardroomRemainingForUser(user),
     },
   })
 })
@@ -97,6 +110,8 @@ authRouter.post('/login', async (req: Request, res: Response) => {
       email: user.email,
       isAdmin: u.isAdmin === true || isAdminEmail(user.email),
       canCreateReferral: canCreateReferral(user.email),
+      plan: userPlan(user),
+      boardroomRemaining: boardroomRemainingForUser(user),
     },
   })
 })
@@ -116,6 +131,8 @@ authRouter.get('/me', requireAuth, async (req: Request, res: Response) => {
       email: user.email,
       isAdmin: u.isAdmin === true || isAdminEmail(user.email),
       canCreateReferral: canCreateReferral(user.email),
+      plan: userPlan(user),
+      boardroomRemaining: boardroomRemainingForUser(user),
     },
   })
 })

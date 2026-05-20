@@ -9,6 +9,8 @@ const scanSchema = new mongoose.Schema(
     matchedKeywords: { type: [String], required: true },
     missingKeywords: { type: [String], required: true },
     tips: { type: [String], required: true },
+    /** Full API response so the checker UI can reload tips, sections, corrected resume, etc. */
+    fullResult: { type: mongoose.Schema.Types.Mixed, required: false },
   },
   { timestamps: true }
 )

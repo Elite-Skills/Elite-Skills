@@ -78,3 +78,16 @@ export function validateLoginInput(body: { email?: unknown; password?: unknown }
 
   return { email, password }
 }
+
+/** Strip C0 control chars (except TAB/LF), normalize newlines, enforce max length — for job descriptions, chat, etc. */
+export function sanitizePlainTextMultiline(input: string, maxLen: number): string {
+  return String(input ?? '')
+    .replace(/\0/g, '')
+    .replace(/[\x01-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .replace(/\u2028/g, '\n')
+    .replace(/\u2029/g, '\n')
+    .trim()
+    .slice(0, maxLen)
+}

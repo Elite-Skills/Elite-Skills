@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
-import { scanHistory, scanResume, type ScanHistoryItem, type ScanResult } from '../api'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { scanById, scanHistory, scanResume, type ScanHistoryItem, type ScanResult } from '../api'
 import { useAuth } from '../state/AuthContext'
+import AcceleratorPaywall from '../components/AcceleratorPaywall'
+import { AcceleratorRichPitch } from '../components/AcceleratorRichPitch'
 
 function formatDate(s: string): string {
   const d = new Date(s)
@@ -9,7 +11,7 @@ function formatDate(s: string): string {
 }
 
 export default function CheckerPage() {
-  useAuth()
+  const { user, loading: authLoading } = useAuth()
 
   const [jobDescription, setJobDescription] = useState('')
   const [resume, setResume] = useState<File | null>(null)
@@ -19,6 +21,9 @@ export default function CheckerPage() {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [historyLoadingId, setHistoryLoadingId] = useState<string | null>(null)
+  const [historyNotice, setHistoryNotice] = useState<string | null>(null)
+  const resultRef = useRef<HTMLDivElement>(null)
 
   async function copy(text: string) {
     try {
@@ -36,6 +41,7 @@ export default function CheckerPage() {
   }, [result?.score])
 
   useEffect(() => {
+    if (authLoading || user?.plan !== 'paid') return
     let cancelled = false
 
     async function load() {
@@ -51,12 +57,13 @@ export default function CheckerPage() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [authLoading, user?.plan])
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
     setResult(null)
+    setHistoryNotice(null)
 
     if (!resume) {
       setError('Please upload a PDF resume.')
@@ -72,14 +79,50 @@ export default function CheckerPage() {
     try {
       const data = await scanResume({ resume, jobDescription })
       setResult(data)
+      setHistoryNotice(null)
 
       const updated = await scanHistory()
       setHistory(updated.scans)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Scan failed')
+      const msg = err instanceof Error ? err.message : 'Scan failed'
+      setError(msg)
     } finally {
       setLoading(false)
     }
+  }
+
+  async function loadScanFromHistory(h: ScanHistoryItem) {
+    setError(null)
+    setHistoryLoadingId(h.id)
+    try {
+      const data = await scanById(h.id)
+      setResult(data)
+      setHistoryNotice(`Saved scan from ${formatDate(h.createdAt)} — full feedback below.`)
+      requestAnimationFrame(() => {
+        resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Could not load scan'
+      setError(msg)
+    } finally {
+      setHistoryLoadingId(null)
+    }
+  }
+
+  if (authLoading) {
+    return (
+      <div className="page">
+        <div className="card">
+          <p className="muted">Loading…</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user || user.plan !== 'paid') {
+    return (
+      <AcceleratorPaywall variant="rich" title="ATS Resume Checker" description={<AcceleratorRichPitch />} />
+    )
   }
 
   return (
@@ -123,8 +166,9 @@ export default function CheckerPage() {
         </div>
       </form>
 
-      <div className="card" style={{ marginTop: 16 }}>
+      <div ref={resultRef} className="card" style={{ marginTop: 16 }}>
         <h2>Result</h2>
+        {historyNotice ? <div className="muted" style={{ marginBottom: 12 }}>{historyNotice}</div> : null}
         {!result ? (
           <div className="muted">Upload a PDF and paste a job description to see your ATS score.</div>
         ) : (
@@ -410,10 +454,28 @@ export default function CheckerPage() {
           ) : (
             <div className="table">
               {history.map((h) => (
-                <div key={h.id} className="tableRow">
-                  <div className="tableCell">{formatDate(h.createdAt)}</div>
-                  <div className="tableCell" style={{ textAlign: 'right' }}>
-                    <span className="pill">{h.score}</span>
+                <div key={h.id} className="tableRow tableRowScanHistory">
+                  <div className="tableCell" style={{ minWidth: 0 }}>
+                    <span className="muted" style={{ fontSize: 12 }}>{formatDate(h.createdAt)}</span>
+                  </div>
+                  <div className="tableCell tableCellScore" style={{ justifyContent: 'flex-end' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                      <span className="muted" style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                        Overall score:
+                      </span>
+                      <span className="pill">{h.score}</span>
+                    </div>
+                  </div>
+                  <div className="tableCell tableCellActions" style={{ justifyContent: 'flex-end' }}>
+                    <button
+                      type="button"
+                      className="btn secondary"
+                      style={{ whiteSpace: 'nowrap' }}
+                      disabled={historyLoadingId !== null}
+                      onClick={() => loadScanFromHistory(h)}
+                    >
+                      {historyLoadingId === h.id ? 'Loading…' : 'View feedback'}
+                    </button>
                   </div>
                 </div>
               ))}

@@ -1,6 +1,10 @@
 import { Router, type Request, type Response } from 'express'
 import { GoogleGenAI } from '@google/genai'
 
+import { requireAuth } from '../middleware/auth.js'
+import { User } from '../models/User.js'
+import { isStrategyBankAllowedForFreePlan } from '../utils/planLimits.js'
+
 async function getStrategyResponse(bank: string): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
@@ -57,7 +61,7 @@ async function getStrategyResponse(bank: string): Promise<string> {
 
 export const strategyRouter = Router()
 
-strategyRouter.post('/', async (req: Request, res: Response) => {
+strategyRouter.post('/', requireAuth, async (req: Request, res: Response) => {
   const { bank } = req.body as { bank?: string }
 
   if (typeof bank !== 'string' || !bank.trim()) {
@@ -65,6 +69,22 @@ strategyRouter.post('/', async (req: Request, res: Response) => {
     return
   }
 
-  const response = await getStrategyResponse(bank.trim())
+  const trimmed = bank.trim()
+  const user = await User.findById(req.userId).select({ plan: 1 })
+  if (!user) {
+    res.status(401).json({ error: 'Unauthorized' })
+    return
+  }
+  if (user.plan !== 'paid' && !isStrategyBankAllowedForFreePlan(trimmed)) {
+    res.status(403).json({
+      error: 'free_plan_limit',
+      code: 'strategy',
+      message:
+        'Sample strategy templates are included on the free tier. Upgrade to Accelerator for every firm, the ATS checker, resume creator, and unlimited boardroom simulations.',
+    })
+    return
+  }
+
+  const response = await getStrategyResponse(trimmed)
   res.json({ response })
 })

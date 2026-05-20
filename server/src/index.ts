@@ -19,6 +19,14 @@ import helmet from 'helmet'
 import { Server } from 'socket.io'
 
 import { connectToDatabase } from './db.js'
+import {
+  boardroomLimiter,
+  contactPostLimiter,
+  referralWriteLimiter,
+  requestWriteLimiter,
+  scanPostLimiter,
+  strategyPostLimiter,
+} from './middleware/rateLimits.js'
 import { authRouter } from './routes/auth.js'
 import { scanRouter } from './routes/scan.js'
 import { profileRouter } from './routes/profile.js'
@@ -61,12 +69,20 @@ if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET is not set')
 }
 
-const allowedOrigins = String(process.env.CLIENT_ORIGIN ?? '')
+const envClientOrigins = String(process.env.CLIENT_ORIGIN ?? '')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean)
 
 const isProd = String(process.env.NODE_ENV ?? '').toLowerCase() === 'production'
+
+/** Local Vite dev server; always allowed when not in production so CORS works even if CLIENT_ORIGIN is prod-only. */
+const defaultDevOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000']
+
+const allowedOrigins = isProd
+  ? envClientOrigins
+  : [...new Set([...defaultDevOrigins, ...envClientOrigins])]
+
 if (isProd && allowedOrigins.length === 0) {
   console.warn('WARNING: CLIENT_ORIGIN not set in production. CORS will allow all origins. Set CLIENT_ORIGIN in Render Environment for security.')
 }
@@ -98,16 +114,16 @@ app.get('/api/health', (_req: Request, res: Response) => {
 })
 
 app.use('/api/auth', authRouter)
-app.use('/api/scan', scanRouter)
+app.use('/api/scan', scanPostLimiter, scanRouter)
 app.use('/api/profile', profileRouter)
-app.use('/api/referrals', referralsRouter)
-app.use('/api/requests', requestsRouter)
+app.use('/api/referrals', referralWriteLimiter, referralsRouter)
+app.use('/api/requests', requestWriteLimiter, requestsRouter)
 app.use('/api/connections', connectionsRouter)
 app.use('/api/chat', chatRouter)
 app.use('/api/notifications', notificationsRouter)
-app.use('/api/boardroom', boardroomRouter)
-app.use('/api/strategy', strategyRouter)
-app.use('/api/contact', contactRouter)
+app.use('/api/boardroom', boardroomLimiter, boardroomRouter)
+app.use('/api/strategy', strategyPostLimiter, strategyRouter)
+app.use('/api/contact', contactPostLimiter, contactRouter)
 app.use('/api/blogs', blogsRouter)
 
 app.use('/api', (_req: Request, res: Response) => {

@@ -1,9 +1,65 @@
+import { apiCacheClear, apiCacheGet, apiCacheInvalidatePrefix, apiCacheSet } from './lib/apiCache'
+import { consumeClientRateLimit } from './lib/clientRateLimit'
+import { FREE_BOARDROOM_AI_MESSAGES } from './lib/planLimits'
+import {
+  assertMongoId,
+  normalizeBlogCreatePayload,
+  normalizeBlogUpdatePayload,
+  normalizeBoardroomPayload,
+  normalizeConnectionRequestPayload,
+  normalizeContactPayload,
+  normalizeListBlogsQuery,
+  normalizeListNotificationsQuery,
+  normalizeListReferralsQuery,
+  normalizeChatMessageLimit,
+  normalizeLoginPayload,
+  normalizeProfileUpdatePayload,
+  normalizeRecommendText,
+  normalizeReferralCreatePayload,
+  normalizeRegisterPayload,
+  normalizeScanPayload,
+  normalizeStrategyBank,
+} from './lib/clientInput'
+
 const PROD_FALLBACK_BASE = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5000'
 
 export const API_BASE =
   import.meta.env.VITE_API_BASE ?? (import.meta.env.DEV ? 'http://localhost:5000' : PROD_FALLBACK_BASE)
 
-export type AuthUser = { id: string; name: string; email: string; isAdmin?: boolean; canCreateReferral?: boolean }
+export type AccountPlan = 'free' | 'paid'
+
+export type AuthUser = {
+  id: string
+  name: string
+  email: string
+  isAdmin?: boolean
+  canCreateReferral?: boolean
+  plan: AccountPlan
+  /** Free plan: messages left; paid: null (unlimited). Omitted on older API responses. */
+  boardroomRemaining?: number | null
+}
+
+/** Ensures plan is always free or paid (defaults to free for older API responses). */
+export function normalizeAuthUser(
+  user: Pick<AuthUser, 'id' | 'name' | 'email'> & Partial<Omit<AuthUser, 'id' | 'name' | 'email'>>,
+): AuthUser {
+  const plan: AccountPlan = user.plan === 'paid' ? 'paid' : 'free'
+  const boardroomRemaining =
+    plan === 'paid'
+      ? null
+      : typeof user.boardroomRemaining === 'number'
+        ? user.boardroomRemaining
+        : FREE_BOARDROOM_AI_MESSAGES
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    isAdmin: user.isAdmin,
+    canCreateReferral: user.canCreateReferral,
+    plan,
+    boardroomRemaining,
+  }
+}
 
 export function getToken(): string | null {
   return localStorage.getItem('token')
@@ -12,6 +68,48 @@ export function getToken(): string | null {
 export function setToken(token: string | null) {
   if (!token) localStorage.removeItem('token')
   else localStorage.setItem('token', token)
+}
+
+/** Bump when cache key shape changes */
+const API_CACHE_VERSION = '1'
+
+function cacheKeyGet(path: string, token: string | null) {
+  return `${API_CACHE_VERSION}:GET:${path}:${token ?? 'anon'}`
+}
+
+/** Call after logout / user switch so cached GETs are not reused across accounts */
+export function clearApiCaches() {
+  apiCacheClear()
+}
+
+export function invalidateNotificationsCaches() {
+  apiCacheInvalidatePrefix(`${API_CACHE_VERSION}:GET:/api/notifications`)
+}
+
+function invalidateScanCaches() {
+  apiCacheInvalidatePrefix(`${API_CACHE_VERSION}:GET:/api/scan`)
+}
+
+function invalidateReferralCaches() {
+  apiCacheInvalidatePrefix(`${API_CACHE_VERSION}:GET:/api/referrals`)
+}
+
+function invalidateRequestCaches() {
+  apiCacheInvalidatePrefix(`${API_CACHE_VERSION}:GET:/api/requests/`)
+}
+
+function invalidateConnectionsCaches() {
+  apiCacheInvalidatePrefix(`${API_CACHE_VERSION}:GET:/api/connections`)
+}
+
+/** Auth /me cache (plan, boardroom remaining, etc.) */
+export function invalidateAuthMeCache() {
+  apiCacheInvalidatePrefix(`${API_CACHE_VERSION}:GET:/api/auth/me`)
+}
+
+/** After connection accept/reject, public profile "connected" flags and lists can change */
+function invalidateProfileRelatedCaches() {
+  apiCacheInvalidatePrefix(`${API_CACHE_VERSION}:GET:/api/profile/`)
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -29,7 +127,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const data = contentType.includes('application/json') ? await res.json() : await res.text()
 
   if (!res.ok) {
-    const message = typeof data === 'object' && data && 'error' in data ? String((data as any).error) : 'Request failed'
+    const message =
+      typeof data === 'object' && data && 'message' in data && typeof (data as { message?: unknown }).message === 'string'
+        ? String((data as { message: string }).message)
+        : typeof data === 'object' && data && 'error' in data
+          ? String((data as { error: unknown }).error)
+          : 'Request failed'
     throw new Error(message)
   }
 
@@ -37,30 +140,43 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export async function register(payload: { name: string; email: string; password: string; passwordConfirm: string }): Promise<{ token: string; user: AuthUser }> {
-  return request('/api/auth/register', {
+  const body = normalizeRegisterPayload(payload)
+  const data = await request<{ token: string; user: AuthUser }>('/api/auth/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   })
+  return { token: data.token, user: normalizeAuthUser(data.user) }
 }
 
 export async function login(payload: { email: string; password: string }): Promise<{ token: string; user: AuthUser }> {
-  return request('/api/auth/login', {
+  const body = normalizeLoginPayload(payload)
+  const data = await request<{ token: string; user: AuthUser }>('/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   })
+  return { token: data.token, user: normalizeAuthUser(data.user) }
 }
 
 export async function me(): Promise<{ user: AuthUser }> {
-  return request('/api/auth/me')
+  const token = getToken()
+  const key = cacheKeyGet('/api/auth/me', token)
+  const hit = apiCacheGet<{ user: AuthUser }>(key)
+  if (hit) return { user: normalizeAuthUser(hit.user) }
+  const data = await request<{ user: AuthUser }>('/api/auth/me')
+  const normalized = { user: normalizeAuthUser(data.user) }
+  apiCacheSet(key, normalized, null)
+  return normalized
 }
 
 export async function submitContact(payload: { name: string; email: string; message: string }): Promise<{ ok: true }> {
+  consumeClientRateLimit('contact:guest', 8, 60 * 60 * 1000)
+  const body = normalizeContactPayload(payload)
   return request('/api/contact', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   })
 }
 
@@ -96,20 +212,47 @@ export type ScanResult = {
 }
 
 export async function scanResume(payload: { resume: File; jobDescription: string }): Promise<ScanResult> {
+  consumeClientRateLimit(`scan:${getToken() ?? 'guest'}`, 12, 15 * 60 * 1000)
+  const { resume, jobDescription } = normalizeScanPayload(payload)
   const form = new FormData()
-  form.append('resume', payload.resume)
-  form.append('jobDescription', payload.jobDescription)
+  form.append('resume', resume)
+  form.append('jobDescription', jobDescription)
 
-  return request('/api/scan', {
+  const data = await request<ScanResult>('/api/scan', {
     method: 'POST',
     body: form,
   })
+  invalidateScanCaches()
+  return data
 }
 
 export type ScanHistoryItem = { id: string; score: number; createdAt: string }
 
-export async function scanHistory(): Promise<{ scans: ScanHistoryItem[] }> {
-  return request('/api/scan/history')
+export async function scanHistory(options?: { force?: boolean }): Promise<{ scans: ScanHistoryItem[] }> {
+  const token = getToken()
+  const path = '/api/scan/history'
+  const key = cacheKeyGet(path, token)
+  if (!options?.force) {
+    const hit = apiCacheGet<{ scans: ScanHistoryItem[] }>(key)
+    if (hit) return hit
+  }
+  const data = await request<{ scans: ScanHistoryItem[] }>(path)
+  apiCacheSet(key, data, null)
+  return data
+}
+
+export async function scanById(id: string, options?: { force?: boolean }): Promise<ScanResult> {
+  assertMongoId(id, 'scan id')
+  const path = `/api/scan/history/${encodeURIComponent(id)}`
+  const token = getToken()
+  const key = cacheKeyGet(path, token)
+  if (!options?.force) {
+    const hit = apiCacheGet<ScanResult>(key)
+    if (hit) return hit
+  }
+  const data = await request<ScanResult>(path)
+  apiCacheSet(key, data, null)
+  return data
 }
 
 export type ReferralPost = {
@@ -127,10 +270,14 @@ export type ReferralPost = {
   createdAt: string
 }
 
-export async function listReferrals(payload?: { q?: string; tag?: string; limit?: number }): Promise<{ posts: ReferralPost[] }> {
-  const q = payload?.q ? encodeURIComponent(payload.q) : ''
-  const tag = payload?.tag ? encodeURIComponent(payload.tag) : ''
-  const limit = payload?.limit ? encodeURIComponent(String(payload.limit)) : ''
+export async function listReferrals(
+  payload?: { q?: string; tag?: string; limit?: number },
+  options?: { force?: boolean },
+): Promise<{ posts: ReferralPost[] }> {
+  const p = normalizeListReferralsQuery(payload)
+  const q = p.q ? encodeURIComponent(p.q) : ''
+  const tag = p.tag ? encodeURIComponent(p.tag) : ''
+  const limit = p.limit !== undefined ? encodeURIComponent(String(p.limit)) : ''
 
   const params = [
     q ? `q=${q}` : null,
@@ -140,7 +287,16 @@ export async function listReferrals(payload?: { q?: string; tag?: string; limit?
     .filter(Boolean)
     .join('&')
 
-  return request(`/api/referrals${params ? `?${params}` : ''}`)
+  const path = `/api/referrals${params ? `?${params}` : ''}`
+  const token = getToken()
+  const key = cacheKeyGet(path, token)
+  if (!options?.force) {
+    const hit = apiCacheGet<{ posts: ReferralPost[] }>(key)
+    if (hit) return hit
+  }
+  const data = await request<{ posts: ReferralPost[] }>(path)
+  apiCacheSet(key, data, null)
+  return data
 }
 
 export async function createReferralPost(payload: {
@@ -153,15 +309,29 @@ export async function createReferralPost(payload: {
   tags?: string[]
   questions?: string[]
 }): Promise<{ id: string }> {
-  return request('/api/referrals', {
+  consumeClientRateLimit(`referral-create:${getToken() ?? 'guest'}`, 28, 60 * 60 * 1000)
+  const body = normalizeReferralCreatePayload(payload)
+  const result = await request<{ id: string }>('/api/referrals', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   })
+  invalidateReferralCaches()
+  return result
 }
 
-export async function getReferralPost(id: string): Promise<{ post: ReferralPost }> {
-  return request(`/api/referrals/${encodeURIComponent(id)}`)
+export async function getReferralPost(id: string, options?: { force?: boolean }): Promise<{ post: ReferralPost }> {
+  assertMongoId(id)
+  const path = `/api/referrals/${encodeURIComponent(id)}`
+  const token = getToken()
+  const key = cacheKeyGet(path, token)
+  if (!options?.force) {
+    const hit = apiCacheGet<{ post: ReferralPost }>(key)
+    if (hit) return hit
+  }
+  const data = await request<{ post: ReferralPost }>(path)
+  apiCacheSet(key, data, null)
+  return data
 }
 
 export type Recommendation = {
@@ -207,8 +377,16 @@ export type ProfilePublic =
       connected: boolean
     }
 
-export async function getMyProfile(): Promise<{ profile: Profile }> {
-  return request('/api/profile/me')
+export async function getMyProfile(options?: { force?: boolean }): Promise<{ profile: Profile }> {
+  const token = getToken()
+  const key = cacheKeyGet('/api/profile/me', token)
+  if (!options?.force) {
+    const hit = apiCacheGet<{ profile: Profile }>(key)
+    if (hit) return hit
+  }
+  const data = await request<{ profile: Profile }>('/api/profile/me')
+  apiCacheSet(key, data, null)
+  return data
 }
 
 export async function updateMyProfile(payload: {
@@ -223,23 +401,42 @@ export async function updateMyProfile(payload: {
   contact?: { email?: string; phone?: string; linkedIn?: string }
   visibility?: { showEmail?: boolean; showPhone?: boolean; showLinkedIn?: boolean }
 }): Promise<{ ok: true }> {
-  return request('/api/profile/me', {
+  const body = normalizeProfileUpdatePayload(payload)
+  const result = await request<{ ok: true }>('/api/profile/me', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   })
+  invalidateProfileRelatedCaches()
+  invalidateConnectionsCaches()
+  return result
 }
 
-export async function getProfile(userId: string): Promise<{ profile: ProfilePublic }> {
-  return request(`/api/profile/${encodeURIComponent(userId)}`)
+export async function getProfile(userId: string, options?: { force?: boolean }): Promise<{ profile: ProfilePublic }> {
+  assertMongoId(userId, 'user id')
+  const path = `/api/profile/${encodeURIComponent(userId)}`
+  const token = getToken()
+  const key = cacheKeyGet(path, token)
+  if (!options?.force) {
+    const hit = apiCacheGet<{ profile: ProfilePublic }>(key)
+    if (hit) return hit
+  }
+  const data = await request<{ profile: ProfilePublic }>(path)
+  apiCacheSet(key, data, null)
+  return data
 }
 
 export async function recommendUser(userId: string, text: string): Promise<{ ok: true }> {
-  return request(`/api/profile/${encodeURIComponent(userId)}/recommend`, {
+  assertMongoId(userId, 'user id')
+  consumeClientRateLimit(`recommend:${getToken() ?? 'guest'}`, 35, 60 * 60 * 1000)
+  const cleaned = normalizeRecommendText(text)
+  const result = await request<{ ok: true }>(`/api/profile/${encodeURIComponent(userId)}/recommend`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text }),
+    body: JSON.stringify({ text: cleaned }),
   })
+  apiCacheInvalidatePrefix(`${API_CACHE_VERSION}:GET:/api/profile/${encodeURIComponent(userId)}`)
+  return result
 }
 
 export type ConnectionRequest = {
@@ -254,12 +451,30 @@ export type ConnectionRequest = {
   createdAt: string
 }
 
-export async function listIncomingRequests(): Promise<{ requests: ConnectionRequest[] }> {
-  return request('/api/requests/incoming')
+export async function listIncomingRequests(options?: { force?: boolean }): Promise<{ requests: ConnectionRequest[] }> {
+  const token = getToken()
+  const path = '/api/requests/incoming'
+  const key = cacheKeyGet(path, token)
+  if (!options?.force) {
+    const hit = apiCacheGet<{ requests: ConnectionRequest[] }>(key)
+    if (hit) return hit
+  }
+  const data = await request<{ requests: ConnectionRequest[] }>(path)
+  apiCacheSet(key, data, null)
+  return data
 }
 
-export async function listOutgoingRequests(): Promise<{ requests: ConnectionRequest[] }> {
-  return request('/api/requests/outgoing')
+export async function listOutgoingRequests(options?: { force?: boolean }): Promise<{ requests: ConnectionRequest[] }> {
+  const token = getToken()
+  const path = '/api/requests/outgoing'
+  const key = cacheKeyGet(path, token)
+  if (!options?.force) {
+    const hit = apiCacheGet<{ requests: ConnectionRequest[] }>(key)
+    if (hit) return hit
+  }
+  const data = await request<{ requests: ConnectionRequest[] }>(path)
+  apiCacheSet(key, data, null)
+  return data
 }
 
 export async function createConnectionRequest(payload: {
@@ -267,19 +482,38 @@ export async function createConnectionRequest(payload: {
   toUserId?: string
   questionAnswers: { question: string; answer: string }[]
 }): Promise<{ id: string }> {
-  return request('/api/requests', {
+  consumeClientRateLimit(`conn-req:${getToken() ?? 'guest'}`, 50, 60 * 60 * 1000)
+  const body = normalizeConnectionRequestPayload(payload)
+  if (!body.postId && !body.toUserId) {
+    throw new Error('toUserId or postId is required')
+  }
+  const result = await request<{ id: string }>('/api/requests', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      postId: body.postId ?? '',
+      toUserId: body.toUserId ?? '',
+      questionAnswers: body.questionAnswers,
+    }),
   })
+  invalidateRequestCaches()
+  return result
 }
 
 export async function acceptRequest(id: string): Promise<{ ok: true }> {
-  return request(`/api/requests/${encodeURIComponent(id)}/accept`, { method: 'POST' })
+  assertMongoId(id, 'request id')
+  const result = await request<{ ok: true }>(`/api/requests/${encodeURIComponent(id)}/accept`, { method: 'POST' })
+  invalidateRequestCaches()
+  invalidateConnectionsCaches()
+  invalidateProfileRelatedCaches()
+  return result
 }
 
 export async function rejectRequest(id: string): Promise<{ ok: true }> {
-  return request(`/api/requests/${encodeURIComponent(id)}/reject`, { method: 'POST' })
+  assertMongoId(id, 'request id')
+  const result = await request<{ ok: true }>(`/api/requests/${encodeURIComponent(id)}/reject`, { method: 'POST' })
+  invalidateRequestCaches()
+  return result
 }
 
 export type ConnectionListItem = {
@@ -288,12 +522,34 @@ export type ConnectionListItem = {
   createdAt: string
 }
 
-export async function listConnections(): Promise<{ connections: ConnectionListItem[] }> {
-  return request('/api/connections')
+export async function listConnections(options?: { force?: boolean }): Promise<{ connections: ConnectionListItem[] }> {
+  const token = getToken()
+  const path = '/api/connections'
+  const key = cacheKeyGet(path, token)
+  if (!options?.force) {
+    const hit = apiCacheGet<{ connections: ConnectionListItem[] }>(key)
+    if (hit) return hit
+  }
+  const data = await request<{ connections: ConnectionListItem[] }>(path)
+  apiCacheSet(key, data, null)
+  return data
 }
 
-export async function getConnectionProfile(connectionId: string): Promise<{ profile: ProfilePublic }> {
-  return request(`/api/connections/${encodeURIComponent(connectionId)}/profile`)
+export async function getConnectionProfile(
+  connectionId: string,
+  options?: { force?: boolean },
+): Promise<{ profile: ProfilePublic }> {
+  assertMongoId(connectionId, 'connection id')
+  const path = `/api/connections/${encodeURIComponent(connectionId)}/profile`
+  const token = getToken()
+  const key = cacheKeyGet(path, token)
+  if (!options?.force) {
+    const hit = apiCacheGet<{ profile: ProfilePublic }>(key)
+    if (hit) return hit
+  }
+  const data = await request<{ profile: ProfilePublic }>(path)
+  apiCacheSet(key, data, null)
+  return data
 }
 
 export type ChatMessage = {
@@ -305,7 +561,9 @@ export type ChatMessage = {
 }
 
 export async function listChatMessages(connectionId: string, limit = 50): Promise<{ messages: ChatMessage[] }> {
-  return request(`/api/chat/${encodeURIComponent(connectionId)}/messages?limit=${encodeURIComponent(String(limit))}`)
+  assertMongoId(connectionId, 'connection id')
+  const safeLimit = normalizeChatMessageLimit(limit)
+  return request(`/api/chat/${encodeURIComponent(connectionId)}/messages?limit=${encodeURIComponent(String(safeLimit))}`)
 }
 
 export type NotificationItem = {
@@ -319,13 +577,24 @@ export type NotificationItem = {
   createdAt: string
 }
 
-export async function listNotifications(payload?: {
-  unreadOnly?: boolean
-  limit?: number
-}): Promise<{ notifications: NotificationItem[] }> {
-  const unreadOnly = payload?.unreadOnly ? 'true' : 'false'
-  const limit = payload?.limit ? encodeURIComponent(String(payload.limit)) : '30'
-  return request(`/api/notifications?unreadOnly=${unreadOnly}&limit=${limit}`)
+export async function listNotifications(
+  payload?: {
+    unreadOnly?: boolean
+    limit?: number
+  },
+  options?: { force?: boolean },
+): Promise<{ notifications: NotificationItem[] }> {
+  const p = normalizeListNotificationsQuery(payload)
+  const path = `/api/notifications?unreadOnly=${p.unreadOnly ? 'true' : 'false'}&limit=${encodeURIComponent(String(p.limit))}`
+  const token = getToken()
+  const key = cacheKeyGet(path, token)
+  if (!options?.force) {
+    const hit = apiCacheGet<{ notifications: NotificationItem[] }>(key)
+    if (hit) return hit
+  }
+  const data = await request<{ notifications: NotificationItem[] }>(path)
+  apiCacheSet(key, data, null)
+  return data
 }
 
 export async function getUnreadNotificationCount(): Promise<{ count: number }> {
@@ -333,29 +602,42 @@ export async function getUnreadNotificationCount(): Promise<{ count: number }> {
 }
 
 export async function markNotificationRead(id: string): Promise<{ ok: true }> {
-  return request(`/api/notifications/${encodeURIComponent(id)}/read`, { method: 'POST' })
+  assertMongoId(id, 'notification id')
+  const result = await request<{ ok: true }>(`/api/notifications/${encodeURIComponent(id)}/read`, { method: 'POST' })
+  invalidateNotificationsCaches()
+  return result
 }
 
 export async function markAllNotificationsRead(): Promise<{ ok: true }> {
-  return request('/api/notifications/read-all', { method: 'POST' })
+  const result = await request<{ ok: true }>('/api/notifications/read-all', { method: 'POST' })
+  invalidateNotificationsCaches()
+  return result
 }
 
 export async function boardroomChat(payload: {
   userMessage: string
   history: { role: string; text: string }[]
-}): Promise<{ response: string }> {
-  return request('/api/boardroom', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  })
+}): Promise<{ response: string; boardroomRemaining?: number | null }> {
+  consumeClientRateLimit(`boardroom:${getToken() ?? 'guest'}`, 42, 60 * 1000)
+  const body = normalizeBoardroomPayload(payload)
+  try {
+    return await request<{ response: string; boardroomRemaining?: number | null }>('/api/boardroom', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+  } finally {
+    invalidateAuthMeCache()
+  }
 }
 
 export async function fetchStrategy(bank: string): Promise<{ response: string }> {
+  consumeClientRateLimit(`strategy:${getToken() ?? 'guest'}`, 36, 15 * 60 * 1000)
+  const cleaned = normalizeStrategyBank(bank)
   return request('/api/strategy', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ bank }),
+    body: JSON.stringify({ bank: cleaned }),
   })
 }
 
@@ -377,18 +659,24 @@ export type BlogPostDetail = BlogPostListItem & {
 }
 
 export async function listBlogs(params?: { q?: string; limit?: number }): Promise<{ posts: BlogPostListItem[] }> {
+  const p = normalizeListBlogsQuery(params)
   const qs = new URLSearchParams()
-  if (params?.q) qs.set('q', params.q)
-  if (params?.limit) qs.set('limit', String(params.limit))
+  if (p.q) qs.set('q', p.q)
+  if (p.limit !== undefined) qs.set('limit', String(p.limit))
   const suffix = qs.toString() ? `?${qs}` : ''
   return request(`/api/blogs${suffix}`)
 }
 
 export async function getBlogBySlug(slug: string): Promise<{ post: BlogPostDetail }> {
-  return request(`/api/blogs/by-slug/${encodeURIComponent(slug)}`)
+  const s = String(slug ?? '').trim().slice(0, 300)
+  if (!s) {
+    throw new Error('Invalid slug')
+  }
+  return request(`/api/blogs/by-slug/${encodeURIComponent(s)}`)
 }
 
 export async function getBlogPost(id: string): Promise<{ post: BlogPostDetail & { status?: string } }> {
+  assertMongoId(id, 'post id')
   return request(`/api/blogs/${encodeURIComponent(id)}`)
 }
 
@@ -401,10 +689,11 @@ export async function createBlogPost(payload: {
   mediaUrls?: string[]
   status?: 'draft' | 'published'
 }): Promise<{ id: string; slug: string }> {
+  const body = normalizeBlogCreatePayload(payload)
   return request('/api/blogs', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   })
 }
 
@@ -417,9 +706,11 @@ export async function updateBlogPost(id: string, payload: {
   mediaUrls?: string[]
   status?: 'draft' | 'published'
 }): Promise<{ id: string; slug: string }> {
+  assertMongoId(id, 'post id')
+  const body = normalizeBlogUpdatePayload(payload)
   return request(`/api/blogs/${encodeURIComponent(id)}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   })
 }

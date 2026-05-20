@@ -1,15 +1,19 @@
 import { Router, type Request, type Response } from 'express'
 import { optionalAuth } from '../middleware/optionalAuth.js'
+import { sanitizePlainTextMultiline } from '../utils/sanitize.js'
+import { FREE_BOARDROOM_AI_MESSAGES } from '../utils/planLimits.js'
+import {
+  boardroomClientKey,
+  markBoardroomFreeExhaustedForNetwork,
+  tryConsumeGuestBoardroomSlot,
+} from '../utils/boardroomLedger.js'
+import { User } from '../models/User.js'
 import { GoogleGenAI } from '@google/genai'
 
-const MESSAGE_LIMIT_GUEST = 3
-const guestUsage = new Map<string, number>()
-
-function getClientId(req: Request): string {
-  const forwarded = req.headers['x-forwarded-for']
-  const ip = typeof forwarded === 'string' ? forwarded.split(',')[0].trim() : req.socket.remoteAddress ?? 'unknown'
-  return ip
-}
+const MESSAGE_LIMIT_GUEST = FREE_BOARDROOM_AI_MESSAGES
+const BOARDROOM_MESSAGE_MAX = 12_000
+const BOARDROOM_HISTORY_MAX_TURNS = 40
+const BOARDROOM_HISTORY_TEXT_MAX = 32_000
 
 async function getMDResponse(userMessage: string, history: { role: string; text: string }[]): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY
@@ -73,25 +77,94 @@ boardroomRouter.post('/', optionalAuth, async (req: Request, res: Response) => {
 
   console.log('[Boardroom] Request received, hasKey:', Boolean(process.env.GEMINI_API_KEY), 'userId:', req.userId ?? 'guest')
 
-  if (typeof userMessage !== 'string' || !userMessage.trim() || !Array.isArray(history)) {
+  if (typeof userMessage !== 'string' || !Array.isArray(history)) {
     res.status(400).json({ error: 'Invalid request: userMessage and history required' })
     return
   }
 
+  const cleanedMessage = sanitizePlainTextMultiline(userMessage, BOARDROOM_MESSAGE_MAX)
+  if (!cleanedMessage) {
+    res.status(400).json({ error: 'Invalid request: userMessage and history required' })
+    return
+  }
+
+  const cleanedHistory = history
+    .slice(-BOARDROOM_HISTORY_MAX_TURNS)
+    .map((h: { role?: string; text?: string }) => {
+      const roleRaw = String(h?.role ?? '').trim()
+      const role = roleRaw === 'user' ? 'user' : 'model'
+      const text = sanitizePlainTextMultiline(String(h?.text ?? ''), BOARDROOM_HISTORY_TEXT_MAX)
+      return { role, text }
+    })
+    .filter((h: { text: string }) => h.text.length > 0)
+
   const isGuest = !req.userId
+  let boardroomRemaining: number | null | undefined
+  let authenticatedUserId: string | undefined
+  const networkKey = boardroomClientKey(req)
+
   if (isGuest) {
-    const clientId = getClientId(req)
-    const count = guestUsage.get(clientId) ?? 0
-    if (count >= MESSAGE_LIMIT_GUEST) {
+    const guestResult = await tryConsumeGuestBoardroomSlot(networkKey)
+    if (guestResult === 'guest_limit') {
       res.status(429).json({
-        error: 'limit_reached',
-        message: `You've used your ${MESSAGE_LIMIT_GUEST} free messages. Log in for unlimited access.`,
+        error: 'free_plan_limit',
+        code: 'boardroom',
+        message: `You've used your ${MESSAGE_LIMIT_GUEST} trial messages. Create a free account for ${FREE_BOARDROOM_AI_MESSAGES} more boardroom messages and sample strategies, or upgrade to Accelerator for unlimited simulations, the ATS checker, and resume creator.`,
       })
       return
     }
-    guestUsage.set(clientId, count + 1)
+    if (guestResult === 'blocked_after_free') {
+      res.status(429).json({
+        error: 'free_plan_limit',
+        code: 'boardroom',
+        message: `Guest trials aren't available from this network after a free account has used all boardroom messages. Sign in with that account, use another network, or upgrade to Accelerator for unlimited boardroom access.`,
+      })
+      return
+    }
+  } else {
+    const userId = req.userId
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' })
+      return
+    }
+    authenticatedUserId = userId
+    const account = await User.findById(userId).select({ plan: 1, boardroomMessagesUsed: 1 })
+    if (!account) {
+      res.status(401).json({ error: 'Unauthorized' })
+      return
+    }
+    if (account.plan !== 'paid') {
+      const reserved = await User.findOneAndUpdate(
+        {
+          _id: userId,
+          plan: 'free',
+          boardroomMessagesUsed: { $lt: FREE_BOARDROOM_AI_MESSAGES },
+        },
+        { $inc: { boardroomMessagesUsed: 1 } },
+        { new: true },
+      )
+      if (!reserved) {
+        await markBoardroomFreeExhaustedForNetwork(networkKey, userId)
+        res.status(429).json({
+          error: 'free_plan_limit',
+          code: 'boardroom',
+          message: `Free plan includes ${FREE_BOARDROOM_AI_MESSAGES} AI boardroom messages. Upgrade to Accelerator for unlimited simulations plus the ATS checker, resume creator, and all strategy firms.`,
+        })
+        return
+      }
+      boardroomRemaining = Math.max(0, FREE_BOARDROOM_AI_MESSAGES - (reserved.boardroomMessagesUsed ?? 0))
+    } else {
+      boardroomRemaining = null
+    }
   }
 
-  const response = await getMDResponse(userMessage.trim(), history)
-  res.json({ response })
+  const response = await getMDResponse(cleanedMessage, cleanedHistory)
+  if (!isGuest && boardroomRemaining !== null && boardroomRemaining === 0 && authenticatedUserId) {
+    await markBoardroomFreeExhaustedForNetwork(networkKey, authenticatedUserId)
+  }
+  const payload: { response: string; boardroomRemaining?: number | null } = { response }
+  if (!isGuest) {
+    payload.boardroomRemaining = boardroomRemaining
+  }
+  res.json(payload)
 })

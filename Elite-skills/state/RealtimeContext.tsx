@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
 
-import { API_BASE, getUnreadNotificationCount, type NotificationItem } from '../api'
+import { API_BASE, getUnreadNotificationCount, invalidateNotificationsCaches, type NotificationItem } from '../api'
 import { useAuth } from './AuthContext'
 
 type NotifyNewPayload = NotificationItem & { userId?: string }
@@ -60,14 +60,17 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
     setSocket(socket)
 
     socket.on('notify:new', (_payload: NotifyNewPayload) => {
+      invalidateNotificationsCaches()
       setUnreadCount((c) => c + 1)
     })
 
     socket.on('notify:read', () => {
+      invalidateNotificationsCaches()
       refreshUnreadCount()
     })
 
     socket.on('notify:read-all', () => {
+      invalidateNotificationsCaches()
       setUnreadCount(0)
     })
 

@@ -25,7 +25,7 @@ function Icon({ children }: { children: React.ReactNode }) {
 }
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
   const { unreadCount } = useRealtime()
   const location = useLocation()
 
@@ -166,22 +166,21 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <LandingNavbar />
       <div className="appShell appShellWithNav">
         <aside className="sidebar">
-          <div className="sidebarTop">
-            <Link className="sidebarBrand" to="/checker" title="Elite Skills">
-              ES
-            </Link>
-          </div>
-
           <nav className="sidebarNav">
             {items.map((it) => {
             const active = isActivePath(location.pathname, it.to)
+            const isAcceleratorOnly = it.to === '/checker' || it.to === '/resume-creator'
+            const hint =
+              isAcceleratorOnly && user?.plan !== 'paid'
+                ? `${it.label} — Accelerator (upgrade)`
+                : it.label
               return (
                 <div key={it.to} className="sidebarItemWrap">
                   <Link
                     to={it.to}
                     className={`sidebarItem ${active ? 'active' : ''}`}
-                    title={it.label}
-                    aria-label={it.label}
+                    title={hint}
+                    aria-label={hint}
                   >
                     {it.icon}
                   </Link>
