@@ -35,21 +35,21 @@ const LandingPage: React.FC = () => {
       <LandingNavbar />
 
       {/* Hero Section */}
-      <header id="top" className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+      <header id="top" className="relative overflow-hidden pt-28 pb-10 md:pt-32 md:pb-20 lg:pt-48 lg:pb-32">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-zinc-900/50 to-transparent opacity-50 -z-10"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center lg:text-left">
           <div className="lg:w-2/3">
-            <div className="inline-block px-4 py-1.5 mb-8 border border-elite-gold/30 rounded-full bg-elite-gold/5">
+            <div className="inline-block px-4 py-1.5 mb-6 border border-elite-gold/30 rounded-full bg-elite-gold/5 md:mb-8">
               <span className="text-[10px] uppercase tracking-[0.3em] text-elite-gold font-semibold">Targets: HEC, ESSEC, LBS, Bocconi, Oxford</span>
             </div>
-            <h1 className="text-5xl lg:text-8xl font-bold leading-tight mb-8">
+            <h1 className="text-5xl lg:text-8xl font-bold leading-tight mb-6 md:mb-8">
               Secure Your 2026 <br />
               <span className="text-gold-gradient font-serif italic">Investment Banking Offer</span>
             </h1>
-            <p className="text-xl text-elite-text-muted mb-12 font-light max-w-2xl leading-relaxed">
+            <p className="text-xl text-elite-text-muted mb-8 font-light max-w-2xl leading-relaxed md:mb-12">
               The definitive Elite Skills guide used by students at Europe's top business schools. Now featuring proprietary AI stress-testing and MD-level logic drills.
             </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center md:gap-6 lg:justify-start">
               {token ? (
                 <Link
                   to="/checker"
@@ -61,15 +61,21 @@ const LandingPage: React.FC = () => {
                 <>
                   <Link
                     to="/pricing"
-                    className="px-10 py-5 bg-elite-gold text-black font-bold text-lg rounded-sm hover:bg-white transition-all duration-300 shadow-[0_0_40px_rgba(212,175,55,0.2)] text-center"
+                    className="px-5 py-3.5 bg-elite-gold text-black font-bold text-sm rounded-sm hover:bg-white transition-all duration-300 shadow-[0_0_40px_rgba(212,175,55,0.2)] text-center md:px-10 md:py-5 md:text-lg"
                   >
-                    Accelerator Bundle — <span className="line-through opacity-70">€249</span> <span className="text-black font-extrabold">€99</span>
+                    Accelerator Bundle —{' '}
+                    <span className="inline-flex items-baseline gap-1 whitespace-nowrap tabular-nums">
+                      <span className="line-through opacity-70">€249</span>
+                      <span className="font-extrabold text-base md:text-lg">€99</span>
+                    </span>
                   </Link>
                   <button
+                    type="button"
                     onClick={() => scrollToSection('ai-demo')}
-                    className="px-10 py-5 border border-white/20 text-white font-medium text-lg rounded-sm hover:border-elite-gold hover:text-elite-gold transition-all duration-300 flex items-center gap-2"
+                    className="flex w-full items-center justify-center gap-2 rounded-sm border border-white/20 px-5 py-3.5 text-sm font-medium text-white transition-all duration-300 hover:border-elite-gold hover:text-elite-gold sm:w-auto md:px-10 md:py-5 md:text-lg"
                   >
-                    Try ✨ AI Simulation <ChevronRight className="w-5 h-5" />
+                    Try ✨ AI Simulation{' '}
+                    <ChevronRight className="h-4 w-4 shrink-0 md:h-5 md:w-5" aria-hidden />
                   </button>
                 </>
               )}
@@ -79,7 +85,7 @@ const LandingPage: React.FC = () => {
       </header>
 
       {/* Features Icons */}
-      <section className="py-12 bg-elite-black/50 border-y border-white/5">
+      <section className="py-8 bg-elite-black/50 border-y border-white/5 md:py-12">
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="flex items-center gap-4 text-elite-text-muted">
             <GraduationCap className="w-6 h-6 text-elite-gold opacity-50" />
@@ -101,65 +107,71 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Problem Section */}
-      <section id="problem" className="py-24 bg-elite-gray border-y border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+      <section id="problem" className="border-y border-white/5 bg-elite-gray py-10 md:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 items-start gap-8 md:gap-12 lg:grid-cols-2 lg:items-center lg:gap-20">
             <div>
-              <h2 className="text-4xl lg:text-5xl font-serif mb-8">The 0.5% Reality</h2>
-              <p className="text-lg text-elite-text-muted mb-8 leading-relaxed">
+              <h2 className="mb-4 font-serif text-4xl md:mb-8 lg:text-5xl">The 0.5% Reality</h2>
+              <p className="mb-4 text-lg leading-relaxed text-elite-text-muted md:mb-6 lg:mb-8">
                 The "January Window" is closing. Across London, Paris, and Frankfurt, over 10,000 top-tier applicants are competing for fewer than 50 spots at elite boutiques. Technical excellence is no longer a differentiator—it is the baseline requirement for entry.
               </p>
-              <div className="bg-black/60 p-8 border-l-2 border-elite-gold shadow-2xl">
-                <h4 className="text-elite-gold font-serif text-xl mb-4">Market Saturation</h4>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center text-sm">
+              <div className="border-l-2 border-elite-gold bg-black/60 p-4 shadow-2xl md:p-8">
+                <h4 className="mb-3 font-serif text-lg text-elite-gold md:mb-4 md:text-xl">Market Saturation</h4>
+                <div className="space-y-3 md:space-y-4">
+                  <div className="flex items-center justify-between text-xs md:text-sm">
                     <span className="text-gray-400">Total Applicants</span>
-                    <span className="text-white font-mono">10,000+</span>
+                    <span className="font-mono text-white">10,000+</span>
                   </div>
-                  <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-white/20 h-full w-full"></div>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+                    <div className="h-full w-full bg-white/20"></div>
                   </div>
-                  <div className="flex justify-between items-center text-sm">
+                  <div className="flex items-center justify-between text-xs md:text-sm">
                     <span className="text-gray-400">Offers Available</span>
-                    <span className="text-elite-gold font-bold font-mono">50</span>
+                    <span className="font-mono font-bold text-elite-gold">50</span>
                   </div>
-                  <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-elite-gold h-full w-[0.5%] shadow-[0_0_10px_#D4AF37]"></div>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+                    <div className="h-full w-[0.5%] bg-elite-gold shadow-[0_0_10px_#D4AF37]"></div>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="bento-card p-8 rounded-xl shadow-inner">
-               <h3 className="text-center text-xs uppercase tracking-[0.3em] text-elite-text-muted mb-6">Recruitment Funnel Metrics</h3>
-               <FunnelChart />
+            <div className="bento-card rounded-xl p-4 shadow-inner md:p-8">
+              <h3 className="mb-3 text-center text-[10px] uppercase tracking-[0.25em] text-elite-text-muted md:mb-6 md:text-xs md:tracking-[0.3em]">
+                Recruitment Funnel Metrics
+              </h3>
+              <FunnelChart />
             </div>
           </div>
         </div>
       </section>
 
       {/* AI Simulation Section */}
-      <section id="ai-demo" className="py-32 bg-elite-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-6xl font-serif mb-6">Master the Boardroom</h2>
-            <p className="text-xl text-elite-text-muted max-w-2xl mx-auto">Don't wait for your first Superday to fail. Stress-test your technical intuition against our Senior MD model.</p>
+      <section id="ai-demo" className="bg-elite-black py-10 md:py-32">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-6 text-center md:mb-16">
+            <h2 className="mb-3 font-serif text-4xl md:mb-6 lg:text-6xl">Master the Boardroom</h2>
+            <p className="mx-auto max-w-2xl text-lg text-elite-text-muted md:text-xl">
+              Don't wait for your first Superday to fail. Stress-test your technical intuition against our Senior MD model.
+            </p>
           </div>
           <AIChatSimulator />
         </div>
       </section>
 
       {/* Product Grid */}
-      <section id="accelerator" className="py-24 bg-elite-gray">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bento-card col-span-1 md:col-span-2 p-10 relative overflow-hidden group rounded-xl">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-elite-gold/5 blur-3xl -z-10 group-hover:bg-elite-gold/10 transition-colors"></div>
-              <h3 className="text-3xl font-serif text-white mb-4">The 2026 Elite Skills Guide</h3>
-              <p className="text-base text-elite-text-muted mb-10 leading-relaxed">
+      <section id="accelerator" className="bg-elite-gray py-10 md:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-8">
+            <div className="bento-card group relative col-span-1 overflow-hidden rounded-xl p-5 md:col-span-2 md:p-10">
+              <div className="absolute top-0 right-0 -z-10 h-32 w-32 bg-elite-gold/5 blur-3xl group-hover:bg-elite-gold/10 transition-colors"></div>
+              <h3 className="mb-3 font-serif text-2xl text-white md:mb-4 md:text-3xl">The 2026 Elite Skills Guide</h3>
+              <p className="mb-6 text-base leading-relaxed text-elite-text-muted md:mb-10">
                 100+ Advanced questions covering DCF, LBO accounting, and M&A math. Not just answers, but the *logic* preferred by elite firms like Centerview and PWP.
               </p>
-              <div className="bg-black/50 border border-white/10 rounded-lg p-10 flex flex-col justify-center items-center text-center">
-                <p className="text-xl font-medium text-white italic mb-4">"Explain how a $10M write-down affects the three financial statements."</p>
+              <div className="flex flex-col items-center justify-center rounded-lg border border-white/10 bg-black/50 p-5 text-center md:p-10">
+                <p className="mb-3 text-base font-medium italic text-white md:mb-4 md:text-xl">
+                  &quot;Explain how a $10M write-down affects the three financial statements.&quot;
+                </p>
                 <div className="h-0.5 w-12 bg-elite-gold/40"></div>
               </div>
             </div>
@@ -170,27 +182,27 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* ROI Section */}
-      <section id="roi" className="py-32 bg-elite-black">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-8 border border-elite-gold/20 rounded-full bg-elite-gold/5">
-             <Calculator className="w-3 h-3 text-elite-gold" />
-             <span className="text-[10px] uppercase tracking-widest text-elite-gold font-bold">Financial Analysis</span>
+      <section id="roi" className="bg-elite-black py-10 md:py-32">
+        <div className="mx-auto max-w-4xl px-4 text-center">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-elite-gold/20 bg-elite-gold/5 px-4 py-1.5 md:mb-8">
+             <Calculator className="h-3 w-3 text-elite-gold" />
+             <span className="text-[10px] font-bold uppercase tracking-widest text-elite-gold">Financial Analysis</span>
           </div>
-          <h2 className="text-4xl lg:text-5xl font-serif mb-12">The Investment Case</h2>
-          <div className="bg-elite-gray border border-white/10 p-6 sm:p-10 rounded-2xl shadow-2xl relative">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center text-left">
-              <div className="space-y-8">
+          <h2 className="mb-6 font-serif text-4xl md:mb-12 lg:text-5xl">The Investment Case</h2>
+          <div className="relative rounded-2xl border border-white/10 bg-elite-gray p-4 shadow-2xl sm:p-6 md:p-10">
+            <div className="grid grid-cols-1 items-center gap-6 text-left md:grid-cols-2 md:gap-12">
+              <div className="space-y-5 md:space-y-8">
                 <div>
-                  <label className="block text-[10px] uppercase tracking-[0.2em] text-elite-text-muted mb-3 font-bold">Investment Cost</label>
-                  <div className="text-5xl font-serif">
+                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-elite-text-muted md:mb-3">Investment Cost</label>
+                  <div className="font-serif text-4xl md:text-5xl">
                     <span className="line-through text-gray-500">€249</span>{' '}
-                    <span className="text-elite-gold font-bold">€99</span>
+                    <span className="font-bold text-elite-gold">€99</span>
                   </div>
                 </div>
                 <div>
-                  <div className="flex justify-between items-center mb-4">
-                    <label className="text-[10px] uppercase tracking-[0.2em] text-elite-text-muted font-bold">Target Salary (First Year)</label>
-                    <span className="text-elite-gold font-bold font-mono">€{salary.toLocaleString()}</span>
+                  <div className="mb-3 flex items-center justify-between md:mb-4">
+                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-elite-text-muted">Target Salary (First Year)</label>
+                    <span className="font-mono font-bold text-elite-gold">€{salary.toLocaleString()}</span>
                   </div>
                   <input 
                     type="range" 
@@ -199,58 +211,66 @@ const LandingPage: React.FC = () => {
                     value={salary} 
                     step="5000" 
                     onChange={(e) => setSalary(parseInt(e.target.value))}
-                    className="w-full accent-elite-gold h-1 bg-white/10 rounded-full appearance-none cursor-pointer" 
+                    className="h-1 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-elite-gold" 
                   />
-                  <div className="flex justify-between text-[10px] text-gray-600 mt-2 font-mono uppercase tracking-widest">
+                  <div className="mt-2 flex justify-between font-mono text-[10px] uppercase tracking-widest text-gray-600">
                     <span>60K</span>
                     <span>110K</span>
                     <span>160K</span>
                   </div>
                 </div>
               </div>
-              <div className="bg-elite-gold/5 p-6 sm:p-10 rounded-xl border border-elite-gold/10 text-center flex flex-col justify-center min-w-0 overflow-hidden">
-                <span className="text-[10px] uppercase tracking-[0.4em] text-elite-gold mb-4 font-bold">Expected ROI</span>
-                <div className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-2 tracking-tighter break-words">{roi.toLocaleString()}x</div>
-                <p className="text-[10px] text-gray-500 uppercase tracking-widest">Return on capital invested</p>
+              <div className="flex min-w-0 flex-col justify-center overflow-hidden rounded-xl border border-elite-gold/10 bg-elite-gold/5 p-5 text-center sm:p-6 md:p-10">
+                <span className="mb-3 text-[10px] font-bold uppercase tracking-[0.4em] text-elite-gold md:mb-4">Expected ROI</span>
+                <div className="mb-2 break-words text-4xl font-bold tracking-tighter text-white sm:text-5xl md:text-6xl lg:text-7xl">{roi.toLocaleString()}x</div>
+                <p className="text-[10px] uppercase tracking-widest text-gray-500">Return on capital invested</p>
               </div>
             </div>
           </div>
           
-          <div id="checkout" className="mt-16 flex flex-col items-center">
+          <div id="checkout" className="mt-8 flex flex-col items-center md:mt-16">
             {token ? (
               <Link
                 to="/checker"
-                className="group relative bg-elite-gold text-black font-bold py-6 px-16 rounded-sm text-xl shadow-[0_0_40px_rgba(212,175,55,0.4)] hover:shadow-[0_0_60px_rgba(212,175,55,0.6)] transition-all transform hover:scale-[1.02] inline-block"
+                className="inline-block rounded-sm bg-elite-gold px-8 py-4 text-center text-base font-bold text-black shadow-[0_0_40px_rgba(212,175,55,0.4)] transition-all hover:shadow-[0_0_60px_rgba(212,175,55,0.6)] hover:brightness-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-elite-black md:px-16 md:py-6 md:text-xl md:transition-transform md:hover:scale-[1.02]"
               >
-                <div className="absolute inset-0 border border-white/20 translate-x-1 translate-y-1 group-hover:translate-x-0 group-hover:translate-y-0 transition-all"></div>
                 Go to Dashboard
               </Link>
             ) : (
               <Link
                 to="/pricing"
-                className="group relative bg-elite-gold text-black font-bold py-6 px-16 rounded-sm text-xl shadow-[0_0_40px_rgba(212,175,55,0.4)] hover:shadow-[0_0_60px_rgba(212,175,55,0.6)] transition-all transform hover:scale-[1.02] inline-block"
+                className="inline-block rounded-sm bg-elite-gold px-8 py-4 text-center text-base font-bold text-black shadow-[0_0_40px_rgba(212,175,55,0.4)] transition-all hover:shadow-[0_0_60px_rgba(212,175,55,0.6)] hover:brightness-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-elite-black md:px-16 md:py-6 md:text-xl md:transition-transform md:hover:scale-[1.02]"
               >
-                <div className="absolute inset-0 border border-white/20 translate-x-1 translate-y-1 group-hover:translate-x-0 group-hover:translate-y-0 transition-all"></div>
-                Get The Elite Skills Bundle — <span className="line-through opacity-70">€249</span> <span className="font-extrabold">€99</span>
+                Get The Elite Skills Bundle —{' '}
+                <span className="inline-flex items-baseline gap-1 whitespace-nowrap tabular-nums">
+                  <span className="line-through opacity-70">€249</span>
+                  <span className="font-extrabold">€99</span>
+                </span>
               </Link>
             )}
-            <p className="mt-6 text-xs text-gray-600 uppercase tracking-[0.3em]">Instant Access • PDF Guide • AI Simulator • Strategy Vault</p>
+            <p className="mt-4 text-xs uppercase tracking-[0.3em] text-gray-600 md:mt-6">Instant Access • PDF Guide • AI Simulator • Strategy Vault</p>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-black py-20 border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+      <footer className="border-t border-white/5 bg-black py-10 md:py-20">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="mb-10 grid grid-cols-1 gap-8 md:mb-16 md:grid-cols-4 md:gap-12">
             <div className="col-span-1 md:col-span-2">
-              <span className="text-2xl font-serif font-bold text-white tracking-widest block mb-6">
-                <span className="text-elite-gold">ELITE</span> SKILLS
+              <span className="mb-4 block text-2xl font-serif font-bold tracking-widest text-white md:mb-6">
+                <span className="flex flex-col items-start leading-tight md:hidden">
+                  <span className="text-elite-gold">ELITE</span>
+                  <span>SKILLS</span>
+                </span>
+                <span className="hidden md:inline">
+                  <span className="text-elite-gold">ELITE</span> SKILLS
+                </span>
               </span>
               <p className="text-elite-text-muted text-sm max-w-sm leading-relaxed">
                 The leading professional training resource for aspiring bulge bracket and elite boutique investment bankers. Created by alumni from HEC, LBS, and Goldman Sachs.
               </p>
-              <div className="flex flex-wrap items-center gap-4 mt-8">
+              <div className="mt-6 flex flex-wrap items-center gap-4 md:mt-8">
                 <span className="text-white text-[10px] uppercase tracking-widest font-bold w-full sm:w-auto">Follow</span>
                 <a
                   href={ELITE_SKILLS_INSTAGRAM}
@@ -273,8 +293,8 @@ const LandingPage: React.FC = () => {
               </div>
             </div>
             <div>
-              <h4 className="text-white text-[10px] uppercase tracking-widest mb-6 font-bold">Resources</h4>
-              <ul className="text-elite-text-muted text-xs space-y-4">
+              <h4 className="mb-4 text-[10px] font-bold uppercase tracking-widest text-white md:mb-6">Resources</h4>
+              <ul className="space-y-3 text-xs text-elite-text-muted md:space-y-4">
                 <li><button onClick={() => scrollToSection('problem')} className="hover:text-white transition-colors">Success Rates</button></li>
                 <li><button onClick={() => scrollToSection('accelerator')} className="hover:text-white transition-colors">Technical Vault</button></li>
                 <li><button onClick={() => scrollToSection('ai-demo')} className="hover:text-white transition-colors">MD Simulation</button></li>
@@ -282,15 +302,15 @@ const LandingPage: React.FC = () => {
               </ul>
             </div>
             <div>
-              <h4 className="text-white text-[10px] uppercase tracking-widest mb-6 font-bold">Legal</h4>
-              <ul className="text-elite-text-muted text-xs space-y-4">
+              <h4 className="mb-4 text-[10px] font-bold uppercase tracking-widest text-white md:mb-6">Legal</h4>
+              <ul className="space-y-3 text-xs text-elite-text-muted md:space-y-4">
                 <li><button className="hover:text-white transition-colors">Privacy Policy</button></li>
                 <li><button className="hover:text-white transition-colors">Terms of Service</button></li>
                 <li><button className="hover:text-white transition-colors">Refund Policy</button></li>
               </ul>
             </div>
           </div>
-          <div className="flex flex-col md:flex-row justify-between items-center border-t border-white/5 pt-8 text-[10px] text-gray-700 uppercase tracking-widest">
+          <div className="flex flex-col items-center justify-between border-t border-white/5 pt-6 text-[10px] uppercase tracking-widest text-gray-700 md:flex-row md:pt-8">
             <div>© 2026 ELITE SKILLS ACCELERATOR. ALL RIGHTS RESERVED.</div>
             <div className="mt-4 md:mt-0 flex gap-8">
               <span>Verified Secure</span>

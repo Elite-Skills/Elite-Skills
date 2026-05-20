@@ -82,8 +82,8 @@ const AIChatSimulator: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full max-w-3xl mx-auto bento-card boardroom-chat p-4 sm:p-6 md:p-10 rounded-lg overflow-hidden flex flex-col">
-      <div className="flex items-center gap-3 mb-4 sm:mb-6 border-b border-white/10 pb-3 sm:pb-4 shrink-0">
+    <div className="relative mx-auto flex w-full max-w-3xl flex-col overflow-hidden rounded-lg bento-card boardroom-chat p-4 sm:p-6 md:p-10">
+      <div className="mb-3 flex shrink-0 items-center gap-3 border-b border-white/10 pb-2 sm:mb-6 sm:pb-4">
         <div className="bg-elite-gold/10 p-2 rounded-full">
             <Briefcase className="w-5 h-5 text-elite-gold" />
         </div>
@@ -93,7 +93,7 @@ const AIChatSimulator: React.FC = () => {
         </div>
       </div>
 
-      <div ref={scrollRef} className="flex-grow overflow-y-auto mb-4 sm:mb-6 custom-scrollbar pr-1 sm:pr-2 space-y-3 sm:space-y-4 min-h-0">
+      <div ref={scrollRef} className="mb-3 min-h-0 flex-grow space-y-3 overflow-y-auto pr-1 custom-scrollbar sm:mb-6 sm:space-y-4 sm:pr-2">
         {messages.map((msg, idx) => (
           <div 
             key={idx} 
@@ -173,7 +173,7 @@ const AIChatSimulator: React.FC = () => {
           </button>
         </div>
       )}
-      <p className="text-[10px] text-gray-500 mt-3 sm:mt-4 text-center italic shrink-0">Powered by Gemini 3 Flash. Unlimited access for Accelerator members.</p>
+      <p className="mt-2 shrink-0 text-center text-[10px] italic text-gray-500 sm:mt-4">Powered by Gemini 3 Flash. Unlimited access for Accelerator members.</p>
     </div>
   );
 };

@@ -107,12 +107,12 @@ const StrategyGenerator: React.FC = () => {
 
   return (
     <>
-      <div ref={strategyCardRef} className="bento-card col-span-1 p-8 rounded-lg flex flex-col h-full">
-        <div className="flex items-center gap-2 mb-4">
-          <Target className="w-4 h-4 text-elite-gold" />
-          <h3 className="text-xl font-serif text-white">✨ AI Strategy Gen</h3>
+      <div ref={strategyCardRef} className="bento-card col-span-1 flex h-full flex-col rounded-lg p-4 md:p-8">
+        <div className="mb-3 flex items-center gap-2 md:mb-4">
+          <Target className="h-4 w-4 text-elite-gold" />
+          <h3 className="font-serif text-lg text-white md:text-xl">✨ AI Strategy Gen</h3>
         </div>
-        <p className="text-xs text-elite-text-muted mb-6">Generate a bespoke recruitment strategy for your target firm.</p>
+        <p className="mb-4 text-xs text-elite-text-muted md:mb-6">Generate a bespoke recruitment strategy for your target firm.</p>
         
         <div className="space-y-4 flex-grow">
           <div className="relative" ref={dropdownRef}>
@@ -156,7 +156,7 @@ const StrategyGenerator: React.FC = () => {
           </button>
 
           {!showOutput && (
-            <div className="bg-black/40 rounded-sm border border-white/5 p-4 min-h-[120px] flex items-center justify-center custom-scrollbar">
+            <div className="flex min-h-[96px] items-center justify-center rounded-sm border border-white/5 bg-black/40 p-3 custom-scrollbar md:min-h-[120px] md:p-4">
               <div className="text-[10px] text-gray-600 flex items-center gap-2">
                 <ShieldCheck className="w-3 h-3" />
                 Select a firm to see technical hotspots.
@@ -168,7 +168,7 @@ const StrategyGenerator: React.FC = () => {
 
       {showOutput && (
         <div className="col-span-1 md:col-span-3">
-          <div className="bento-card rounded-xl p-8 border border-white/10 overflow-hidden">
+          <div className="bento-card overflow-hidden rounded-xl border border-white/10 p-4 md:p-8">
             {isLoading ? (
               <div className="space-y-4 py-4">
                 <div className="shimmer h-4 w-full rounded"></div>
