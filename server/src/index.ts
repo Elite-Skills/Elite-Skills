@@ -151,7 +151,11 @@ app.use(
 )
 
 app.get('/api/health', (_req: Request, res: Response) => {
-  res.json({ ok: true })
+  res.json({
+    ok: true,
+    version: '0.2.0',
+    features: ['admin-invites', 'invite-registration'],
+  })
 })
 
 app.use('/api/auth', authRouter)

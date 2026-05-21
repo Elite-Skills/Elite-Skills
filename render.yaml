@@ -1,0 +1,16 @@
+# Render Blueprint — backend API (Express + MongoDB)
+# Dashboard: connect repo and use this file, or mirror these settings on an existing Web Service.
+services:
+  - type: web
+    name: elite-skills-api
+    runtime: node
+    plan: free
+    region: oregon
+    branch: main
+    rootDir: server
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production

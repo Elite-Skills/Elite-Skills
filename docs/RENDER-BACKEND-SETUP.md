@@ -33,6 +33,8 @@ Deploy the Elite Skills API (Express + MongoDB) to Render. Use this guide with a
 
 ## 3. Configure the Service
 
+Use **`render.yaml`** in the repo root (recommended), or set manually:
+
 | Setting | Value |
 |--------|-------|
 | **Name** | `elite-skills-api` (or any name) |
@@ -42,6 +44,9 @@ Deploy the Elite Skills API (Express + MongoDB) to Render. Use this guide with a
 | **Runtime** | `Node` |
 | **Build Command** | `npm install && npm run build` |
 | **Start Command** | `npm start` |
+| **Health Check Path** | `/api/health` |
+
+After deploy, `GET /api/health` should include `"version":"0.2.0"` and `"features":["admin-invites","invite-registration"]`. If you only see `{"ok":true}`, the service is still on old code — clear build cache and redeploy.
 
 ---
 
