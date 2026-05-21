@@ -27,7 +27,7 @@ import {
   scanPostLimiter,
   strategyPostLimiter,
 } from './middleware/rateLimits.js'
-import { authRouter } from './routes/auth.js'
+import { authRouter, adminRouter } from './routes/auth.js'
 import { scanRouter } from './routes/scan.js'
 import { profileRouter } from './routes/profile.js'
 import { referralsRouter } from './routes/referrals.js'
@@ -155,6 +155,7 @@ app.get('/api/health', (_req: Request, res: Response) => {
 })
 
 app.use('/api/auth', authRouter)
+app.use('/api/admin', adminRouter)
 app.use('/api/scan', scanPostLimiter, scanRouter)
 app.use('/api/profile', profileRouter)
 app.use('/api/referrals', referralWriteLimiter, referralsRouter)

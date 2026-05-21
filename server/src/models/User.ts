@@ -6,9 +6,16 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, trim: true, lowercase: true, unique: true, maxlength: 254 },
     passwordHash: { type: String, required: true },
     isAdmin: { type: Boolean, default: false, index: true },
-    plan: { type: String, enum: ['free', 'paid'], default: 'free', index: true },
-    /** AI boardroom messages consumed (free plan only; paid ignores this) */
+    plan: {
+      type: String,
+      enum: ['foundation', 'accelerator', 'elite', 'free', 'paid'],
+      default: 'foundation',
+      index: true,
+    },
     boardroomMessagesUsed: { type: Number, default: 0, min: 0 },
+    scansUsed: { type: Number, default: 0, min: 0 },
+    strategyRequestsUsed: { type: Number, default: 0, min: 0 },
+    registeredViaInviteId: { type: mongoose.Schema.Types.ObjectId, ref: 'RegistrationInvite', default: null },
   },
   { timestamps: true }
 )

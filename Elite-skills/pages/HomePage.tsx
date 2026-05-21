@@ -25,9 +25,6 @@ export default function HomePage() {
               <Link className="btn secondary" to="/login">
                 Login
               </Link>
-              <Link className="btn" to="/register">
-                Create Account
-              </Link>
             </>
           )}
         </nav>
@@ -60,7 +57,7 @@ export default function HomePage() {
               Start Checking
             </Link>
           ) : (
-            <Link className="btn" to="/register">
+            <Link className="btn" to="/login">
               Get Started
             </Link>
           )}

@@ -3,7 +3,8 @@ import { GoogleGenAI } from '@google/genai'
 
 import { requireAuth } from '../middleware/auth.js'
 import { User } from '../models/User.js'
-import { isStrategyBankAllowedForFreePlan } from '../utils/planLimits.js'
+import { getPlanLimits, isStrategyBankAllowedForPlan, planLabel } from '../utils/planLimits.js'
+import { loadUserPlanFields, normalizePlanTier } from '../utils/userPlan.js'
 
 async function getStrategyResponse(bank: string): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY
@@ -70,19 +71,47 @@ strategyRouter.post('/', requireAuth, async (req: Request, res: Response) => {
   }
 
   const trimmed = bank.trim()
-  const user = await User.findById(req.userId).select({ plan: 1 })
-  if (!user) {
+  const userId = req.userId
+  if (!userId) {
     res.status(401).json({ error: 'Unauthorized' })
     return
   }
-  if (user.plan !== 'paid' && !isStrategyBankAllowedForFreePlan(trimmed)) {
+
+  const account = await loadUserPlanFields(userId)
+  if (!account) {
+    res.status(401).json({ error: 'Unauthorized' })
+    return
+  }
+
+  const plan = normalizePlanTier(account.plan)
+  if (!isStrategyBankAllowedForPlan(plan, trimmed)) {
     res.status(403).json({
-      error: 'free_plan_limit',
+      error: 'plan_limit',
       code: 'strategy',
-      message:
-        'Sample strategy templates are included on the free tier. Upgrade to Accelerator for every firm, the ATS checker, resume creator, and unlimited boardroom simulations.',
+      message: `Sample strategy templates are included on the ${planLabel(plan)}. Upgrade your plan for every firm.`,
     })
     return
+  }
+
+  const limits = getPlanLimits(plan)
+  const maxRequests = limits.strategyRequests
+  if (maxRequests !== null) {
+    const reserved = await User.findOneAndUpdate(
+      {
+        _id: userId,
+        strategyRequestsUsed: { $lt: maxRequests },
+      },
+      { $inc: { strategyRequestsUsed: 1 } },
+      { new: true },
+    )
+    if (!reserved) {
+      res.status(429).json({
+        error: 'plan_limit',
+        code: 'strategy',
+        message: `Your ${planLabel(plan)} includes ${maxRequests} strategy requests. Contact us to upgrade for more.`,
+      })
+      return
+    }
   }
 
   const response = await getStrategyResponse(trimmed)

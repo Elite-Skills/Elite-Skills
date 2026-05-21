@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 import { login } from '../api'
 import { useAuth } from '../state/AuthContext'
@@ -62,7 +62,7 @@ export default function LoginPage() {
         </form>
 
         <div className="muted" style={{ marginTop: 12 }}>
-          Don’t have an account? <Link to="/register" style={{ color: 'var(--elite-gold)' }}>Create one</Link>
+          Need access? Contact Elite Skills for a registration link.
         </div>
           </div>
         </div>

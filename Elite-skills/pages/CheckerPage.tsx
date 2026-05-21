@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { scanById, scanHistory, scanResume, type ScanHistoryItem, type ScanResult } from '../api'
 import { useAuth } from '../state/AuthContext'
-import AcceleratorPaywall from '../components/AcceleratorPaywall'
-import { AcceleratorRichPitch } from '../components/AcceleratorRichPitch'
 
 function formatDate(s: string): string {
   const d = new Date(s)
@@ -41,7 +39,7 @@ export default function CheckerPage() {
   }, [result?.score])
 
   useEffect(() => {
-    if (authLoading || user?.plan !== 'paid') return
+    if (authLoading || !user) return
     let cancelled = false
 
     async function load() {
@@ -57,7 +55,7 @@ export default function CheckerPage() {
     return () => {
       cancelled = true
     }
-  }, [authLoading, user?.plan])
+  }, [authLoading, user])
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -119,9 +117,13 @@ export default function CheckerPage() {
     )
   }
 
-  if (!user || user.plan !== 'paid') {
+  if (!user) {
     return (
-      <AcceleratorPaywall variant="rich" title="ATS Resume Checker" description={<AcceleratorRichPitch />} />
+      <div className="page">
+        <div className="card">
+          <p className="muted">Please log in to use the ATS Resume Checker.</p>
+        </div>
+      </div>
     )
   }
 

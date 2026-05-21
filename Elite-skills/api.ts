@@ -1,6 +1,6 @@
 import { apiCacheClear, apiCacheGet, apiCacheInvalidatePrefix, apiCacheSet } from './lib/apiCache'
 import { consumeClientRateLimit } from './lib/clientRateLimit'
-import { FREE_BOARDROOM_AI_MESSAGES } from './lib/planLimits'
+import { FREE_BOARDROOM_AI_MESSAGES, normalizePlanTier, planLabel, type PlanTier } from './lib/planLimits'
 import {
   assertMongoId,
   normalizeBlogCreatePayload,
@@ -26,7 +26,7 @@ const PROD_FALLBACK_BASE = typeof window !== 'undefined' ? window.location.origi
 export const API_BASE =
   import.meta.env.VITE_API_BASE ?? (import.meta.env.DEV ? 'http://localhost:5000' : PROD_FALLBACK_BASE)
 
-export type AccountPlan = 'free' | 'paid'
+export type AccountPlan = PlanTier
 
 export type AuthUser = {
   id: string
@@ -35,20 +35,22 @@ export type AuthUser = {
   isAdmin?: boolean
   canCreateReferral?: boolean
   plan: AccountPlan
-  /** Free plan: messages left; paid: null (unlimited). Omitted on older API responses. */
+  planLabel?: string
   boardroomRemaining?: number | null
+  scansRemaining?: number | null
+  strategyRemaining?: number | null
 }
 
-/** Ensures plan is always free or paid (defaults to free for older API responses). */
+/** Ensures plan fields are normalized (defaults for older API responses). */
 export function normalizeAuthUser(
   user: Pick<AuthUser, 'id' | 'name' | 'email'> & Partial<Omit<AuthUser, 'id' | 'name' | 'email'>>,
 ): AuthUser {
-  const plan: AccountPlan = user.plan === 'paid' ? 'paid' : 'free'
+  const plan = normalizePlanTier(user.plan)
   const boardroomRemaining =
-    plan === 'paid'
-      ? null
-      : typeof user.boardroomRemaining === 'number'
-        ? user.boardroomRemaining
+    typeof user.boardroomRemaining === 'number' || user.boardroomRemaining === null
+      ? user.boardroomRemaining
+      : plan === 'elite'
+        ? null
         : FREE_BOARDROOM_AI_MESSAGES
   return {
     id: user.id,
@@ -57,7 +59,10 @@ export function normalizeAuthUser(
     isAdmin: user.isAdmin,
     canCreateReferral: user.canCreateReferral,
     plan,
+    planLabel: user.planLabel ?? planLabel(plan),
     boardroomRemaining,
+    scansRemaining: user.scansRemaining ?? null,
+    strategyRemaining: user.strategyRemaining ?? null,
   }
 }
 
@@ -139,14 +144,59 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return data as T
 }
 
-export async function register(payload: { name: string; email: string; password: string; passwordConfirm: string }): Promise<{ token: string; user: AuthUser }> {
+export async function register(payload: {
+  inviteToken: string
+  name: string
+  email: string
+  password: string
+  passwordConfirm: string
+}): Promise<{ token: string; user: AuthUser }> {
   const body = normalizeRegisterPayload(payload)
   const data = await request<{ token: string; user: AuthUser }>('/api/auth/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ ...body, inviteToken: payload.inviteToken }),
   })
   return { token: data.token, user: normalizeAuthUser(data.user) }
+}
+
+export type InvitePreview = { valid: true; plan: AccountPlan; planLabel: string } | { valid: false; error?: string }
+
+export async function validateRegistrationInvite(token: string): Promise<InvitePreview> {
+  const cleaned = String(token ?? '').trim()
+  if (!cleaned) return { valid: false, error: 'Invalid link' }
+  try {
+    const data = await request<{ valid: boolean; plan?: AccountPlan; planLabel?: string; error?: string }>(
+      `/api/auth/invite/${encodeURIComponent(cleaned)}`,
+    )
+    if (!data.valid || !data.plan) return { valid: false, error: data.error ?? 'Invalid link' }
+    return { valid: true, plan: normalizePlanTier(data.plan), planLabel: data.planLabel ?? planLabel(normalizePlanTier(data.plan)) }
+  } catch (err) {
+    return { valid: false, error: err instanceof Error ? err.message : 'Invalid link' }
+  }
+}
+
+export type RegistrationInviteItem = {
+  id: string
+  plan: AccountPlan
+  planLabel: string
+  usedAt: string | null
+  usedByUserId: string | null
+  createdAt: string
+}
+
+export async function createRegistrationInvite(plan: AccountPlan): Promise<{
+  invite: RegistrationInviteItem & { registrationUrl: string }
+}> {
+  return request('/api/admin/invites', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ plan }),
+  })
+}
+
+export async function listRegistrationInvites(): Promise<{ invites: RegistrationInviteItem[] }> {
+  return request('/api/admin/invites')
 }
 
 export async function login(payload: { email: string; password: string }): Promise<{ token: string; user: AuthUser }> {

@@ -6,6 +6,7 @@ import { useContact } from './state/ContactContext';
 import { useAuth } from './state/AuthContext';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import AdminPage from './pages/AdminPage';
 import CheckerPage from './pages/CheckerPage';
 import ReferralsPage from './pages/ReferralsPage';
 import NewReferralPage from './pages/NewReferralPage';
@@ -37,7 +38,9 @@ export default function App() {
     <Routes>
       <Route path="/" element={<LandingOrRedirect />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register/:token" element={<RegisterPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/admin" element={<AdminPage />} />
       <Route path="/pricing" element={<Navigate to="/" replace />} />
       <Route path="/blog" element={<BlogListPage />} />
       <Route path="/blog/new" element={<BlogEditPage />} />

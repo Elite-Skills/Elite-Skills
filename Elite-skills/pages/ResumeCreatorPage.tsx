@@ -13,8 +13,6 @@ import {
 } from 'react'
 import { Link } from 'react-router-dom'
 import { getMyProfile, type Profile } from '../api'
-import AcceleratorPaywall from '../components/AcceleratorPaywall'
-import { AcceleratorRichPitch } from '../components/AcceleratorRichPitch'
 import { useAuth } from '../state/AuthContext'
 import {
   FileDown,
@@ -1211,7 +1209,7 @@ export default function ResumeCreatorPage() {
   }, [])
 
   useEffect(() => {
-    if (authLoading || !user || user.plan !== 'paid') return
+    if (authLoading || !user) return
 
     let cancelled = false
     async function load() {
@@ -1283,9 +1281,13 @@ export default function ResumeCreatorPage() {
     )
   }
 
-  if (!user || user.plan !== 'paid') {
+  if (!user) {
     return (
-      <AcceleratorPaywall variant="rich" title="Resume Creator" description={<AcceleratorRichPitch />} />
+      <div className="page">
+        <div className="card">
+          <p className="muted">Please log in to use the Resume Creator.</p>
+        </div>
+      </div>
     )
   }
 

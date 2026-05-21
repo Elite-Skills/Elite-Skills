@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import AIChatSimulator from './components/AIChatSimulator';
 import FunnelChart from './components/FunnelChart';
 import StrategyGenerator from './components/StrategyGenerator';
 import LandingNavbar from './components/LandingNavbar';
-import { Calculator, ChevronRight, GraduationCap, TrendingUp, Globe, Award, Instagram, Linkedin } from 'lucide-react';
+import RoiSnackCharts from './components/RoiSnackCharts';
+import { ChevronRight, GraduationCap, TrendingUp, Globe, Award, Instagram, Linkedin } from 'lucide-react';
 import { useAuth } from './state/AuthContext';
 import { useContact } from './state/ContactContext';
 import {
@@ -19,7 +20,6 @@ const LANDING_WHATSAPP_CTA_MIN_W =
   'inline-flex items-center justify-center min-w-[15.5rem] sm:min-w-[17rem] md:min-w-[20rem] lg:min-w-[22rem] xl:min-w-[24rem]';
 
 const LandingPage: React.FC = () => {
-  const [salary, setSalary] = useState(120000);
   const { openContact } = useContact();
   const { token } = useAuth();
   const { hash } = useLocation();
@@ -36,8 +36,6 @@ const LandingPage: React.FC = () => {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
-
-  const roi = Math.floor((salary - 99) / 99);
 
   return (
     <div className="min-h-screen">
@@ -188,60 +186,19 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* ROI Section */}
-      <section id="roi" className="bg-elite-black py-10 md:py-32">
-        <div className="mx-auto max-w-4xl px-4 text-center">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-elite-gold/20 bg-elite-gold/5 px-4 py-1.5 md:mb-8">
-             <Calculator className="h-3 w-3 text-elite-gold" />
-             <span className="text-[10px] font-bold uppercase tracking-widest text-elite-gold">Financial Analysis</span>
+      {/* ROI — minimal copy; charts reinforce stakes → Get Access */}
+      <section id="roi" className="bg-elite-black py-12 md:py-24">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="mb-8 text-center md:mb-10">
+            <h2 className="font-serif text-4xl tracking-tight text-white md:text-5xl lg:text-6xl">ROI</h2>
+            <p className="mx-auto mt-2 max-w-sm text-[10px] uppercase tracking-[0.28em] text-elite-text-muted">
+              Rare seats · real envelopes — illustrative snapshots
+            </p>
           </div>
-          <h2 className="mb-6 font-serif text-4xl md:mb-12 lg:text-5xl">The Investment Case</h2>
-          <div className="relative rounded-2xl border border-white/10 bg-elite-gray p-4 shadow-2xl sm:p-6 md:p-10">
-            <div className="grid grid-cols-1 items-center gap-6 text-left md:grid-cols-2 md:gap-12">
-              <div className="space-y-5 md:space-y-8">
-                <div>
-                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-elite-text-muted md:mb-3">
-                    Investment Cost
-                  </label>
-                  <div className="font-serif text-4xl md:text-5xl">
-                    <span className="line-through text-gray-500">€249</span>{' '}
-                    <span className="font-bold text-elite-gold">€99</span>
-                  </div>
-                </div>
-                <div>
-                  <div className="mb-3 flex items-center justify-between md:mb-4">
-                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-elite-text-muted">
-                      Target Salary (First Year)
-                    </label>
-                    <span className="font-mono font-bold text-elite-gold">€{salary.toLocaleString()}</span>
-                  </div>
-                  <input 
-                    type="range" 
-                    min="60000" 
-                    max="160000" 
-                    value={salary} 
-                    step="5000" 
-                    onChange={(e) => setSalary(parseInt(e.target.value))}
-                    className="h-1 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-elite-gold" 
-                  />
-                  <div className="mt-2 flex justify-between font-mono text-[10px] uppercase tracking-widest text-gray-600">
-                    <span>60K</span>
-                    <span>110K</span>
-                    <span>160K</span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex min-w-0 flex-col justify-center overflow-hidden rounded-xl border border-elite-gold/10 bg-elite-gold/5 p-5 text-center sm:p-6 md:p-10">
-                <span className="mb-3 text-[10px] font-bold uppercase tracking-[0.4em] text-elite-gold md:mb-4">Expected ROI</span>
-                <div className="mb-2 break-words text-4xl font-bold tracking-tighter text-white sm:text-5xl md:text-6xl lg:text-7xl">
-                  {roi.toLocaleString()}x
-                </div>
-                <p className="text-[10px] uppercase tracking-widest text-gray-500">Return on capital invested</p>
-              </div>
-            </div>
-          </div>
-          
-          <div id="checkout" className="mt-8 flex flex-col items-center md:mt-16">
+
+          <RoiSnackCharts />
+
+          <div id="checkout" className="mt-10 flex flex-col items-center md:mt-14">
             {token ? (
               <Link
                 to="/checker"
@@ -259,8 +216,8 @@ const LandingPage: React.FC = () => {
                 {ELITE_SKILLS_GET_ACCESS_LABEL}
               </a>
             )}
-            <p className="mt-4 text-xs uppercase tracking-[0.3em] text-gray-600 md:mt-6">
-              Instant Access • PDF Guide • AI Simulator • Strategy Vault
+            <p className="mt-4 text-center text-xs uppercase tracking-[0.3em] text-gray-600 md:mt-6">
+              {ELITE_SKILLS_GET_ACCESS_LABEL} · WhatsApp • PDF guide · AI boardroom · ATS · strategies
             </p>
           </div>
         </div>

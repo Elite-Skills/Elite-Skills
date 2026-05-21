@@ -9,7 +9,7 @@ import { FREE_BOARDROOM_AI_MESSAGES } from '../lib/planLimits';
 
 const STORAGE_KEY = 'boardroom_guest_sent';
 
-type LimitKind = 'guest' | 'free';
+type LimitKind = 'guest' | 'plan';
 
 interface Message {
   role: 'user' | 'model';
@@ -36,11 +36,11 @@ const AIChatSimulator: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const guestSentCount = token ? 0 : guestCount;
-  const freeRemaining = user?.plan === 'free' ? user.boardroomRemaining : undefined;
+  const boardroomRemaining = user?.boardroomRemaining;
+  const hasBoardroomCap = Boolean(token) && boardroomRemaining !== null && boardroomRemaining !== undefined;
   const hitLimitGuest = !token && guestSentCount >= FREE_BOARDROOM_AI_MESSAGES;
-  const hitLimitFree =
-    Boolean(token) && user?.plan === 'free' && typeof freeRemaining === 'number' && freeRemaining <= 0;
-  const hitLimit = hitLimitGuest || hitLimitFree;
+  const hitLimitPlan = hasBoardroomCap && typeof boardroomRemaining === 'number' && boardroomRemaining <= 0;
+  const hitLimit = hitLimitGuest || hitLimitPlan;
 
   useEffect(() => {
     if (token) {
@@ -62,7 +62,7 @@ const AIChatSimulator: React.FC = () => {
     if (hitLimit) return;
     const currentCount = getGuestSentCount();
     if (!token && currentCount >= FREE_BOARDROOM_AI_MESSAGES) return;
-    if (token && user?.plan === 'free' && typeof freeRemaining === 'number' && freeRemaining <= 0) return;
+    if (token && hasBoardroomCap && typeof boardroomRemaining === 'number' && boardroomRemaining <= 0) return;
 
     const userMessage = input;
     if (!token) {
@@ -92,7 +92,7 @@ const AIChatSimulator: React.FC = () => {
         sessionStorage.setItem(STORAGE_KEY, String(FREE_BOARDROOM_AI_MESSAGES));
         setGuestCount(FREE_BOARDROOM_AI_MESSAGES);
       }
-      if (token && user?.plan === 'free' && isQuota) {
+      if (token && hasBoardroomCap && isQuota) {
         patchUser({ boardroomRemaining: 0 })
       }
       if (token) {
@@ -100,7 +100,7 @@ const AIChatSimulator: React.FC = () => {
           .then((d) => patchUser(normalizeAuthUser(d.user)))
           .catch(() => {})
       }
-      const limitKind: LimitKind = token ? 'free' : 'guest';
+      const limitKind: LimitKind = token ? 'plan' : 'guest';
       setMessages(prev => [...prev, { role: 'model', text: '', limitKind }]);
     }
     setIsLoading(false);
@@ -153,11 +153,9 @@ const AIChatSimulator: React.FC = () => {
                     </a>
                     {' '}for unlimited boardroom, ATS checker, resume creator, and full strategy vault.
                   </>
-                ) : msg.limitKind === 'free' ? (
+                ) : msg.limitKind === 'plan' ? (
                   <>
-                    You&apos;ve used your {FREE_BOARDROOM_AI_MESSAGES} free boardroom messages.{' '}
-                    <strong className="text-white not-italic">Accelerator</strong> — unlimited boardroom, ATS checker, resume PDF
-                    export, and every strategy firm.{' '}
+                    You&apos;ve used all boardroom messages on your {user?.planLabel ?? 'current'} plan.{' '}
                     <a
                       href={ELITE_SKILLS_WHATSAPP}
                       target="_blank"
@@ -166,7 +164,7 @@ const AIChatSimulator: React.FC = () => {
                     >
                       {ELITE_SKILLS_GET_ACCESS_LABEL}
                     </a>
-                    .
+                    {' '}to upgrade.
                   </>
                 ) : (
                   msg.text

@@ -1,7 +1,8 @@
 import { Router, type Request, type Response } from 'express'
 import { optionalAuth } from '../middleware/optionalAuth.js'
 import { sanitizePlainTextMultiline } from '../utils/sanitize.js'
-import { FREE_BOARDROOM_AI_MESSAGES } from '../utils/planLimits.js'
+import { FREE_BOARDROOM_AI_MESSAGES, getPlanLimits } from '../utils/planLimits.js'
+import { loadUserPlanFields, normalizePlanTier } from '../utils/userPlan.js'
 import {
   boardroomClientKey,
   markBoardroomFreeExhaustedForNetwork,
@@ -30,7 +31,7 @@ async function getMDResponse(userMessage: string, history: { role: string; text:
     A candidate is answering a technical finance question. 
     Be brief, professional, and slightly critical. 
     Give them quick feedback on their answer (whether it was technically sound, too verbose, or lacked intuition).
-    Then, ask one more deep-dive technical question about valuation (DCF/Comps), M&A math, or accounting (3-statement linking). 
+    Then, ask one more deep-dive technical question about valuation (DCF/Comps), or accounting (3-statement linking). 
     Limit response to 2-3 sentences max. Maintain an elite, high-stakes persona.
   `
 
@@ -109,7 +110,7 @@ boardroomRouter.post('/', optionalAuth, async (req: Request, res: Response) => {
       res.status(429).json({
         error: 'free_plan_limit',
         code: 'boardroom',
-        message: `You've used your ${MESSAGE_LIMIT_GUEST} trial messages. Create a free account for ${FREE_BOARDROOM_AI_MESSAGES} more boardroom messages and sample strategies, or upgrade to Accelerator for unlimited simulations, the ATS checker, and resume creator.`,
+        message: `You've used your ${MESSAGE_LIMIT_GUEST} trial messages. Register with an invite link for more boardroom messages, or contact us to upgrade your plan.`,
       })
       return
     }
@@ -117,7 +118,7 @@ boardroomRouter.post('/', optionalAuth, async (req: Request, res: Response) => {
       res.status(429).json({
         error: 'free_plan_limit',
         code: 'boardroom',
-        message: `Guest trials aren't available from this network after a free account has used all boardroom messages. Sign in with that account, use another network, or upgrade to Accelerator for unlimited boardroom access.`,
+        message: `Guest trials aren't available from this network after an account has used all boardroom messages. Sign in with that account, use another network, or contact us to upgrade.`,
       })
       return
     }
@@ -128,17 +129,21 @@ boardroomRouter.post('/', optionalAuth, async (req: Request, res: Response) => {
       return
     }
     authenticatedUserId = userId
-    const account = await User.findById(userId).select({ plan: 1, boardroomMessagesUsed: 1 })
+    const account = await loadUserPlanFields(userId)
     if (!account) {
       res.status(401).json({ error: 'Unauthorized' })
       return
     }
-    if (account.plan !== 'paid') {
+
+    const plan = normalizePlanTier(account.plan)
+    const limits = getPlanLimits(plan)
+    const maxMessages = limits.boardroomMessages
+
+    if (maxMessages !== null) {
       const reserved = await User.findOneAndUpdate(
         {
           _id: userId,
-          plan: 'free',
-          boardroomMessagesUsed: { $lt: FREE_BOARDROOM_AI_MESSAGES },
+          boardroomMessagesUsed: { $lt: maxMessages },
         },
         { $inc: { boardroomMessagesUsed: 1 } },
         { new: true },
@@ -146,13 +151,13 @@ boardroomRouter.post('/', optionalAuth, async (req: Request, res: Response) => {
       if (!reserved) {
         await markBoardroomFreeExhaustedForNetwork(networkKey, userId)
         res.status(429).json({
-          error: 'free_plan_limit',
+          error: 'plan_limit',
           code: 'boardroom',
-          message: `Free plan includes ${FREE_BOARDROOM_AI_MESSAGES} AI boardroom messages. Upgrade to Accelerator for unlimited simulations plus the ATS checker, resume creator, and all strategy firms.`,
+          message: `Your ${plan} plan includes ${maxMessages} AI boardroom messages. Contact us to upgrade for more.`,
         })
         return
       }
-      boardroomRemaining = Math.max(0, FREE_BOARDROOM_AI_MESSAGES - (reserved.boardroomMessagesUsed ?? 0))
+      boardroomRemaining = Math.max(0, maxMessages - (reserved.boardroomMessagesUsed ?? 0))
     } else {
       boardroomRemaining = null
     }

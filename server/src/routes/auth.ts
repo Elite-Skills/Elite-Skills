@@ -4,29 +4,16 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 
 import { User } from '../models/User.js'
+import { RegistrationInvite } from '../models/RegistrationInvite.js'
 import { requireAuth } from '../middleware/auth.js'
+import { requireAdmin } from '../middleware/requireAdmin.js'
 import { validateRegisterInput, validateLoginInput } from '../utils/sanitize.js'
-import { FREE_BOARDROOM_AI_MESSAGES } from '../utils/planLimits.js'
-
-function getAdminEmails(): Set<string> {
-  const raw = process.env.ADMIN_EMAILS ?? ''
-  return new Set(raw.split(',').map((e) => e.trim().toLowerCase()).filter(Boolean))
-}
-
-function isAdminEmail(email: string): boolean {
-  const adminEmails = getAdminEmails()
-  if (adminEmails.size === 0) return false
-  return adminEmails.has(email.trim().toLowerCase())
-}
-
-/** Matches referrals route: when ADMIN_EMAILS empty, all can post; else only admins */
-function canCreateReferral(email: string): boolean {
-  const adminEmails = getAdminEmails()
-  if (adminEmails.size === 0) return true
-  return adminEmails.has(email.trim().toLowerCase())
-}
+import { generateInviteToken, hashInviteToken } from '../utils/inviteToken.js'
+import { isInvitePlan, planLabel, type InvitePlan } from '../utils/planLimits.js'
+import { isAdminEmail, serializeAuthUser } from '../utils/userPlan.js'
 
 export const authRouter = Router()
+export const adminRouter = Router()
 
 function signToken(userId: string): string {
   const secret = process.env.JWT_SECRET
@@ -37,17 +24,36 @@ function signToken(userId: string): string {
   return jwt.sign({}, secret, { subject: userId, expiresIn: '7d' })
 }
 
-function userPlan(user: { plan?: string }): 'free' | 'paid' {
-  return user.plan === 'paid' ? 'paid' : 'free'
+function getClientOrigin(): string {
+  const raw = String(process.env.CLIENT_ORIGIN ?? 'http://localhost:5173').split(',')[0]?.trim()
+  return raw.replace(/\/+$/, '') || 'http://localhost:5173'
 }
 
-function boardroomRemainingForUser(user: { plan?: string; boardroomMessagesUsed?: number }): number | null {
-  if (userPlan(user) === 'paid') return null
-  const used = user.boardroomMessagesUsed ?? 0
-  return Math.max(0, FREE_BOARDROOM_AI_MESSAGES - used)
-}
+authRouter.get('/invite/:token', async (req: Request, res: Response) => {
+  const token = String(req.params.token ?? '').trim()
+  if (!token || token.length > 256) {
+    res.status(400).json({ valid: false, error: 'Invalid link' })
+    return
+  }
+
+  const inviteDoc = await RegistrationInvite.findOne({ tokenHash: hashInviteToken(token) }).lean().exec()
+  const invite = inviteDoc as { usedAt?: Date | null; plan?: string } | null
+  if (!invite || invite.usedAt) {
+    res.status(404).json({ valid: false, error: 'Invalid link' })
+    return
+  }
+
+  const plan = invite.plan as InvitePlan
+  res.json({ valid: true, plan, planLabel: planLabel(plan) })
+})
 
 authRouter.post('/register', async (req: Request, res: Response) => {
+  const inviteToken = String(req.body?.inviteToken ?? '').trim()
+  if (!inviteToken) {
+    res.status(403).json({ error: 'Invalid link' })
+    return
+  }
+
   const validated = validateRegisterInput(req.body)
   if ('error' in validated) {
     res.status(400).json({ error: validated.error })
@@ -61,22 +67,42 @@ authRouter.post('/register', async (req: Request, res: Response) => {
     return
   }
 
+  const tokenHash = hashInviteToken(inviteToken)
+  const invite = await RegistrationInvite.findOneAndUpdate(
+    { tokenHash, usedAt: null },
+    { $set: { usedAt: new Date() } },
+    { new: false },
+  )
+  if (!invite) {
+    res.status(403).json({ error: 'Invalid link' })
+    return
+  }
+
   const passwordHash = await bcrypt.hash(password, 12)
   const isAdmin = isAdminEmail(email)
-  const user = await User.create({ name, email, passwordHash, isAdmin, plan: 'free' })
+  const plan = invite.plan
+
+  let user
+  try {
+    user = await User.create({
+      name,
+      email,
+      passwordHash,
+      isAdmin,
+      plan,
+      registeredViaInviteId: invite._id,
+    })
+  } catch (err) {
+    await RegistrationInvite.updateOne({ _id: invite._id }, { $set: { usedAt: null, usedByUserId: null } })
+    throw err
+  }
+
+  await RegistrationInvite.updateOne({ _id: invite._id }, { $set: { usedByUserId: user._id } })
 
   const token = signToken(String(user._id))
   res.json({
     token,
-    user: {
-      id: String(user._id),
-      name: user.name,
-      email: user.email,
-      isAdmin: isAdmin || (user as { isAdmin?: boolean }).isAdmin,
-      canCreateReferral: canCreateReferral(user.email),
-      plan: userPlan(user),
-      boardroomRemaining: boardroomRemainingForUser(user),
-    },
+    user: serializeAuthUser(user),
   })
 })
 
@@ -100,19 +126,10 @@ authRouter.post('/login', async (req: Request, res: Response) => {
     return
   }
 
-  const u = user as { isAdmin?: boolean }
   const token = signToken(String(user._id))
   res.json({
     token,
-    user: {
-      id: String(user._id),
-      name: user.name,
-      email: user.email,
-      isAdmin: u.isAdmin === true || isAdminEmail(user.email),
-      canCreateReferral: canCreateReferral(user.email),
-      plan: userPlan(user),
-      boardroomRemaining: boardroomRemainingForUser(user),
-    },
+    user: serializeAuthUser(user),
   })
 })
 
@@ -123,16 +140,51 @@ authRouter.get('/me', requireAuth, async (req: Request, res: Response) => {
     return
   }
 
-  const u = user as { isAdmin?: boolean }
-  res.json({
-    user: {
-      id: String(user._id),
-      name: user.name,
-      email: user.email,
-      isAdmin: u.isAdmin === true || isAdminEmail(user.email),
-      canCreateReferral: canCreateReferral(user.email),
-      plan: userPlan(user),
-      boardroomRemaining: boardroomRemainingForUser(user),
+  res.json({ user: serializeAuthUser(user) })
+})
+
+adminRouter.post('/invites', requireAuth, requireAdmin, async (req: Request, res: Response) => {
+  const planRaw = String(req.body?.plan ?? '').trim().toLowerCase()
+  if (!isInvitePlan(planRaw)) {
+    res.status(400).json({ error: 'plan must be one of: foundation, accelerator, elite' })
+    return
+  }
+
+  const token = generateInviteToken()
+  const invite = await RegistrationInvite.create({
+    tokenHash: hashInviteToken(token),
+    plan: planRaw,
+    createdBy: req.userId,
+  })
+
+  const registrationUrl = `${getClientOrigin()}/register/${token}`
+  res.status(201).json({
+    invite: {
+      id: String(invite._id),
+      plan: planRaw,
+      planLabel: planLabel(planRaw),
+      registrationUrl,
+      usedAt: null,
+      createdAt: invite.createdAt,
     },
+  })
+})
+
+adminRouter.get('/invites', requireAuth, requireAdmin, async (_req: Request, res: Response) => {
+  const invites = await RegistrationInvite.find()
+    .sort({ createdAt: -1 })
+    .limit(100)
+    .lean()
+    .exec()
+
+  res.json({
+    invites: invites.map((invite) => ({
+      id: String(invite._id),
+      plan: invite.plan,
+      planLabel: planLabel(invite.plan as InvitePlan),
+      usedAt: invite.usedAt ?? null,
+      usedByUserId: invite.usedByUserId ? String(invite.usedByUserId) : null,
+      createdAt: invite.createdAt,
+    })),
   })
 })

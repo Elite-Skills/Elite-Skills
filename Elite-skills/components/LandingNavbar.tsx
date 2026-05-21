@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Instagram, Linkedin, Menu, X } from 'lucide-react'
 import { useAuth } from '../state/AuthContext'
-import { useContact } from '../state/ContactContext'
+import type { PlanTier } from '../lib/planLimits'
 import {
   ELITE_SKILLS_GET_ACCESS_LABEL,
   ELITE_SKILLS_WHATSAPP,
@@ -18,27 +18,15 @@ function scrollToSection(id: string) {
 const navPrimaryCtaClassName =
   'inline-flex items-center justify-center bg-elite-gold hover:bg-elite-gold-dim text-black font-bold px-4 py-2 sm:px-6 rounded-sm transition-all text-[10px] sm:text-xs uppercase tracking-widest shrink-0 leading-none'
 
-function NavPrimaryCta({ token, plan }: { token: string | null; plan?: 'free' | 'paid' }) {
+function NavPrimaryCta({ token }: { token: string | null; plan?: PlanTier }) {
   if (token) {
-    if (plan === 'paid') {
-      return (
-        <Link
-          to="/checker"
-          className={`dashboard-nav-btn ${navPrimaryCtaClassName}`}
-        >
-          Dashboard
-        </Link>
-      )
-    }
     return (
-      <a
-        href={ELITE_SKILLS_WHATSAPP}
-        target="_blank"
-        rel="noopener noreferrer"
+      <Link
+        to="/checker"
         className={`dashboard-nav-btn ${navPrimaryCtaClassName}`}
       >
-        {ELITE_SKILLS_GET_ACCESS_LABEL}
-      </a>
+        Dashboard
+      </Link>
     )
   }
   return (
@@ -63,7 +51,6 @@ const navLinks = [
 
 export default function LandingNavbar() {
   const { token, user } = useAuth()
-  const { openContact } = useContact()
   const location = useLocation()
   const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -71,11 +58,6 @@ export default function LandingNavbar() {
 
   const handleNavClick = (e: React.MouseEvent, sectionId: string) => {
     setMobileOpen(false)
-    if (sectionId === 'contact') {
-      e.preventDefault()
-      openContact()
-      return
-    }
     if (isLanding) {
       e.preventDefault()
       scrollToSection(sectionId)
@@ -106,16 +88,28 @@ export default function LandingNavbar() {
 
           {/* Desktop: centered nav — vertically aligned with logo + actions */}
           <div className="relative z-10 hidden md:flex flex-1 min-w-0 items-center justify-center gap-x-5 lg:gap-x-6 px-2 text-xs uppercase tracking-[0.2em] text-elite-text-muted">
-            {navLinks.slice(0, -1).map(({ id, label, highlight }) => (
-              <Link
-                key={id}
-                to={id === 'contact' ? '#' : `/#${id}`}
-                onClick={(e) => handleNavClick(e, id)}
-                className={`inline-flex items-center shrink-0 whitespace-nowrap hover:text-elite-gold transition-colors py-2 ${highlight ? 'font-bold text-elite-gold' : ''}`}
-              >
-                {label}
-              </Link>
-            ))}
+            {navLinks.slice(0, -1).map(({ id, label, highlight }) =>
+              id === 'contact' ? (
+                <a
+                  key={id}
+                  href={ELITE_SKILLS_WHATSAPP}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`inline-flex items-center shrink-0 whitespace-nowrap hover:text-elite-gold transition-colors py-2 ${highlight ? 'font-bold text-elite-gold' : ''}`}
+                >
+                  {label}
+                </a>
+              ) : (
+                <Link
+                  key={id}
+                  to={`/#${id}`}
+                  onClick={(e) => handleNavClick(e, id)}
+                  className={`inline-flex items-center shrink-0 whitespace-nowrap hover:text-elite-gold transition-colors py-2 ${highlight ? 'font-bold text-elite-gold' : ''}`}
+                >
+                  {label}
+                </Link>
+              ),
+            )}
             <Link
               key={navLinks[navLinks.length - 1].id}
               to={`/#${navLinks[navLinks.length - 1].id}`}
@@ -161,16 +155,29 @@ export default function LandingNavbar() {
         </div>
         {mobileOpen && (
           <div className="md:hidden absolute top-20 left-0 right-0 bg-elite-black border-b border-white/10 py-4 px-4 flex flex-col gap-4">
-            {navLinks.map(({ id, label, highlight }) => (
-              <Link
-                key={id}
-                to={id === 'contact' ? '#' : `/#${id}`}
-                onClick={(e) => handleNavClick(e, id)}
-                className={`py-2 text-xs uppercase tracking-[0.2em] hover:text-elite-gold transition-colors ${highlight ? 'font-bold text-elite-gold' : 'text-elite-text-muted'}`}
-              >
-                {label}
-              </Link>
-            ))}
+            {navLinks.map(({ id, label, highlight }) =>
+              id === 'contact' ? (
+                <a
+                  key={id}
+                  href={ELITE_SKILLS_WHATSAPP}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMobileOpen(false)}
+                  className={`py-2 text-xs uppercase tracking-[0.2em] hover:text-elite-gold transition-colors ${highlight ? 'font-bold text-elite-gold' : 'text-elite-text-muted'}`}
+                >
+                  {label}
+                </a>
+              ) : (
+                <Link
+                  key={id}
+                  to={`/#${id}`}
+                  onClick={(e) => handleNavClick(e, id)}
+                  className={`py-2 text-xs uppercase tracking-[0.2em] hover:text-elite-gold transition-colors ${highlight ? 'font-bold text-elite-gold' : 'text-elite-text-muted'}`}
+                >
+                  {label}
+                </Link>
+              ),
+            )}
             <div className="flex flex-col gap-3 pt-4 border-t border-white/10">
               <span className="text-[10px] uppercase tracking-widest text-white/50 font-bold">
                 Follow

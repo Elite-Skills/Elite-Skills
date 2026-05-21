@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { ELITE_SKILLS_GET_ACCESS_LABEL, ELITE_SKILLS_WHATSAPP } from '../socialLinks';
 import { fetchStrategy } from '../api';
 import { ShieldCheck, Target, ChevronDown } from 'lucide-react';
-import { SAMPLE_STRATEGY_BANKS } from '../lib/planLimits';
+import { SAMPLE_STRATEGY_BANKS, planHasAllStrategyBanks } from '../lib/planLimits';
 import { useAuth } from '../state/AuthContext';
 
 /** Parses strategy text: **bold** titles, proper paragraphs */
@@ -65,7 +65,7 @@ const StrategyGenerator: React.FC = () => {
   const { token, user } = useAuth();
   const selectableBanks = useMemo(() => {
     if (!token) return [...SAMPLE_STRATEGY_BANKS];
-    if (user?.plan === 'paid') return [...ALL_STRATEGY_BANKS];
+    if (user && planHasAllStrategyBanks(user.plan)) return [...ALL_STRATEGY_BANKS];
     return [...SAMPLE_STRATEGY_BANKS];
   }, [token, user?.plan]);
 

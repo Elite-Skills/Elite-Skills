@@ -5,11 +5,13 @@ import mongoose from 'mongoose'
 import pdf from 'pdf-parse'
 
 import { requireAuth } from '../middleware/auth.js'
-import { requirePaidPlan } from '../middleware/requirePaidPlan.js'
 import { scoreResume } from '../utils/ats.js'
 import { correctGrammar } from '../utils/grammar.js'
 import { Scan } from '../models/Scan.js'
+import { User } from '../models/User.js'
 import { sanitizePlainTextMultiline } from '../utils/sanitize.js'
+import { getPlanLimits, planLabel } from '../utils/planLimits.js'
+import { loadUserPlanFields, normalizePlanTier } from '../utils/userPlan.js'
 
 export const scanRouter = Router()
 
@@ -19,13 +21,13 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 *
 
 type MulterRequest = Request & { file?: Express.Multer.File }
 
-const scanPaidOnly = requirePaidPlan({
-  code: 'ats_checker',
-  message:
-    'The ATS Resume Checker is included with Accelerator. Upgrade to run unlimited scans, unlock the resume creator, and get full AI tooling.',
-})
+scanRouter.post('/', requireAuth, upload.single('resume'), async (req: Request, res: Response) => {
+  const userId = req.userId
+  if (!userId) {
+    res.status(401).json({ error: 'Unauthorized' })
+    return
+  }
 
-scanRouter.post('/', requireAuth, scanPaidOnly, upload.single('resume'), async (req: Request, res: Response) => {
   const jobDescription = sanitizePlainTextMultiline(String(req.body?.jobDescription ?? ''), JOB_DESCRIPTION_MAX)
   if (!jobDescription.trim()) {
     res.status(400).json({ error: 'jobDescription is required' })
@@ -41,6 +43,34 @@ scanRouter.post('/', requireAuth, scanPaidOnly, upload.single('resume'), async (
   if (file.mimetype !== 'application/pdf') {
     res.status(400).json({ error: 'Only PDF files are supported' })
     return
+  }
+
+  const account = await loadUserPlanFields(userId)
+  if (!account) {
+    res.status(401).json({ error: 'Unauthorized' })
+    return
+  }
+
+  const plan = normalizePlanTier(account.plan)
+  const limits = getPlanLimits(plan)
+  const maxScans = limits.scans
+  if (maxScans !== null) {
+    const reserved = await User.findOneAndUpdate(
+      {
+        _id: userId,
+        scansUsed: { $lt: maxScans },
+      },
+      { $inc: { scansUsed: 1 } },
+      { new: true },
+    )
+    if (!reserved) {
+      res.status(429).json({
+        error: 'plan_limit',
+        code: 'ats_checker',
+        message: `Your ${planLabel(plan)} includes ${maxScans} ATS scans. Contact us to upgrade for more.`,
+      })
+      return
+    }
   }
 
   const parsed = await pdf(file.buffer)
@@ -75,7 +105,7 @@ scanRouter.post('/', requireAuth, scanPaidOnly, upload.single('resume'), async (
   res.json(apiResponse)
 })
 
-scanRouter.get('/history', requireAuth, scanPaidOnly, async (req: Request, res: Response) => {
+scanRouter.get('/history', requireAuth, async (req: Request, res: Response) => {
   type ScanListItem = { _id: unknown; score: number; createdAt: Date }
 
   const scans = (await Scan.find({ userId: req.userId })
@@ -88,7 +118,7 @@ scanRouter.get('/history', requireAuth, scanPaidOnly, async (req: Request, res: 
   })
 })
 
-scanRouter.get('/history/:scanId', requireAuth, scanPaidOnly, async (req: Request, res: Response) => {
+scanRouter.get('/history/:scanId', requireAuth, async (req: Request, res: Response) => {
   const { scanId } = req.params
   if (!mongoose.Types.ObjectId.isValid(scanId)) {
     res.status(400).json({ error: 'Invalid scan id' })
