@@ -16,7 +16,7 @@ function scrollToSection(id: string) {
 }
 
 const navPrimaryCtaClassName =
-  'bg-elite-gold hover:bg-elite-gold-dim text-black font-bold px-6 py-2 rounded-sm transition-all text-xs uppercase tracking-widest shrink-0'
+  'inline-flex items-center justify-center bg-elite-gold hover:bg-elite-gold-dim text-black font-bold px-4 py-2 sm:px-6 rounded-sm transition-all text-[10px] sm:text-xs uppercase tracking-widest shrink-0 leading-none'
 
 function NavPrimaryCta({ token, plan }: { token: string | null; plan?: 'free' | 'paid' }) {
   if (token) {
@@ -87,28 +87,31 @@ export default function LandingNavbar() {
   return (
     <nav className="landing-navbar fixed top-0 left-0 right-0 z-50 bg-elite-black/90 backdrop-blur-md border-b border-white/10 min-w-0">
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-20 w-full items-center gap-2 md:justify-between md:gap-4">
+        <div className="flex h-20 w-full items-center justify-between gap-3 sm:gap-4">
           <div className="relative z-10 flex min-w-0 shrink-0 items-center">
             <Link
               to="/"
-              className="font-serif font-bold hover:opacity-90 transition-opacity"
+              className="font-serif font-bold hover:opacity-90 transition-opacity inline-flex flex-col justify-center md:flex-row md:items-center md:gap-1.5 leading-[1.1]"
             >
-              <span className="flex flex-col items-start leading-[1.05] text-lg tracking-wider text-white md:hidden">
+              <span className="flex flex-col items-start justify-center leading-[1.05] text-base tracking-wider text-white sm:text-lg md:hidden">
                 <span className="text-elite-gold">ELITE</span>
-                <span>SKILLS</span>
+                <span className="text-white">SKILLS</span>
               </span>
-              <span className="hidden text-2xl tracking-wider text-white md:inline">
-                <span className="text-elite-gold">ELITE</span> SKILLS
+              <span className="hidden md:inline-flex md:items-center text-xl lg:text-2xl tracking-wider text-white">
+                <span className="text-elite-gold">ELITE</span>
+                <span className="text-white">{' '}SKILLS</span>
               </span>
             </Link>
           </div>
-          <div className="relative z-10 hidden md:flex items-center space-x-5 text-xs uppercase tracking-[0.2em] text-elite-text-muted">
+
+          {/* Desktop: centered nav — vertically aligned with logo + actions */}
+          <div className="relative z-10 hidden md:flex flex-1 min-w-0 items-center justify-center gap-x-5 lg:gap-x-6 px-2 text-xs uppercase tracking-[0.2em] text-elite-text-muted">
             {navLinks.slice(0, -1).map(({ id, label, highlight }) => (
               <Link
                 key={id}
                 to={id === 'contact' ? '#' : `/#${id}`}
                 onClick={(e) => handleNavClick(e, id)}
-                className={`hover:text-elite-gold transition-colors ${highlight ? 'font-bold text-elite-gold' : ''}`}
+                className={`inline-flex items-center shrink-0 whitespace-nowrap hover:text-elite-gold transition-colors py-2 ${highlight ? 'font-bold text-elite-gold' : ''}`}
               >
                 {label}
               </Link>
@@ -117,32 +120,29 @@ export default function LandingNavbar() {
               key={navLinks[navLinks.length - 1].id}
               to={`/#${navLinks[navLinks.length - 1].id}`}
               onClick={(e) => handleNavClick(e, navLinks[navLinks.length - 1].id)}
-              className="ml-4 pl-4 border-l border-white/20 font-bold text-elite-gold hover:text-elite-gold-dim transition-colors"
+              className="inline-flex items-center shrink-0 whitespace-nowrap ml-3 lg:ml-4 pl-3 lg:pl-4 border-l border-white/20 font-bold text-elite-gold hover:text-elite-gold-dim transition-colors py-2"
             >
               {navLinks[navLinks.length - 1].label}
             </Link>
           </div>
-          <div className="flex min-w-0 flex-1 justify-center md:hidden">
+
+          {/* Right cluster: same vertical alignment on mobile + desktop */}
+          <div className="relative z-10 flex shrink-0 items-center gap-2 sm:gap-3">
             <NavPrimaryCta token={token} plan={user?.plan} />
-          </div>
-          <div className="relative z-10 flex shrink-0 items-center gap-3 pr-3 sm:pr-4 md:gap-2 md:pr-0">
-            <div className="hidden md:block">
-              <NavPrimaryCta token={token} plan={user?.plan} />
-            </div>
             <button
               type="button"
               onClick={() => setMobileOpen((o) => !o)}
-              className="md:hidden shrink-0 p-2 text-elite-text-muted hover:text-white"
+              className="md:hidden inline-flex shrink-0 items-center justify-center p-2 text-elite-text-muted hover:text-white"
               aria-label="Toggle menu"
             >
-              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileOpen ? <X className="w-6 h-6" aria-hidden /> : <Menu className="w-6 h-6" aria-hidden />}
             </button>
-            <div className="hidden md:flex items-center gap-3 ml-3 sm:ml-4 pl-3 sm:pl-4 border-l border-white/20">
+            <div className="hidden md:inline-flex items-center gap-3 ml-1 pl-3 sm:ml-2 sm:pl-4 border-l border-white/20">
               <a
                 href={ELITE_SKILLS_INSTAGRAM}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-elite-text-muted hover:text-elite-gold transition-colors p-1"
+                className="inline-flex items-center justify-center text-elite-text-muted hover:text-elite-gold transition-colors p-1"
                 aria-label="Elite Skills on Instagram"
               >
                 <Instagram className="w-5 h-5" aria-hidden />
@@ -151,7 +151,7 @@ export default function LandingNavbar() {
                 href={ELITE_SKILLS_LINKEDIN}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-elite-text-muted hover:text-elite-gold transition-colors p-1"
+                className="inline-flex items-center justify-center text-elite-text-muted hover:text-elite-gold transition-colors p-1"
                 aria-label="Elite Skills on LinkedIn"
               >
                 <Linkedin className="w-5 h-5" aria-hidden />

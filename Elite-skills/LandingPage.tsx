@@ -14,6 +14,9 @@ import {
   ELITE_SKILLS_LINKEDIN,
 } from './socialLinks';
 
+/** Landing hero + footer WhatsApp CTAs: bundle wording while keeping the header Get Access label elsewhere. */
+const LANDING_ACCELERATOR_WHATSAPP_LABEL = 'Accelerator Bundle';
+
 const LandingPage: React.FC = () => {
   const [salary, setSalary] = useState(120000);
   const { openContact } = useContact();
@@ -68,7 +71,7 @@ const LandingPage: React.FC = () => {
                     rel="noopener noreferrer"
                     className="px-5 py-3.5 bg-elite-gold text-black font-bold text-sm rounded-sm hover:bg-white transition-all duration-300 shadow-[0_0_40px_rgba(212,175,55,0.2)] text-center md:px-10 md:py-5 md:text-lg"
                   >
-                    {ELITE_SKILLS_GET_ACCESS_LABEL}
+                    {LANDING_ACCELERATOR_WHATSAPP_LABEL}
                   </a>
                   <button
                     type="button"
@@ -239,11 +242,11 @@ const LandingPage: React.FC = () => {
                 rel="noopener noreferrer"
                 className="inline-block rounded-sm bg-elite-gold px-8 py-4 text-center text-base font-bold text-black shadow-[0_0_40px_rgba(212,175,55,0.4)] transition-all hover:shadow-[0_0_60px_rgba(212,175,55,0.6)] hover:brightness-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-elite-black md:px-16 md:py-6 md:text-xl md:transition-transform md:hover:scale-[1.02]"
               >
-                {ELITE_SKILLS_GET_ACCESS_LABEL}
+                {LANDING_ACCELERATOR_WHATSAPP_LABEL}
               </a>
             )}
             <p className="mt-4 max-w-xl text-center text-xs uppercase tracking-[0.3em] text-gray-600 md:mt-6">
-              Full Elite Skills bundle via WhatsApp — same {ELITE_SKILLS_GET_ACCESS_LABEL} link as the header
+              Opens WhatsApp for the Accelerator bundle — same {ELITE_SKILLS_GET_ACCESS_LABEL} link as the header
             </p>
           </div>
         </div>
