@@ -72,38 +72,69 @@ const isProd = String(process.env.NODE_ENV ?? '').toLowerCase() === 'production'
 /** Local Vite dev server; always allowed when not in production so CORS works even if CLIENT_ORIGIN is prod-only. */
 const defaultDevOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000']
 
-const allowedOrigins = isProd
-  ? envClientOrigins
-  : [...new Set([...defaultDevOrigins, ...envClientOrigins])]
+/** Production with no CLIENT_ORIGIN: allow any origin (logged warning). Otherwise build explicit allowlist. */
+const prodAllowAnyOrigin = isProd && envClientOrigins.length === 0
 
-const allowedOriginSet = new Set(allowedOrigins.map((o) => normalizeBrowserOrigin(o)))
+const originBaseList = isProd ? envClientOrigins : [...new Set([...defaultDevOrigins, ...envClientOrigins])]
 
-if (isProd && allowedOrigins.length === 0) {
+/** Adds www ⇄ apex variants so CLIENT_ORIGIN only needs one public hostname. Skips localhost. */
+function expandOriginAliases(origins: readonly string[]): string[] {
+  const out = new Set<string>()
+  for (const raw of origins) {
+    const o = normalizeBrowserOrigin(raw)
+    out.add(o)
+    try {
+      const u = new URL(o)
+      const host = u.hostname.toLowerCase()
+      if (host === 'localhost' || host === '127.0.0.1' || host.endsWith('.localhost')) continue
+      const port = u.port ? `:${u.port}` : ''
+      const proto = u.protocol
+      if (host.startsWith('www.')) {
+        const apex = host.slice(4)
+        if (apex) out.add(`${proto}//${apex}${port}`)
+      } else {
+        out.add(`${proto}//www.${host}${port}`)
+      }
+    } catch {
+      /* malformed URL — keep literal origin only */
+    }
+  }
+  return [...out]
+}
+
+const expandedOrigins = prodAllowAnyOrigin ? [] : expandOriginAliases(originBaseList)
+const allowedOriginSet = new Set(expandedOrigins.map((o) => normalizeBrowserOrigin(o)))
+
+if (prodAllowAnyOrigin) {
   console.warn('WARNING: CLIENT_ORIGIN not set in production. CORS will allow all origins. Set CLIENT_ORIGIN in Render Environment for security.')
+} else if (expandedOrigins.length > 0) {
+  console.log('[CORS] Allowed origins:', [...allowedOriginSet].sort().join(', '))
 }
 
 /** Before helmet/rate limits so OPTIONS preflight always receives CORS headers. */
 app.use(
   cors((req, callback) => {
-    const origin = String(req.headers.origin ?? '')
-
-    if (!origin) {
-      callback(null, { origin: false })
-      return
-    }
-
-    const normalized = normalizeBrowserOrigin(origin)
-
-    if (allowedOrigins.length > 0) {
+    if (prodAllowAnyOrigin) {
       callback(null, {
-        origin: allowedOriginSet.has(normalized),
+        origin: true,
         credentials: true,
         allowedHeaders: ['Content-Type', 'Authorization'],
       })
       return
     }
 
-    callback(null, { origin: true, credentials: true, allowedHeaders: ['Content-Type', 'Authorization'] })
+    const origin = String(req.headers.origin ?? '')
+    if (!origin) {
+      callback(null, { origin: false })
+      return
+    }
+
+    const normalized = normalizeBrowserOrigin(origin)
+    callback(null, {
+      origin: allowedOriginSet.has(normalized),
+      credentials: true,
+      allowedHeaders: ['Content-Type', 'Authorization'],
+    })
   })
 )
 
@@ -153,7 +184,7 @@ const httpServer = createServer(app)
 
 const io = new Server(httpServer, {
   cors: {
-    origin: allowedOrigins.length > 0 ? [...allowedOriginSet] : true,
+    origin: prodAllowAnyOrigin ? true : [...allowedOriginSet],
     credentials: true,
   },
   maxHttpBufferSize: 1e6,

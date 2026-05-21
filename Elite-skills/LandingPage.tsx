@@ -7,7 +7,12 @@ import LandingNavbar from './components/LandingNavbar';
 import { Calculator, ChevronRight, GraduationCap, TrendingUp, Globe, Award, Instagram, Linkedin } from 'lucide-react';
 import { useAuth } from './state/AuthContext';
 import { useContact } from './state/ContactContext';
-import { ELITE_SKILLS_INSTAGRAM, ELITE_SKILLS_LINKEDIN } from './socialLinks';
+import {
+  ELITE_SKILLS_GET_ACCESS_LABEL,
+  ELITE_SKILLS_WHATSAPP,
+  ELITE_SKILLS_INSTAGRAM,
+  ELITE_SKILLS_LINKEDIN,
+} from './socialLinks';
 
 const LandingPage: React.FC = () => {
   const [salary, setSalary] = useState(120000);
@@ -27,8 +32,6 @@ const LandingPage: React.FC = () => {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
-
-  const roi = Math.floor((salary - 99) / 99);
 
   return (
     <div className="min-h-screen">
@@ -59,16 +62,14 @@ const LandingPage: React.FC = () => {
                 </Link>
               ) : (
                 <>
-                  <Link
-                    to="/pricing"
+                  <a
+                    href={ELITE_SKILLS_WHATSAPP}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="px-5 py-3.5 bg-elite-gold text-black font-bold text-sm rounded-sm hover:bg-white transition-all duration-300 shadow-[0_0_40px_rgba(212,175,55,0.2)] text-center md:px-10 md:py-5 md:text-lg"
                   >
-                    Accelerator Bundle —{' '}
-                    <span className="inline-flex items-baseline gap-1 whitespace-nowrap tabular-nums">
-                      <span className="line-through opacity-70">€249</span>
-                      <span className="font-extrabold text-base md:text-lg">€99</span>
-                    </span>
-                  </Link>
+                    {ELITE_SKILLS_GET_ACCESS_LABEL}
+                  </a>
                   <button
                     type="button"
                     onClick={() => scrollToSection('ai-demo')}
@@ -186,22 +187,15 @@ const LandingPage: React.FC = () => {
         <div className="mx-auto max-w-4xl px-4 text-center">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-elite-gold/20 bg-elite-gold/5 px-4 py-1.5 md:mb-8">
              <Calculator className="h-3 w-3 text-elite-gold" />
-             <span className="text-[10px] font-bold uppercase tracking-widest text-elite-gold">Financial Analysis</span>
+             <span className="text-[10px] font-bold uppercase tracking-widest text-elite-gold">Perspective</span>
           </div>
-          <h2 className="mb-6 font-serif text-4xl md:mb-12 lg:text-5xl">The Investment Case</h2>
+          <h2 className="mb-6 font-serif text-4xl md:mb-12 lg:text-5xl">Your Upside</h2>
           <div className="relative rounded-2xl border border-white/10 bg-elite-gray p-4 shadow-2xl sm:p-6 md:p-10">
             <div className="grid grid-cols-1 items-center gap-6 text-left md:grid-cols-2 md:gap-12">
               <div className="space-y-5 md:space-y-8">
                 <div>
-                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-elite-text-muted md:mb-3">Investment Cost</label>
-                  <div className="font-serif text-4xl md:text-5xl">
-                    <span className="line-through text-gray-500">€249</span>{' '}
-                    <span className="font-bold text-elite-gold">€99</span>
-                  </div>
-                </div>
-                <div>
                   <div className="mb-3 flex items-center justify-between md:mb-4">
-                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-elite-text-muted">Target Salary (First Year)</label>
+                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-elite-text-muted">Illustrative first-year compensation</label>
                     <span className="font-mono font-bold text-elite-gold">€{salary.toLocaleString()}</span>
                   </div>
                   <input 
@@ -220,10 +214,12 @@ const LandingPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex min-w-0 flex-col justify-center overflow-hidden rounded-xl border border-elite-gold/10 bg-elite-gold/5 p-5 text-center sm:p-6 md:p-10">
-                <span className="mb-3 text-[10px] font-bold uppercase tracking-[0.4em] text-elite-gold md:mb-4">Expected ROI</span>
-                <div className="mb-2 break-words text-4xl font-bold tracking-tighter text-white sm:text-5xl md:text-6xl lg:text-7xl">{roi.toLocaleString()}x</div>
-                <p className="text-[10px] uppercase tracking-widest text-gray-500">Return on capital invested</p>
+              <div className="flex min-w-0 flex-col justify-center overflow-hidden rounded-xl border border-elite-gold/10 bg-elite-gold/5 p-5 text-left sm:p-6 md:p-10">
+                <span className="mb-3 text-[10px] font-bold uppercase tracking-[0.4em] text-elite-gold md:mb-4">Why preparation compounds</span>
+                <p className="text-sm leading-relaxed text-elite-text-muted">
+                  Strong processes stack: sharper technicals, cleaner materials, and less wasted cycles before interviews.
+                  Bands like the one you dial in above show why marginal gains in readiness can matter far beyond any fixed sticker price—we focus on shipping outcomes, not quoting numbers here.
+                </p>
               </div>
             </div>
           </div>
@@ -237,18 +233,18 @@ const LandingPage: React.FC = () => {
                 Go to Dashboard
               </Link>
             ) : (
-              <Link
-                to="/pricing"
+              <a
+                href={ELITE_SKILLS_WHATSAPP}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-block rounded-sm bg-elite-gold px-8 py-4 text-center text-base font-bold text-black shadow-[0_0_40px_rgba(212,175,55,0.4)] transition-all hover:shadow-[0_0_60px_rgba(212,175,55,0.6)] hover:brightness-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-elite-black md:px-16 md:py-6 md:text-xl md:transition-transform md:hover:scale-[1.02]"
               >
-                Get The Elite Skills Bundle —{' '}
-                <span className="inline-flex items-baseline gap-1 whitespace-nowrap tabular-nums">
-                  <span className="line-through opacity-70">€249</span>
-                  <span className="font-extrabold">€99</span>
-                </span>
-              </Link>
+                {ELITE_SKILLS_GET_ACCESS_LABEL}
+              </a>
             )}
-            <p className="mt-4 text-xs uppercase tracking-[0.3em] text-gray-600 md:mt-6">Instant Access • PDF Guide • AI Simulator • Strategy Vault</p>
+            <p className="mt-4 max-w-xl text-center text-xs uppercase tracking-[0.3em] text-gray-600 md:mt-6">
+              Full Elite Skills bundle via WhatsApp — same {ELITE_SKILLS_GET_ACCESS_LABEL} link as the header
+            </p>
           </div>
         </div>
       </section>

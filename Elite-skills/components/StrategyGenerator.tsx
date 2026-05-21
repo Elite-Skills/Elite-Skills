@@ -1,6 +1,7 @@
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { ELITE_SKILLS_GET_ACCESS_LABEL, ELITE_SKILLS_WHATSAPP } from '../socialLinks';
 import { fetchStrategy } from '../api';
 import { ShieldCheck, Target, ChevronDown } from 'lucide-react';
 import { SAMPLE_STRATEGY_BANKS } from '../lib/planLimits';
@@ -195,9 +196,14 @@ const StrategyGenerator: React.FC = () => {
           {planError && (
             <p className="text-[11px] text-amber-200/90">
               {planError}{' '}
-              <Link to="/pricing" className="font-semibold text-elite-gold underline hover:text-elite-gold-dim">
-                View pricing
-              </Link>
+              <a
+                href={ELITE_SKILLS_WHATSAPP}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-elite-gold underline hover:text-elite-gold-dim"
+              >
+                {ELITE_SKILLS_GET_ACCESS_LABEL}
+              </a>
             </p>
           )}
 

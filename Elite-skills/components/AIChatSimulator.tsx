@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { boardroomChat, me, normalizeAuthUser } from '../api';
+import { ELITE_SKILLS_GET_ACCESS_LABEL, ELITE_SKILLS_WHATSAPP } from '../socialLinks';
 import { Send, Briefcase } from 'lucide-react';
 import { useAuth } from '../state/AuthContext';
 import { FREE_BOARDROOM_AI_MESSAGES } from '../lib/planLimits';
@@ -141,20 +142,30 @@ const AIChatSimulator: React.FC = () => {
                     <Link to="/login" className="font-semibold text-elite-gold underline hover:text-elite-gold-dim">
                       Create a free account
                     </Link>
-                    {' '}for {FREE_BOARDROOM_AI_MESSAGES} more boardroom messages, or see{' '}
-                    <Link to="/pricing" className="font-semibold text-elite-gold underline hover:text-elite-gold-dim">
-                      View pricing
-                    </Link>
+                    {' '}for {FREE_BOARDROOM_AI_MESSAGES} more boardroom messages, or{' '}
+                    <a
+                      href={ELITE_SKILLS_WHATSAPP}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold text-elite-gold underline hover:text-elite-gold-dim"
+                    >
+                      {ELITE_SKILLS_GET_ACCESS_LABEL}
+                    </a>
                     {' '}for unlimited boardroom, ATS checker, resume creator, and full strategy vault.
                   </>
                 ) : msg.limitKind === 'free' ? (
                   <>
                     You&apos;ve used your {FREE_BOARDROOM_AI_MESSAGES} free boardroom messages.{' '}
                     <strong className="text-white not-italic">Accelerator</strong> — unlimited boardroom, ATS checker, resume PDF
-                    export, and every strategy firm. Open the upgrade panel or{' '}
-                    <Link to="/pricing" className="font-semibold text-elite-gold underline not-italic hover:text-elite-gold-dim">
-                      View pricing
-                    </Link>
+                    export, and every strategy firm.{' '}
+                    <a
+                      href={ELITE_SKILLS_WHATSAPP}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold text-elite-gold underline not-italic hover:text-elite-gold-dim"
+                    >
+                      {ELITE_SKILLS_GET_ACCESS_LABEL}
+                    </a>
                     .
                   </>
                 ) : (
@@ -192,18 +203,28 @@ const AIChatSimulator: React.FC = () => {
                     Log in
                   </Link>
                   {' '}or sign up for {FREE_BOARDROOM_AI_MESSAGES} more boardroom runs on a free account—or{' '}
-                  <Link to="/pricing" className="font-semibold text-elite-gold underline hover:text-elite-gold-dim">
-                    View pricing
-                  </Link>
+                  <a
+                    href={ELITE_SKILLS_WHATSAPP}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-elite-gold underline hover:text-elite-gold-dim"
+                  >
+                    {ELITE_SKILLS_GET_ACCESS_LABEL}
+                  </a>
                   {' '}for <strong className="text-white">Accelerator</strong>—unlimited boardroom, ATS checker, resume creator,
                   and every strategy firm.
                 </>
               ) : (
                 <>
                   Free tier includes {FREE_BOARDROOM_AI_MESSAGES} boardroom messages—you&apos;re at the limit.{' '}
-                  <Link to="/pricing" className="font-semibold text-elite-gold underline hover:text-elite-gold-dim">
-                    View pricing
-                  </Link>
+                  <a
+                    href={ELITE_SKILLS_WHATSAPP}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-elite-gold underline hover:text-elite-gold-dim"
+                  >
+                    {ELITE_SKILLS_GET_ACCESS_LABEL}
+                  </a>
                   {' '}for <strong className="text-white">Accelerator</strong>—unlimited boardroom, ATS checker, resume creator,
                   and the full strategy vault.
                 </>
@@ -218,20 +239,24 @@ const AIChatSimulator: React.FC = () => {
                   >
                     Log in or sign up
                   </Link>
-                  <Link
-                    to="/pricing"
+                  <a
+                    href={ELITE_SKILLS_WHATSAPP}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="inline-block rounded-sm bg-elite-gold px-6 py-3 text-center text-sm font-bold !text-black hover:bg-white hover:!text-black"
                   >
-                    View pricing
-                  </Link>
+                    {ELITE_SKILLS_GET_ACCESS_LABEL}
+                  </a>
                 </>
               ) : (
-                <Link
-                  to="/pricing"
+                <a
+                  href={ELITE_SKILLS_WHATSAPP}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-block w-full rounded-sm bg-elite-gold px-8 py-3 text-center text-sm font-bold !text-black hover:bg-white hover:!text-black sm:w-auto"
                 >
-                  View pricing
-                </Link>
+                  {ELITE_SKILLS_GET_ACCESS_LABEL}
+                </a>
               )}
             </div>
           </div>

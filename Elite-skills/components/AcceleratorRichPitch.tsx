@@ -1,3 +1,5 @@
+import { ELITE_SKILLS_GET_ACCESS_LABEL, ELITE_SKILLS_WHATSAPP } from '../socialLinks'
+
 import { Link } from 'react-router-dom'
 
 type AcceleratorRichPitchProps = {
@@ -47,7 +49,16 @@ export function AcceleratorRichPitch({ className }: AcceleratorRichPitchProps) {
         <Link to="/profile/me" style={{ color: 'var(--elite-gold, #d4af37)' }}>
           keep it updated here
         </Link>
-        , then upgrade when you&apos;re ready to ship like you mean it.
+        . For the full Elite Skills bundle on WhatsApp, use{' '}
+        <a
+          href={ELITE_SKILLS_WHATSAPP}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: 'var(--elite-gold, #d4af37)', fontWeight: 600 }}
+        >
+          {ELITE_SKILLS_GET_ACCESS_LABEL}
+        </a>
+        —the same link as the header.
       </p>
     </div>
   )

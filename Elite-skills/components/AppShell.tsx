@@ -1,6 +1,7 @@
 import type React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
+import { ELITE_SKILLS_GET_ACCESS_LABEL } from '../socialLinks'
 import { useAuth } from '../state/AuthContext'
 import LandingNavbar from './LandingNavbar'
 import { useRealtime } from '../state/RealtimeContext'
@@ -172,7 +173,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             const isAcceleratorOnly = it.to === '/checker' || it.to === '/resume-creator'
             const hint =
               isAcceleratorOnly && user?.plan !== 'paid'
-                ? `${it.label} — Accelerator (upgrade)`
+                ? `${it.label} — ${ELITE_SKILLS_GET_ACCESS_LABEL} (WhatsApp)`
                 : it.label
               return (
                 <div key={it.to} className="sidebarItemWrap">

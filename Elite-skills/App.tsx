@@ -6,7 +6,6 @@ import { useContact } from './state/ContactContext';
 import { useAuth } from './state/AuthContext';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import PricingPage from './pages/PricingPage';
 import CheckerPage from './pages/CheckerPage';
 import ReferralsPage from './pages/ReferralsPage';
 import NewReferralPage from './pages/NewReferralPage';
@@ -39,7 +38,7 @@ export default function App() {
       <Route path="/" element={<LandingOrRedirect />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
-      <Route path="/pricing" element={<PricingPage />} />
+      <Route path="/pricing" element={<Navigate to="/" replace />} />
       <Route path="/blog" element={<BlogListPage />} />
       <Route path="/blog/new" element={<BlogEditPage />} />
       <Route path="/blog/edit/:id" element={<BlogEditPage />} />

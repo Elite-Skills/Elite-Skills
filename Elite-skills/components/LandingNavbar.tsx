@@ -3,15 +3,17 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Instagram, Linkedin, Menu, X } from 'lucide-react'
 import { useAuth } from '../state/AuthContext'
 import { useContact } from '../state/ContactContext'
-import { ELITE_SKILLS_INSTAGRAM, ELITE_SKILLS_LINKEDIN } from '../socialLinks'
+import {
+  ELITE_SKILLS_GET_ACCESS_LABEL,
+  ELITE_SKILLS_WHATSAPP,
+  ELITE_SKILLS_INSTAGRAM,
+  ELITE_SKILLS_LINKEDIN,
+} from '../socialLinks'
 
 function scrollToSection(id: string) {
   const el = document.getElementById(id)
   if (el) el.scrollIntoView({ behavior: 'smooth' })
 }
-
-const WHATSAPP_GET_ACCESS =
-  'https://api.whatsapp.com/send/?phone=447441428122'
 
 const navPrimaryCtaClassName =
   'bg-elite-gold hover:bg-elite-gold-dim text-black font-bold px-6 py-2 rounded-sm transition-all text-xs uppercase tracking-widest shrink-0'
@@ -29,22 +31,24 @@ function NavPrimaryCta({ token, plan }: { token: string | null; plan?: 'free' | 
       )
     }
     return (
-      <Link
-        to="/pricing"
+      <a
+        href={ELITE_SKILLS_WHATSAPP}
+        target="_blank"
+        rel="noopener noreferrer"
         className={`dashboard-nav-btn ${navPrimaryCtaClassName}`}
       >
-        Get Upgraded
-      </Link>
+        {ELITE_SKILLS_GET_ACCESS_LABEL}
+      </a>
     )
   }
   return (
     <a
-      href={WHATSAPP_GET_ACCESS}
+      href={ELITE_SKILLS_WHATSAPP}
       target="_blank"
       rel="noopener noreferrer"
       className={navPrimaryCtaClassName}
     >
-      Get Access
+      {ELITE_SKILLS_GET_ACCESS_LABEL}
     </a>
   )
 }
@@ -54,7 +58,7 @@ const navLinks = [
   { id: 'accelerator', label: 'The Accelerator' },
   { id: 'ai-demo', label: '✨ AI Simulation', highlight: true },
   { id: 'contact', label: 'Contact Us' },
-  { id: 'roi', label: 'ROI', highlight: true },
+  { id: 'roi', label: 'Upside', highlight: true },
 ]
 
 export default function LandingNavbar() {
