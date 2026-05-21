@@ -45,7 +45,7 @@ const navLinks = [
   { id: 'problem', label: 'The Reality' },
   { id: 'accelerator', label: 'The Accelerator' },
   { id: 'ai-demo', label: '✨ AI Simulation', highlight: true },
-  { id: 'contact', label: 'Contact Us' },
+  { id: 'dashboard', label: 'Dashboard' },
   { id: 'roi', label: 'ROI', highlight: true },
 ]
 
@@ -89,16 +89,14 @@ export default function LandingNavbar() {
           {/* Desktop: centered nav — vertically aligned with logo + actions */}
           <div className="relative z-10 hidden md:flex flex-1 min-w-0 items-center justify-center gap-x-5 lg:gap-x-6 px-2 text-xs uppercase tracking-[0.2em] text-elite-text-muted">
             {navLinks.slice(0, -1).map(({ id, label, highlight }) =>
-              id === 'contact' ? (
-                <a
+              id === 'dashboard' ? (
+                <Link
                   key={id}
-                  href={ELITE_SKILLS_WHATSAPP}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  to="/checker"
                   className={`inline-flex items-center shrink-0 whitespace-nowrap hover:text-elite-gold transition-colors py-2 ${highlight ? 'font-bold text-elite-gold' : ''}`}
                 >
                   {label}
-                </a>
+                </Link>
               ) : (
                 <Link
                   key={id}
@@ -156,17 +154,15 @@ export default function LandingNavbar() {
         {mobileOpen && (
           <div className="md:hidden absolute top-20 left-0 right-0 bg-elite-black border-b border-white/10 py-4 px-4 flex flex-col gap-4">
             {navLinks.map(({ id, label, highlight }) =>
-              id === 'contact' ? (
-                <a
+              id === 'dashboard' ? (
+                <Link
                   key={id}
-                  href={ELITE_SKILLS_WHATSAPP}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  to="/checker"
                   onClick={() => setMobileOpen(false)}
                   className={`py-2 text-xs uppercase tracking-[0.2em] hover:text-elite-gold transition-colors ${highlight ? 'font-bold text-elite-gold' : 'text-elite-text-muted'}`}
                 >
                   {label}
-                </a>
+                </Link>
               ) : (
                 <Link
                   key={id}
