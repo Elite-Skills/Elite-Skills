@@ -53,25 +53,18 @@ app.set('trust proxy', trustProxy ? 1 : false)
 
 app.use(express.json({ limit: '2mb' }))
 
-app.use(helmet())
-app.use(compression())
-
-app.use(
-  rateLimit({
-    windowMs: 15 * 60 * 1000,
-    limit: 300,
-    standardHeaders: 'draft-7',
-    legacyHeaders: false,
-  })
-)
-
 if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET is not set')
 }
 
+/** Normalize Origin header values and env entries so https://example.com/ matches https://example.com */
+function normalizeBrowserOrigin(raw: string): string {
+  return raw.trim().replace(/\/+$/, '')
+}
+
 const envClientOrigins = String(process.env.CLIENT_ORIGIN ?? '')
   .split(',')
-  .map((s) => s.trim())
+  .map((s) => normalizeBrowserOrigin(s))
   .filter(Boolean)
 
 const isProd = String(process.env.NODE_ENV ?? '').toLowerCase() === 'production'
@@ -83,10 +76,13 @@ const allowedOrigins = isProd
   ? envClientOrigins
   : [...new Set([...defaultDevOrigins, ...envClientOrigins])]
 
+const allowedOriginSet = new Set(allowedOrigins.map((o) => normalizeBrowserOrigin(o)))
+
 if (isProd && allowedOrigins.length === 0) {
   console.warn('WARNING: CLIENT_ORIGIN not set in production. CORS will allow all origins. Set CLIENT_ORIGIN in Render Environment for security.')
 }
 
+/** Before helmet/rate limits so OPTIONS preflight always receives CORS headers. */
 app.use(
   cors((req, callback) => {
     const origin = String(req.headers.origin ?? '')
@@ -96,9 +92,11 @@ app.use(
       return
     }
 
+    const normalized = normalizeBrowserOrigin(origin)
+
     if (allowedOrigins.length > 0) {
       callback(null, {
-        origin: allowedOrigins.includes(origin),
+        origin: allowedOriginSet.has(normalized),
         credentials: true,
         allowedHeaders: ['Content-Type', 'Authorization'],
       })
@@ -106,6 +104,18 @@ app.use(
     }
 
     callback(null, { origin: true, credentials: true, allowedHeaders: ['Content-Type', 'Authorization'] })
+  })
+)
+
+app.use(helmet())
+app.use(compression())
+
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 300,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
   })
 )
 
@@ -143,7 +153,7 @@ const httpServer = createServer(app)
 
 const io = new Server(httpServer, {
   cors: {
-    origin: allowedOrigins.length > 0 ? allowedOrigins : true,
+    origin: allowedOrigins.length > 0 ? [...allowedOriginSet] : true,
     credentials: true,
   },
   maxHttpBufferSize: 1e6,
