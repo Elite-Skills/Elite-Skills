@@ -58,7 +58,7 @@ const navLinks = [
   { id: 'accelerator', label: 'The Accelerator' },
   { id: 'ai-demo', label: '✨ AI Simulation', highlight: true },
   { id: 'contact', label: 'Contact Us' },
-  { id: 'roi', label: 'Upside', highlight: true },
+  { id: 'roi', label: 'ROI', highlight: true },
 ]
 
 export default function LandingNavbar() {
