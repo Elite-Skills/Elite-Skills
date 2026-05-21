@@ -1,7 +1,9 @@
 import mongoose from 'mongoose'
 
 import { User } from './models/User.js'
+import { RegistrationInvite } from './models/RegistrationInvite.js'
 import { ensureBootstrapAdmin } from './utils/bootstrapAdmin.js'
+import { inviteExpiresAt } from './utils/inviteExpiry.js'
 
 export async function connectToDatabase(): Promise<void> {
   const uri = process.env.MONGODB_URI
@@ -66,5 +68,24 @@ export async function connectToDatabase(): Promise<void> {
     await ensureBootstrapAdmin()
   } catch (e) {
     console.warn('[db] admin bootstrap skipped:', e)
+  }
+
+  try {
+    const missingExpiry = await RegistrationInvite.find({
+      $or: [{ expiresAt: { $exists: false } }, { expiresAt: null }],
+    })
+      .select({ createdAt: 1 })
+      .lean()
+      .exec()
+
+    for (const invite of missingExpiry) {
+      const created = invite.createdAt instanceof Date ? invite.createdAt : new Date()
+      await RegistrationInvite.updateOne({ _id: invite._id }, { $set: { expiresAt: inviteExpiresAt(created) } })
+    }
+    if (missingExpiry.length > 0) {
+      console.log(`[db] Backfilled expiresAt for ${missingExpiry.length} registration invite(s)`)
+    }
+  } catch (e) {
+    console.warn('[db] invite expiry backfill skipped:', e)
   }
 }

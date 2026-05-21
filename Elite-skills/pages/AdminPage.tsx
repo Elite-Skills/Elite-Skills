@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 
 import {
   createRegistrationInvite,
+  deleteRegistrationInvite,
   listRegistrationInvites,
   login,
   type AccountPlan,
@@ -17,6 +18,12 @@ function formatWhen(value: string | null): string {
   const d = new Date(value)
   if (Number.isNaN(d.getTime())) return value
   return d.toLocaleString()
+}
+
+function inviteStatusLabel(invite: RegistrationInviteItem): string {
+  if (invite.status === 'used') return `Used ${formatWhen(invite.usedAt)}`
+  if (invite.status === 'expired') return 'Expired'
+  return 'Unused'
 }
 
 export default function AdminPage() {
@@ -37,6 +44,7 @@ export default function AdminPage() {
   const [invites, setInvites] = useState<RegistrationInviteItem[]>([])
   const [invitesLoading, setInvitesLoading] = useState(false)
   const [invitesError, setInvitesError] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const isAdmin = Boolean(user?.isAdmin)
 
@@ -98,6 +106,8 @@ export default function AdminPage() {
           usedAt: data.invite.usedAt,
           usedByUserId: null,
           createdAt: data.invite.createdAt,
+          expiresAt: data.invite.expiresAt,
+          status: data.invite.status,
         },
         ...prev,
       ])
@@ -115,6 +125,20 @@ export default function AdminPage() {
       window.setTimeout(() => setCopied(false), 2000)
     } catch {
       setCreateError('Could not copy link to clipboard')
+    }
+  }
+
+  async function onDeleteInvite(id: string) {
+    if (!window.confirm('Delete this registration link? It will stop working immediately.')) return
+    setDeletingId(id)
+    setInvitesError(null)
+    try {
+      await deleteRegistrationInvite(id)
+      setInvites((prev) => prev.filter((invite) => invite.id !== id))
+    } catch (err) {
+      setInvitesError(err instanceof Error ? err.message : 'Could not delete invite')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -178,7 +202,7 @@ export default function AdminPage() {
 
               <h2 style={{ marginBottom: 8 }}>Registration link creator</h2>
               <p className="muted" style={{ marginTop: 0 }}>
-                Each link works once. Choose the plan the user receives when they register.
+                Each link works once and expires 24 hours after creation. Choose the plan the user receives when they register.
               </p>
 
               <form onSubmit={onCreateInvite} className="form" style={{ marginTop: 16 }}>
@@ -250,7 +274,9 @@ export default function AdminPage() {
                       <tr className="muted">
                         <th style={{ textAlign: 'left', padding: '8px 6px' }}>Plan</th>
                         <th style={{ textAlign: 'left', padding: '8px 6px' }}>Created</th>
+                        <th style={{ textAlign: 'left', padding: '8px 6px' }}>Expires</th>
                         <th style={{ textAlign: 'left', padding: '8px 6px' }}>Status</th>
+                        <th style={{ textAlign: 'right', padding: '8px 6px' }}></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -258,8 +284,18 @@ export default function AdminPage() {
                         <tr key={invite.id} style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                           <td style={{ padding: '10px 6px' }}>{invite.planLabel}</td>
                           <td style={{ padding: '10px 6px' }}>{formatWhen(invite.createdAt)}</td>
-                          <td style={{ padding: '10px 6px' }}>
-                            {invite.usedAt ? `Used ${formatWhen(invite.usedAt)}` : 'Unused'}
+                          <td style={{ padding: '10px 6px' }}>{formatWhen(invite.expiresAt)}</td>
+                          <td style={{ padding: '10px 6px' }}>{inviteStatusLabel(invite)}</td>
+                          <td style={{ padding: '10px 6px', textAlign: 'right' }}>
+                            <button
+                              type="button"
+                              className="btn secondary"
+                              disabled={deletingId === invite.id}
+                              onClick={() => onDeleteInvite(invite.id)}
+                              style={{ padding: '6px 12px', fontSize: 13 }}
+                            >
+                              {deletingId === invite.id ? 'Deleting…' : 'Delete'}
+                            </button>
                           </td>
                         </tr>
                       ))}

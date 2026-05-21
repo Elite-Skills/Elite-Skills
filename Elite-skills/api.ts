@@ -160,21 +160,34 @@ export async function register(payload: {
   return { token: data.token, user: normalizeAuthUser(data.user) }
 }
 
-export type InvitePreview = { valid: true; plan: AccountPlan; planLabel: string } | { valid: false; error?: string }
+export type InvitePreview =
+  | { valid: true; plan: AccountPlan; planLabel: string; expiresAt?: string }
+  | { valid: false; error?: string }
 
 export async function validateRegistrationInvite(token: string): Promise<InvitePreview> {
   const cleaned = String(token ?? '').trim()
   if (!cleaned) return { valid: false, error: 'Invalid link' }
   try {
-    const data = await request<{ valid: boolean; plan?: AccountPlan; planLabel?: string; error?: string }>(
-      `/api/auth/invite/${encodeURIComponent(cleaned)}`,
-    )
+    const data = await request<{
+      valid: boolean
+      plan?: AccountPlan
+      planLabel?: string
+      expiresAt?: string
+      error?: string
+    }>(`/api/auth/invite/${encodeURIComponent(cleaned)}`)
     if (!data.valid || !data.plan) return { valid: false, error: data.error ?? 'Invalid link' }
-    return { valid: true, plan: normalizePlanTier(data.plan), planLabel: data.planLabel ?? planLabel(normalizePlanTier(data.plan)) }
+    return {
+      valid: true,
+      plan: normalizePlanTier(data.plan),
+      planLabel: data.planLabel ?? planLabel(normalizePlanTier(data.plan)),
+      expiresAt: data.expiresAt,
+    }
   } catch (err) {
     return { valid: false, error: err instanceof Error ? err.message : 'Invalid link' }
   }
 }
+
+export type RegistrationInviteStatus = 'unused' | 'used' | 'expired'
 
 export type RegistrationInviteItem = {
   id: string
@@ -183,6 +196,8 @@ export type RegistrationInviteItem = {
   usedAt: string | null
   usedByUserId: string | null
   createdAt: string
+  expiresAt: string | null
+  status: RegistrationInviteStatus
 }
 
 export async function createRegistrationInvite(plan: AccountPlan): Promise<{
@@ -197,6 +212,11 @@ export async function createRegistrationInvite(plan: AccountPlan): Promise<{
 
 export async function listRegistrationInvites(): Promise<{ invites: RegistrationInviteItem[] }> {
   return request('/api/admin/invites')
+}
+
+export async function deleteRegistrationInvite(id: string): Promise<{ ok: true }> {
+  assertMongoId(id, 'invite id')
+  return request(`/api/admin/invites/${encodeURIComponent(id)}`, { method: 'DELETE' })
 }
 
 export async function login(payload: { email: string; password: string }): Promise<{ token: string; user: AuthUser }> {

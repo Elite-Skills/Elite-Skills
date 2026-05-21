@@ -2,18 +2,29 @@ import { Router } from 'express'
 import type { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+import mongoose from 'mongoose'
 
 import { User } from '../models/User.js'
 import { RegistrationInvite } from '../models/RegistrationInvite.js'
 import { requireAuth } from '../middleware/auth.js'
 import { requireAdmin } from '../middleware/requireAdmin.js'
 import { validateRegisterInput, validateLoginInput } from '../utils/sanitize.js'
+import { inviteExpiresAt, inviteStatus, isInviteExpired, resolveInviteExpiresAt } from '../utils/inviteExpiry.js'
 import { generateInviteToken, hashInviteToken } from '../utils/inviteToken.js'
 import { isInvitePlan, planLabel, type InvitePlan } from '../utils/planLimits.js'
 import { isAdminEmail, serializeAuthUser } from '../utils/userPlan.js'
 
 export const authRouter = Router()
 export const adminRouter = Router()
+
+type InviteLean = {
+  _id?: unknown
+  plan?: string
+  usedAt?: Date | null
+  usedByUserId?: unknown
+  createdAt?: Date
+  expiresAt?: Date | null
+}
 
 function signToken(userId: string): string {
   const secret = process.env.JWT_SECRET
@@ -29,6 +40,20 @@ function getClientOrigin(): string {
   return raw.replace(/\/+$/, '') || 'http://localhost:5173'
 }
 
+function serializeInviteListItem(invite: InviteLean) {
+  const expiresAt = resolveInviteExpiresAt(invite)
+  return {
+    id: String(invite._id),
+    plan: invite.plan,
+    planLabel: planLabel(invite.plan as InvitePlan),
+    usedAt: invite.usedAt ?? null,
+    usedByUserId: invite.usedByUserId ? String(invite.usedByUserId) : null,
+    createdAt: invite.createdAt,
+    expiresAt,
+    status: inviteStatus(invite),
+  }
+}
+
 authRouter.get('/invite/:token', async (req: Request, res: Response) => {
   const token = String(req.params.token ?? '').trim()
   if (!token || token.length > 256) {
@@ -37,14 +62,24 @@ authRouter.get('/invite/:token', async (req: Request, res: Response) => {
   }
 
   const inviteDoc = await RegistrationInvite.findOne({ tokenHash: hashInviteToken(token) }).lean().exec()
-  const invite = inviteDoc as { usedAt?: Date | null; plan?: string } | null
+  const invite = inviteDoc as InviteLean | null
   if (!invite || invite.usedAt) {
     res.status(404).json({ valid: false, error: 'Invalid link' })
     return
   }
 
+  if (isInviteExpired(invite)) {
+    res.status(410).json({ valid: false, error: 'This registration link has expired' })
+    return
+  }
+
   const plan = invite.plan as InvitePlan
-  res.json({ valid: true, plan, planLabel: planLabel(plan) })
+  res.json({
+    valid: true,
+    plan,
+    planLabel: planLabel(plan),
+    expiresAt: resolveInviteExpiresAt(invite),
+  })
 })
 
 authRouter.post('/register', async (req: Request, res: Response) => {
@@ -68,12 +103,19 @@ authRouter.post('/register', async (req: Request, res: Response) => {
   }
 
   const tokenHash = hashInviteToken(inviteToken)
+  const now = new Date()
   const invite = await RegistrationInvite.findOneAndUpdate(
-    { tokenHash, usedAt: null },
-    { $set: { usedAt: new Date() } },
+    { tokenHash, usedAt: null, expiresAt: { $gt: now } },
+    { $set: { usedAt: now } },
     { new: false },
   )
   if (!invite) {
+    const existingInvite = await RegistrationInvite.findOne({ tokenHash }).lean().exec()
+    const doc = existingInvite as InviteLean | null
+    if (doc && !doc.usedAt && isInviteExpired(doc)) {
+      res.status(403).json({ error: 'This registration link has expired' })
+      return
+    }
     res.status(403).json({ error: 'Invalid link' })
     return
   }
@@ -151,21 +193,19 @@ adminRouter.post('/invites', requireAuth, requireAdmin, async (req: Request, res
   }
 
   const token = generateInviteToken()
+  const expiresAt = inviteExpiresAt()
   const invite = await RegistrationInvite.create({
     tokenHash: hashInviteToken(token),
     plan: planRaw,
     createdBy: req.userId,
+    expiresAt,
   })
 
   const registrationUrl = `${getClientOrigin()}/register/${token}`
   res.status(201).json({
     invite: {
-      id: String(invite._id),
-      plan: planRaw,
-      planLabel: planLabel(planRaw),
+      ...serializeInviteListItem(invite as InviteLean),
       registrationUrl,
-      usedAt: null,
-      createdAt: invite.createdAt,
     },
   })
 })
@@ -178,13 +218,22 @@ adminRouter.get('/invites', requireAuth, requireAdmin, async (_req: Request, res
     .exec()
 
   res.json({
-    invites: invites.map((invite) => ({
-      id: String(invite._id),
-      plan: invite.plan,
-      planLabel: planLabel(invite.plan as InvitePlan),
-      usedAt: invite.usedAt ?? null,
-      usedByUserId: invite.usedByUserId ? String(invite.usedByUserId) : null,
-      createdAt: invite.createdAt,
-    })),
+    invites: (invites as InviteLean[]).map(serializeInviteListItem),
   })
+})
+
+adminRouter.delete('/invites/:id', requireAuth, requireAdmin, async (req: Request, res: Response) => {
+  const { id } = req.params
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    res.status(400).json({ error: 'Invalid invite id' })
+    return
+  }
+
+  const deleted = await RegistrationInvite.findOneAndDelete({ _id: id }).exec()
+  if (!deleted) {
+    res.status(404).json({ error: 'Invite not found' })
+    return
+  }
+
+  res.json({ ok: true })
 })

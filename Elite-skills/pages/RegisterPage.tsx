@@ -12,6 +12,7 @@ export default function RegisterPage() {
 
   const [inviteLoading, setInviteLoading] = useState(true)
   const [inviteValid, setInviteValid] = useState(false)
+  const [inviteError, setInviteError] = useState<string | null>(null)
   const [planLabel, setPlanLabel] = useState<string | null>(null)
 
   const [name, setName] = useState('')
@@ -27,22 +28,29 @@ export default function RegisterPage() {
     async function loadInvite() {
       if (!token) {
         setInviteValid(false)
+        setInviteError('Invalid link')
         setInviteLoading(false)
         return
       }
 
       setInviteLoading(true)
+      setInviteError(null)
       try {
         const preview = await validateRegistrationInvite(token)
         if (cancelled) return
         if (preview.valid) {
           setInviteValid(true)
           setPlanLabel(preview.planLabel)
+          setInviteError(null)
         } else {
           setInviteValid(false)
+          setInviteError(preview.error ?? 'Invalid link')
         }
       } catch {
-        if (!cancelled) setInviteValid(false)
+        if (!cancelled) {
+          setInviteValid(false)
+          setInviteError('Invalid link')
+        }
       } finally {
         if (!cancelled) setInviteLoading(false)
       }
@@ -90,8 +98,10 @@ export default function RegisterPage() {
               </>
             ) : !inviteValid ? (
               <>
-                <h1>Invalid link</h1>
-                <p className="muted">Registration is invite-only. Use the one-time link provided by Elite Skills.</p>
+                <h1>{inviteError?.includes('expired') ? 'Link expired' : 'Invalid link'}</h1>
+                <p className="muted">
+                  {inviteError ?? 'Registration is invite-only. Use the one-time link provided by Elite Skills.'}
+                </p>
                 <div className="muted" style={{ marginTop: 12 }}>
                   Already have an account? <Link to="/login" style={{ color: 'var(--elite-gold)' }}>Login</Link>
                 </div>
