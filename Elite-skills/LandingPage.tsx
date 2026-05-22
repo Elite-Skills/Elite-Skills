@@ -64,10 +64,10 @@ const LandingPage: React.FC = () => {
             </div>
             <h1 className="text-5xl lg:text-8xl font-bold leading-tight mb-6 md:mb-8">
               Secure Your 2026 <br />
-              <span className="text-gold-gradient font-serif italic">Financial Internship &amp; IB Offer</span>
+              <span className="text-gold-gradient font-serif italic">Investment Banking Offer</span>
             </h1>
             <p className="text-xl text-elite-text-muted mb-8 font-light max-w-2xl leading-relaxed md:mb-12">
-              Elite Skills is the definitive guide for financial internships and investment banking recruiting, trusted by students at Europe&apos;s top business schools. Featuring proprietary AI stress-testing and MD-level logic drills.
+              The definitive Elite Skills guide used by students at Europe's top business schools. Now featuring proprietary AI stress-testing and MD-level logic drills.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center md:gap-6 lg:justify-start">
               {token ? (
@@ -129,9 +129,9 @@ const LandingPage: React.FC = () => {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 items-start gap-8 md:gap-12 lg:grid-cols-2 lg:items-center lg:gap-20">
             <div>
-              <h2 className="mb-4 font-serif text-4xl md:mb-8 lg:text-5xl">Financial Internships Are Hyper-Competitive</h2>
+              <h2 className="mb-4 font-serif text-4xl md:mb-8 lg:text-5xl">The 0.5% Reality</h2>
               <p className="mb-4 text-lg leading-relaxed text-elite-text-muted md:mb-6 lg:mb-8">
-                The January recruiting window is closing. Across London, Paris, and Frankfurt, thousands of candidates compete for elite boutique and bulge bracket financial internships. Technical excellence is no longer a differentiator. It is the baseline requirement for entry.
+                The "January Window" is closing. Across London, Paris, and Frankfurt, over 10,000 top-tier applicants are competing for fewer than 50 spots at elite boutiques. Technical excellence is no longer a differentiator. It is the baseline requirement for entry.
               </p>
               <div className="border-l-2 border-elite-gold bg-black/60 p-4 shadow-2xl md:p-8">
                 <h4 className="mb-3 font-serif text-lg text-elite-gold md:mb-4 md:text-xl">Market Saturation</h4>
@@ -201,7 +201,7 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* ROI — minimal copy; charts reinforce stakes → Get Access */}
+      {/* ROI: minimal copy; charts reinforce stakes */}
       <section id="roi" className="bg-elite-black py-12 md:py-24">
         <div className="mx-auto max-w-6xl px-4">
           <div className="mb-8 text-center md:mb-10">
@@ -256,7 +256,7 @@ const LandingPage: React.FC = () => {
                 </span>
               </span>
               <p className="text-elite-text-muted text-sm max-w-sm leading-relaxed">
-                Elite Skills is the leading training resource for financial internships and investment banking recruiting. Built for candidates targeting bulge bracket and elite boutique offers, from HEC and LBS to Goldman Sachs alumni pathways.
+                The leading professional training resource for aspiring bulge bracket and elite boutique investment bankers. Created by alumni from HEC, LBS, and Goldman Sachs.
               </p>
               <div className="mt-6 flex flex-wrap items-center gap-4 md:mt-8">
                 <span className="text-white text-[10px] uppercase tracking-widest font-bold w-full sm:w-auto">Follow</span>
