@@ -48,12 +48,13 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
     }
 
     const socket = io(API_BASE, {
-      transports: ['websocket'],
+      transports: ['polling', 'websocket'],
       auth: { token },
       withCredentials: true,
       reconnection: true,
       reconnectionAttempts: 8,
-      reconnectionDelay: 500,
+      reconnectionDelay: 1000,
+      timeout: 20000,
     })
 
     socketRef.current = socket

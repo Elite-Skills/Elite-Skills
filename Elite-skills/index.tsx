@@ -6,6 +6,7 @@ import { AuthProvider } from './state/AuthContext';
 import { RealtimeProvider } from './state/RealtimeContext';
 import { ContactProvider } from './state/ContactContext';
 import App from './App';
+import './index.css';
 import './ats-styles.css';
 
 const rootElement = document.getElementById('root');

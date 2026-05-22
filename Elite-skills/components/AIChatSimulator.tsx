@@ -138,7 +138,7 @@ const AIChatSimulator: React.FC = () => {
               <p className={msg.role === 'model' && !msg.limitKind ? 'italic' : ''}>
                 {msg.limitKind === 'guest' ? (
                   <>
-                    Trial complete—{' '}
+                    Trial complete.{' '}
                     <Link to="/login" className="font-semibold text-elite-gold underline hover:text-elite-gold-dim">
                       Create a free account
                     </Link>
@@ -196,11 +196,11 @@ const AIChatSimulator: React.FC = () => {
             <p className="mb-6 text-sm leading-relaxed text-elite-text-muted">
               {hitLimitGuest ? (
                 <>
-                  You&apos;ve used your trial messages—{' '}
+                  You&apos;ve used your trial messages.{' '}
                   <Link to="/login" className="font-semibold text-elite-gold underline hover:text-elite-gold-dim">
                     Log in
                   </Link>
-                  {' '}or sign up for {FREE_BOARDROOM_AI_MESSAGES} more boardroom runs on a free account—or{' '}
+                  {' '}or sign up for {FREE_BOARDROOM_AI_MESSAGES} more boardroom runs on a free account, or{' '}
                   <a
                     href={ELITE_SKILLS_WHATSAPP}
                     target="_blank"
@@ -209,12 +209,12 @@ const AIChatSimulator: React.FC = () => {
                   >
                     {ELITE_SKILLS_GET_ACCESS_LABEL}
                   </a>
-                  {' '}for <strong className="text-white">Accelerator</strong>—unlimited boardroom, ATS checker, resume creator,
+                  {' '}for <strong className="text-white">Accelerator</strong>: unlimited boardroom, ATS checker, resume creator,
                   and every strategy firm.
                 </>
               ) : (
                 <>
-                  Free tier includes {FREE_BOARDROOM_AI_MESSAGES} boardroom messages—you&apos;re at the limit.{' '}
+                  Free tier includes {FREE_BOARDROOM_AI_MESSAGES} boardroom messages. You&apos;re at the limit.{' '}
                   <a
                     href={ELITE_SKILLS_WHATSAPP}
                     target="_blank"
@@ -223,7 +223,7 @@ const AIChatSimulator: React.FC = () => {
                   >
                     {ELITE_SKILLS_GET_ACCESS_LABEL}
                   </a>
-                  {' '}for <strong className="text-white">Accelerator</strong>—unlimited boardroom, ATS checker, resume creator,
+                  {' '}for <strong className="text-white">Accelerator</strong>: unlimited boardroom, ATS checker, resume creator,
                   and the full strategy vault.
                 </>
               )}

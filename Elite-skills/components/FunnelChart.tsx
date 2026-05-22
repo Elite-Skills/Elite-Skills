@@ -88,7 +88,7 @@ const FunnelChart: React.FC = () => {
         <FunnelChartMobile />
       </div>
       <div className="hidden h-[280px] w-full md:block lg:h-[300px]">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
           <BarChart
             layout="vertical"
             data={data}

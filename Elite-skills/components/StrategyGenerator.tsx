@@ -36,7 +36,7 @@ const ALL_STRATEGY_BANKS = [
   "Centerview Partners",
 ] as const;
 
-const AI_TIRED_MESSAGE = "**The AI is taking a quick break.** It'll be back soon—try again in a moment!";
+const AI_TIRED_MESSAGE = "**The AI is taking a quick break.** It'll be back soon. Try again in a moment!";
 
 const isErrorResponse = (text: string) =>
   text.includes('Temporary service limit') || text.includes('high demand') || text.includes('503') || text.includes('taking a quick break');

@@ -1,10 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import AIChatSimulator from './components/AIChatSimulator';
 import FunnelChart from './components/FunnelChart';
 import StrategyGenerator from './components/StrategyGenerator';
 import LandingNavbar from './components/LandingNavbar';
-import RoiSnackCharts from './components/RoiSnackCharts';
 import { ChevronRight, GraduationCap, TrendingUp, Globe, Award, Instagram, Linkedin } from 'lucide-react';
 import { useAuth } from './state/AuthContext';
 import { useContact } from './state/ContactContext';
@@ -14,6 +12,13 @@ import {
   ELITE_SKILLS_INSTAGRAM,
   ELITE_SKILLS_LINKEDIN,
 } from './socialLinks';
+
+const AIChatSimulator = lazy(() => import('./components/AIChatSimulator'));
+const RoiSnackCharts = lazy(() => import('./components/RoiSnackCharts'));
+
+function LandingSectionFallback({ className = 'h-64' }: { className?: string }) {
+  return <div className={`animate-pulse rounded-xl bg-white/5 ${className}`} aria-hidden />;
+}
 
 /** Keeps WhatsApp CTAs visually wide after shortening label from “Accelerator Bundle” to Get Access */
 const LANDING_WHATSAPP_CTA_MIN_W =
@@ -118,7 +123,7 @@ const LandingPage: React.FC = () => {
             <div>
               <h2 className="mb-4 font-serif text-4xl md:mb-8 lg:text-5xl">The 0.5% Reality</h2>
               <p className="mb-4 text-lg leading-relaxed text-elite-text-muted md:mb-6 lg:mb-8">
-                The "January Window" is closing. Across London, Paris, and Frankfurt, over 10,000 top-tier applicants are competing for fewer than 50 spots at elite boutiques. Technical excellence is no longer a differentiator—it is the baseline requirement for entry.
+                The "January Window" is closing. Across London, Paris, and Frankfurt, over 10,000 top-tier applicants are competing for fewer than 50 spots at elite boutiques. Technical excellence is no longer a differentiator. It is the baseline requirement for entry.
               </p>
               <div className="border-l-2 border-elite-gold bg-black/60 p-4 shadow-2xl md:p-8">
                 <h4 className="mb-3 font-serif text-lg text-elite-gold md:mb-4 md:text-xl">Market Saturation</h4>
@@ -159,7 +164,9 @@ const LandingPage: React.FC = () => {
               Don't wait for your first Superday to fail. Stress-test your technical intuition against our Senior MD model.
             </p>
           </div>
-          <AIChatSimulator />
+          <Suspense fallback={<LandingSectionFallback className="mx-auto h-[420px] max-w-3xl" />}>
+            <AIChatSimulator />
+          </Suspense>
         </div>
       </section>
 
@@ -192,11 +199,13 @@ const LandingPage: React.FC = () => {
           <div className="mb-8 text-center md:mb-10">
             <h2 className="font-serif text-4xl tracking-tight text-white md:text-5xl lg:text-6xl">ROI</h2>
             <p className="mx-auto mt-2 max-w-sm text-[10px] uppercase tracking-[0.28em] text-elite-text-muted">
-              Rare seats · real envelopes — illustrative snapshots
+              Rare seats · real envelopes (illustrative snapshots)
             </p>
           </div>
 
-          <RoiSnackCharts />
+          <Suspense fallback={<LandingSectionFallback className="mx-auto h-[320px] max-w-6xl" />}>
+            <RoiSnackCharts />
+          </Suspense>
 
           <div id="checkout" className="mt-10 flex flex-col items-center md:mt-14">
             {token ? (

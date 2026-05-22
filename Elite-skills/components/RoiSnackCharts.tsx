@@ -23,7 +23,7 @@ function RunwayTooltip({ active, payload, label }: RunwayTooltipProps) {
 
   return (
     <div className="pointer-events-none z-50 max-w-[min(calc(100vw-2rem),18rem)] rounded-md border border-white/15 bg-[#0f0f0f]/95 px-3 py-2 text-[11px] shadow-lg backdrop-blur-sm">
-      <div className="font-medium capitalize tracking-wide text-zinc-300">After landing — {phase}</div>
+      <div className="font-medium capitalize tracking-wide text-zinc-300">After landing · {phase}</div>
       <div className="mt-1 tabular-nums text-[13px] font-semibold text-elite-gold">
         ~€{kThousands.toLocaleString(undefined, { maximumFractionDigits: 1 })}k cumulative{' '}
         <span className="font-normal text-zinc-500">(illustrative)</span>
@@ -115,31 +115,31 @@ export default function RoiSnackCharts() {
               What distinguishes you here
             </p>
             <p className="text-sm leading-relaxed text-elite-text-muted">
-              Paper parity is table stakes—the filter is rehearsal under pressure. Elite Skills Accelerator stacks ATS scoring,
+              Paper parity is table stakes. The filter is rehearsal under pressure. Elite Skills Accelerator stacks ATS scoring,
               vault, and infinite boardroom drills on{' '}
               <span className="text-white">the bar interviewers drill you against</span>
-              —compound reps steadily; skip the panic week before a Superday.
+              . Compound reps steadily and skip the panic week before a Superday.
             </p>
           </div>
           <div className="mt-4 shrink-0 border-t border-white/10 pt-3 sm:mt-auto sm:pt-4">
             <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-elite-gold">Scarcity · speed</p>
             <p className="text-[11px] leading-relaxed text-elite-text-muted">
               Offers spread thin across boutiques, yet seasons sprint through shortlists faster than spreadsheets turn. Accelerator
-              is laid out so you bank crisp repetitions inside those narrowing windows—not after invites land with zero runway.
+              is laid out so you bank crisp repetitions inside those narrowing windows, not after invites land with zero runway.
             </p>
           </div>
         </div>
       </div>
 
-      <div className="relative z-[2] flex min-h-0 flex-col overflow-visible rounded-xl border border-elite-gold/20 bg-gradient-to-b from-elite-gold/10 to-transparent p-3 sm:p-4 md:h-full md:min-h-0 md:p-5">
-        <div className="flex min-h-0 flex-1 flex-col overflow-visible">
+      <div className="relative z-[2] flex min-h-0 flex-col overflow-hidden rounded-xl border border-elite-gold/20 bg-gradient-to-b from-elite-gold/10 to-transparent p-3 sm:p-4 md:h-full md:min-h-0 md:p-5">
+        <div className="flex min-h-0 flex-1 flex-col">
           <div className="shrink-0">
             <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.25em] text-elite-gold">
-              Landing the seat—potential Y1 pay (€)
+              Landing the seat · potential Y1 pay (€)
             </p>
             <p className="mb-2 text-[11px] leading-snug text-elite-text-muted sm:mb-3">
               When the process breaks your way after serious prep here, juniors in boutique IB often slot into envelopes like
-              this—illustrative only, before tax & firm specifics.
+              this (illustrative only, before tax and firm specifics).
             </p>
             <p className="mb-0.5 text-[10px] uppercase tracking-widest text-gray-500">Illustrative Y1 TC snapshot</p>
             <p className="font-mono text-2xl font-bold tracking-tight text-white sm:text-3xl md:text-4xl">
@@ -147,9 +147,9 @@ export default function RoiSnackCharts() {
             </p>
           </div>
 
-          <div className="relative z-[1] mt-3 min-h-0 w-full flex-1 overflow-visible sm:mt-4">
-            <div className="relative h-[112px] w-full overflow-visible rounded-lg border border-white/5 bg-black/20 sm:h-[148px] md:h-full md:min-h-[148px] [&_.recharts-responsive-container]:!overflow-visible [&_.recharts-wrapper]:!overflow-visible">
-              <ResponsiveContainer width="100%" height="100%" debounce={50} minHeight={112}>
+          <div className="relative z-[1] mt-3 w-full sm:mt-4">
+            <div className="relative h-[112px] w-full overflow-hidden rounded-lg border border-white/5 bg-black/20 sm:h-[148px] md:h-[160px]">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <AreaChart
                   data={illustrativeRunway}
                   margin={{ top: 6, right: 6, left: 8, bottom: 18 }}
