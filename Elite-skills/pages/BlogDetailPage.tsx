@@ -1,27 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import LandingNavbar from '../components/LandingNavbar'
-import { useAuth } from '../state/AuthContext'
 import { getBlogBySlug, type BlogPostDetail } from '../api'
-
-function useSeo(title: string, description: string, slug?: string) {
-  useEffect(() => {
-    const prevTitle = document.title
-    document.title = title
-    let descEl = document.querySelector('meta[name="description"]') as HTMLMetaElement | null
-    if (!descEl) {
-      descEl = document.createElement('meta')
-      descEl.name = 'description'
-      document.head.appendChild(descEl)
-    }
-    const prevDesc = descEl.content
-    descEl.content = description
-    return () => {
-      document.title = prevTitle
-      descEl!.content = prevDesc
-    }
-  }, [title, description])
-}
+import { usePageSeo } from '../lib/seo'
+import { useAuth } from '../state/AuthContext'
 
 export default function BlogDetailPage() {
   const { slug } = useParams()
@@ -29,6 +11,15 @@ export default function BlogDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [post, setPost] = useState<BlogPostDetail | null>(null)
+
+  usePageSeo({
+    title: post ? `${post.metaTitle || post.title} | Elite Skills Blog` : 'Elite Skills Blog',
+    description: post
+      ? post.metaDescription || post.excerpt
+      : 'Investment banking recruiting insights from Elite Skills.',
+    path: slug ? `/blog/${slug}` : '/blog',
+    type: 'article',
+  })
 
   useEffect(() => {
     if (!slug) return
@@ -70,10 +61,6 @@ export default function BlogDetailPage() {
       </div>
     )
   }
-
-  const metaTitle = post.metaTitle || post.title
-  const metaDesc = post.metaDescription || post.excerpt
-  useSeo(`${metaTitle} | Elite Skills Blog`, metaDesc)
 
   return (
     <div className="min-h-screen bg-elite-black">

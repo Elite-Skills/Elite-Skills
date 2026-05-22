@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 
 import LandingPage from './LandingPage';
 import ContactFormModal from './components/ContactFormModal';
@@ -153,6 +154,7 @@ export default function App() {
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
     <ContactFormModal isOpen={isOpen} onClose={closeContact} />
+    <Analytics />
     </>
   );
 }
