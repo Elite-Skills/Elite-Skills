@@ -55,7 +55,7 @@ const LandingPage: React.FC = () => {
 
       <main id="main-content">
       {/* Hero Section */}
-      <header id="top" className="relative overflow-hidden pt-28 pb-10 md:pt-32 md:pb-20 lg:pt-48 lg:pb-32">
+      <header id="top" className="relative overflow-hidden pt-[9.25rem] pb-10 md:pt-36 md:pb-20 lg:pt-48 lg:pb-32">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-zinc-900/50 to-transparent opacity-50 -z-10"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center lg:text-left">
           <div className="lg:w-2/3">
